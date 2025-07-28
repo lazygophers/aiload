@@ -1,0 +1,31 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+aiload
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when run with the
+# -o option
+*.out
+
+# Dependency directories (if not vendored)
+/vendor/
+
+# IDE-specific files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS-generated files
+.DS_Store
+ehthumbs.db
+Thumbs.db
