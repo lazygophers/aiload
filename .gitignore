@@ -27,5 +27,7 @@ aiload
 
 # OS-generated files
 .DS_Store
-ehthumbs.db
-Thumbs.db
+*.db.cache
+*.db
+*.cache
+*.bbolt

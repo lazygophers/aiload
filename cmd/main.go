@@ -1,23 +1,21 @@
 package main
 
 import (
-	"aiload/internal"
 	"log"
 
-	"github.com/gofiber/fiber/v2"
+	"aiload/internal/server"
+	"aiload/internal/state"
 )
 
 func main() {
-	state, err := internal.NewState()
-	if err != nil {
-		log.Fatalf("failed to initialize state: %v", err)
-	}
-	defer state.DB.Close()
-	defer state.Cache.Close()
+	// Initialize database
+	db := state.InitDB("aiload.db")
+	// Initialize cache
+	cache := state.InitCache("aiload.db.cache")
 
-	app := fiber.New()
+	// Create a new Fiber application
+	app := server.New(db, cache)
 
-	internal.RegisterRoutes(app, state)
-
-	log.Fatal(app.Listen(":14001"))
+	// Start the server
+	log.Fatal(app.Listen(":3000"))
 }
