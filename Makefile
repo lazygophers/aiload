@@ -9,3 +9,8 @@ test:
 .PHONY: air
 air:
 	@air
+
+.PHONY: cover
+cover:
+	@go test -coverprofile=coverage.out ./...
+	@go tool cover -func=coverage.out
