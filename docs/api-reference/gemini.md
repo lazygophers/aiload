@@ -12,7 +12,7 @@
 
 - 您将继续使用与 OpenAI 兼容的端点。
 - **AI Load** 会根据您请求的`model`名称（例如 `"gemini-pro"`）和 `routing` 配置，智能地将请求转发到在 `upstreams` 中定义的 Gemini 服务。
-- **请求端点:** `http://localhost:8080/v1/chat/completions`
+- **请求端点:** `http://localhost:14004/v1/chat/completions`
 
 **2. 认证方式**
 
@@ -26,7 +26,7 @@
   # 使用在 config.yaml 中配置的密钥
   export AILOAD_API_KEY="your_configured_key"
 
-  curl http://localhost:8080/v1/chat/completions \
+  curl http://localhost:14004/v1/chat/completions \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $AILOAD_API_KEY" \
     -d '{
@@ -44,7 +44,7 @@
 
   client = OpenAI(
       # 指向 AI Load 服务地址
-      base_url="http://localhost:8080/v1",
+      base_url="http://localhost:14004/v1",
       # 使用在 config.yaml 中配置的密钥
       api_key="your_configured_key"
   )

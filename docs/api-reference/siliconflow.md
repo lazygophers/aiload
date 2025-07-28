@@ -26,7 +26,7 @@
   # 使用在 config.yaml 中配置的密钥
   export AILOAD_API_KEY="your_configured_key"
 
-  curl http://localhost:8080/v1/chat/completions \
+  curl http://localhost:14004/v1/chat/completions \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $AILOAD_API_KEY" \
     -d '{
@@ -44,7 +44,7 @@
 
   client = OpenAI(
       # 指向 AI Load 服务地址
-      base_url="http://localhost:8080/v1",
+      base_url="http://localhost:14004/v1",
       # 使用在 config.yaml 中配置的密钥
       api_key="your_configured_key"
   )

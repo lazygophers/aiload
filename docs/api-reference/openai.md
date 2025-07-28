@@ -13,8 +13,8 @@
   https://api.openai.com/v1/chat/completions
   ```
 - **通过 AI Load 的请求:**
-  - 将 `https://api.openai.com` 替换为您的 **AI Load** 服务地址，例如 `http://localhost:8080`。
-  - 最终端点为: `http://localhost:8080/v1/chat/completions`
+  - 将 `https://api.openai.com` 替换为您的 **AI Load** 服务地址，例如 `http://localhost:14004`。
+  - 最终端点为: `http://localhost:14004/v1/chat/completions`
 
 **2. 认证方式**
 
@@ -40,7 +40,7 @@
   # 使用在 config.yaml 中配置的密钥
   export AILOAD_API_KEY="your_configured_key"
 
-  curl http://localhost:8080/v1/chat/completions \
+  curl http://localhost:14004/v1/chat/completions \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $AILOAD_API_KEY" \
     -d '{
@@ -80,7 +80,7 @@
 
   client = OpenAI(
       # 指向 AI Load 服务地址
-      base_url="http://localhost:8080/v1",
+      base_url="http://localhost:14004/v1",
       # 使用在 config.yaml 中配置的密钥
       api_key="your_configured_key"
   )

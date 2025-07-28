@@ -35,8 +35,15 @@
 - 提供一个最简化的 `config.yaml` 示例，包含服务端口和至少一个 AI 模型的上游配置。
 
   ```yaml
+  logger:
+    level: info
+
   server:
-    port: 8080
+    addr: 0.0.0.0:14004
+
+  database:
+    driver: sqlite
+    dsn: aiload.db
   ```
 
 - 提醒用户将示例中的 `api_key` 替换为自己的真实密钥。
@@ -47,13 +54,13 @@
   ```bash
   ./aiload --config config.yaml
   ```
-- 描述服务成功启动后，在终端会看到的提示信息（例如：`Server started at :8080`）。
+- 描述服务成功启动后，在终端会看到的提示信息（例如：`Server started at :14004`）。
 
 **5. 验证服务 (Verify the Service):**
 
 - 提供一个使用 `curl` 命令向代理服务发起请求的示例，以验证服务是否正常工作。
   ```bash
-  curl http://localhost:8080/v1/chat/completions \
+  curl http://localhost:14004/v1/chat/completions \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer sk-global-xxxxxxxxxxxxxxxxxxxxxxxx" \
     -d '{

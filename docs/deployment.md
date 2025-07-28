@@ -36,9 +36,9 @@ chmod +x aiload-linux-amd64
   ```
 - **(推荐)** 使用 `nohup` 在后台持久化运行：
   ```bash
-  nohup ./aiload-linux-amd64 --config config.yaml > aiload.log 2>&1 &
+  nohup ./aiload-linux-amd64 --config config.yaml &
   ```
-  这会将日志输出到 `aiload.log` 文件，并使服务在您关闭 SSH 连接后继续运行。
+  使用 `nohup` 在后台持久化运行，日志将直接输出到当前控制台。
 
 **5. (可选) 使用 Systemd 进行管理**
 
@@ -52,8 +52,6 @@ chmod +x aiload-linux-amd64
 
   [Service]
   Type=simple
-  User=your_user # 推荐使用非 root 用户
-  WorkingDirectory=/opt/aiload
   ExecStart=/opt/aiload/aiload-linux-amd64 --config /opt/aiload/config.yaml
   Restart=on-failure
   RestartSec=5s
@@ -72,42 +70,7 @@ chmod +x aiload-linux-amd64
 
 ---
 
-### 方式二：使用 Docker
-
-如果您熟悉容器化部署，使用 Docker 是一个极佳的选择，它能提供一致和隔离的运行环境。
-
-**1. 拉取 Docker 镜像**
-
-- 从 Docker Hub 或项目的容器镜像仓库拉取最新的镜像。
-  ```bash
-  docker pull lazygophers/aiload:latest
-  ```
-
-**2. 准备配置文件**
-
-- 将您的 `config.yaml` 文件放置在宿主机的某个位置，例如 `/data/aiload/config.yaml`。
-
-**3. 运行容器**
-
-```bash
-docker run -d \
-  --name aiload-service \
-  -p 8080:8080 \
-  -v /data/aiload/config.yaml:/app/config.yaml \
-  --restart=always \
-  lazygophers/aiload:latest
-```
-
-- **参数解释:**
-  - `-d`: 后台运行容器。
-  - `--name`: 为容器指定一个名称。
-  - `-p 8080:8080`: 将宿主机的 8080 端口映射到容器的 8080 端口（请根据您的 `config.yaml` 进行调整）。
-  - `-v`: 将宿主机上的配置文件挂载到容器内的 `/app/config.yaml`。**这是关键步骤**。
-  - `--restart=always`: 确保在 Docker 服务重启或容器退出时自动重启容器。
-
----
-
-### 方式三：从源码构建
+### 方式二：从源码构建
 
 如果您想使用最新的未发布功能或进行自定义修改，可以从源码构建。
 
@@ -148,9 +111,5 @@ go build -o aiload_server ./cmd/server
 - 构建完成后，即可按照**方式一**中的步骤运行 `aiload_server` 二进制文件。
 
 ---
-
-### 未来展望：Kubernetes 部署
-
-我们计划在未来提供官方的 Helm Chart，以简化在 Kubernetes 集群上的部署和管理。这将支持高可用性 (HA) 配置、自动扩缩容 (HPA) 和更复杂的流量管理策略。
 
 请确保所有路径、命令和文件名都清晰准确，并为不同技术水平的用户提供易于理解的指导。
