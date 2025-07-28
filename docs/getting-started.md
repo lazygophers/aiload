@@ -18,7 +18,7 @@
 - **步骤 2: 构建后端**
   - 提供编译和构建 Go 后端服务的命令。
   ```bash
-  go build -o aiload_server ./cmd/server
+  go build -o aiload ./cmd
   ```
 - **步骤 3: 构建前端**
   - 提供进入 `assets` 目录、安装依赖并打包前端应用的完整命令。
@@ -37,20 +37,6 @@
   ```yaml
   server:
     port: 8080
-
-  auth:
-    # 全局密钥，适用于所有未指定分组密钥的请求
-    keys:
-      - "sk-global-xxxxxxxxxxxxxxxxxxxxxxxx"
-
-  upstreams:
-    - name: "openai_default"
-      # AI 服务类型
-      provider: "openai"
-      # 负载均衡权重
-      weight: 100
-      # 你的 OpenAI API 密钥
-      api_key: "sk-your-openai-api-key"
   ```
 
 - 提醒用户将示例中的 `api_key` 替换为自己的真实密钥。
@@ -59,7 +45,7 @@
 
 - 提供启动后端服务的命令。
   ```bash
-  ./aiload_server --config config.yaml
+  ./aiload --config config.yaml
   ```
 - 描述服务成功启动后，在终端会看到的提示信息（例如：`Server started at :8080`）。
 
