@@ -1,0 +1,711 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "🚀 AI Load 统一 API",
+    "version": "1.0.0",
+    "description": "欢迎使用 **AI Load**！本文档是您与 AI Load 服务进行交互的终极指南。AI Load 的核心价值在于其强大的**智能路由**与**协议转换**能力，让您可以无缝调用所有已接入的大模型。"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:14004/v1"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "API Key"
+      }
+    },
+    "schemas": {
+      "Model": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The model identifier, which can be referenced in the API endpoints."
+          },
+          "object": {
+            "type": "string",
+            "description": "The object type, which is always `model`."
+          },
+          "created": {
+            "type": "integer",
+            "description": "The Unix timestamp (in seconds) of when the model was created."
+          },
+          "owned_by": {
+            "type": "string",
+            "description": "The organization that owns the model."
+          }
+        },
+        "required": [
+          "id",
+          "object",
+          "created",
+          "owned_by"
+        ]
+      },
+      "ModelList": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "description": "The object type, which is always `list`."
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Model"
+            }
+          }
+        },
+        "required": [
+          "object",
+          "data"
+        ]
+      },
+      "CreateEmbeddingRequest": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string"
+          },
+          "input": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ]
+          },
+          "encoding_format": {
+            "type": "string",
+            "enum": ["float", "base64"],
+            "default": "float"
+          },
+          "user": {
+            "type": "string"
+          }
+        },
+        "required": ["model", "input"]
+      },
+      "CreateEmbeddingResponse": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "object": { "type": "string" },
+                "index": { "type": "integer" },
+                "embedding": {
+                  "type": "array",
+                  "items": { "type": "number", "format": "float" }
+                }
+              }
+            }
+          },
+          "model": {
+            "type": "string"
+          },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "prompt_tokens": { "type": "integer" },
+              "total_tokens": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "RerankRequest": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "documents": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "top_n": {
+            "type": "integer"
+          },
+          "return_documents": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": ["model", "query", "documents"]
+      },
+      "RerankResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": { "type": "integer" },
+                "relevance_score": { "type": "number", "format": "float" },
+                "document": {
+                  "type": "object",
+                  "properties": {
+                    "text": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "total_tokens": { "type": "integer" }
+            }
+          }
+        }
+      }
+    },
+    "CreateImageRequest": {
+      "type": "object",
+      "properties": {
+        "prompt": { "type": "string", "maxLength": 1000 },
+        "model": { "type": "string", "default": "dall-e-2" },
+        "n": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "size": { "type": "string", "enum": ["256x256", "512x512", "1024x1024"] }
+      },
+      "required": ["prompt"]
+    },
+    "ImagesResponse": {
+      "type": "object",
+      "properties": {
+        "created": { "type": "integer" },
+        "data": { "type": "array", "items": { "$ref": "#/components/schemas/Image" } }
+      },
+      "required": ["created", "data"]
+    },
+    "Image": {
+      "type": "object",
+      "properties": {
+        "url": { "type": "string" },
+        "b64_json": { "type": "string" }
+      }
+    },
+    "CreateImageEditRequest": {
+      "type": "object",
+      "properties": {
+        "image": { "type": "string", "format": "binary" },
+        "prompt": { "type": "string", "maxLength": 1000 },
+        "mask": { "type": "string", "format": "binary" },
+        "n": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "size": { "type": "string", "enum": ["256x256", "512x512", "1024x1024"] }
+      },
+      "required": ["image", "prompt"]
+    },
+    "CreateImageVariationRequest": {
+      "type": "object",
+      "properties": {
+        "image": { "type": "string", "format": "binary" },
+        "n": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "size": { "type": "string", "enum": ["256x256", "512x512", "1024x1024"] }
+      },
+      "required": ["image"]
+    },
+    "CreateSpeechRequest": {
+        "type": "object",
+        "properties": {
+            "model": { "type": "string", "enum": ["tts-1", "tts-1-hd"] },
+            "input": { "type": "string", "maxLength": 4096 },
+            "voice": { "type": "string", "enum": ["alloy", "echo", "fable", "onyx", "nova", "shimmer"] },
+            "speed": { "type": "number", "minimum": 0.25, "maximum": 4.0, "default": 1.0 }
+        },
+        "required": ["model", "input", "voice"]
+    },
+    "CreateTranscriptionRequest": {
+      "type": "object",
+      "properties": {
+        "file": { "type": "string", "format": "binary" },
+        "model": { "type": "string", "enum": ["whisper-1"] },
+        "prompt": { "type": "string" },
+        "language": { "type": "string" }
+      },
+      "required": ["file", "model"]
+    },
+    "CreateTranscriptionResponseJson": {
+        "type": "object",
+        "properties": {
+            "text": { "type": "string" }
+        },
+        "required": ["text"]
+    },
+    "CreateTranslationRequest": {
+      "type": "object",
+      "properties": {
+    "/v1/models": {
+      "get": {
+        "summary": "List models",
+        "description": "Retrieves a list of available models.",
+        "tags": ["Models"],
+        "responses": {
+          "200": {
+            "description": "A list of available models.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+        "file": { "type": "string", "format": "binary" },
+        "model": { "type": "string", "enum": ["whisper-1"] },
+        "prompt": { "type": "string" }
+      },
+      "required": ["file", "model"]
+    },
+    "CreateTranslationResponseJson": {
+        "type": "object",
+        "properties": {
+            "text": { "type": "string" }
+        },
+        "required": ["text"]
+    },
+    "CreateVideoGenerationRequest": {
+      "type": "object",
+      "properties": {
+        "prompt": { "type": "string", "maxLength": 4000 },
+        "model": { "type": "string", "default": "sora-1" },
+        "n": { "type": "integer", "default": 1 },
+        "size": { "type": "string", "default": "1920x1080" },
+        "duration": { "type": "integer" }
+      },
+      "required": ["prompt"]
+    },
+    "VideoResponse": {
+        "type": "object",
+        "properties": {
+            "created": { "type": "integer" },
+            "data": { "type": "array", "items": { "$ref": "#/components/schemas/Video" } }
+        },
+        "required": ["created", "data"]
+    },
+    "Video": {
+        "type": "object",
+        "properties": {
+            "url": { "type": "string" },
+            "b64_json": { "type": "string" }
+        }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/chat/completions": {
+      "post": {
+        "summary": "创建聊天补全",
+        "description": "这是最核心、最常用的端点，用于与所有支持的聊天模型进行对话。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "model": {
+                    "type": "string",
+                    "description": "您希望调用的模型名称。AI Load 会根据此名称自动路由到后台配置的正确模型供应商。",
+                    "example": "gpt-4"
+                  },
+                  "messages": {
+                    "type": "array",
+                    "description": "一个消息对象数组，用于描述对话上下文。",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "type": "string",
+                          "enum": ["user", "assistant", "system"],
+                          "description": "消息发送者的角色。"
+                        },
+                        "content": {
+                          "type": "string",
+                          "description": "消息的具体内容。"
+                        }
+                      },
+                      "required": ["role", "content"]
+                    }
+                  },
+                  "stream": {
+                    "type": "boolean",
+                    "description": "是否使用流式传输。如果为 true，响应将以 Server-Sent Events (SSE) 的形式返回。",
+                    "default": false
+                  },
+                  "temperature": {
+                    "type": "number",
+                    "description": "控制生成文本的随机性，介于 0 和 2 之间。",
+                    "default": 1
+                  },
+                  "max_tokens": {
+                    "type": "integer",
+                    "description": "生成响应的最大 token 数量。"
+                  }
+                },
+                "required": ["model", "messages"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功的响应",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "created": {
+                      "type": "integer"
+                    },
+                    "model": {
+                      "type": "string"
+                    },
+                    "choices": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "index": {
+                            "type": "integer"
+                          },
+                          "message": {
+                            "type": "object",
+                            "properties": {
+                              "role": {
+                                "type": "string"
+                              },
+                              "content": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "finish_reason": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "usage": {
+                      "type": "object",
+                      "properties": {
+                        "prompt_tokens": {
+                          "type": "integer"
+                        },
+                        "completion_tokens": {
+                          "type": "integer"
+                        },
+                        "total_tokens": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/embeddings": {
+      "post": {
+        "summary": "Create embeddings",
+        "operationId": "createEmbeddings",
+        "tags": ["Embeddings"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmbeddingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateEmbeddingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/rerank": {
+      "post": {
+        "summary": "Rerank documents",
+        "operationId": "rerankDocuments",
+        "tags": ["Rerank"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RerankRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RerankResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/images/generations": {
+      "post": {
+        "summary": "Creates an image given a prompt.",
+        "operationId": "createImage",
+        "tags": [
+          "Images"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateImageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImagesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/images/edits": {
+      "post": {
+        "summary": "Creates an edited or extended image given an original image and a prompt.",
+        "operationId": "createImageEdit",
+        "tags": [
+          "Images"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateImageEditRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImagesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/images/variations": {
+      "post": {
+        "summary": "Creates a variation of a given image.",
+        "operationId": "createImageVariation",
+        "tags": [
+          "Images"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateImageVariationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImagesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/audio/speech": {
+      "post": {
+        "summary": "Generates audio from the input text.",
+        "operationId": "createSpeech",
+        "tags": [
+          "Audio"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpeechRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/octet-stream": {}
+            }
+          }
+        }
+      }
+    },
+    "/v1/audio/transcriptions": {
+      "post": {
+        "summary": "Transcribes audio into the input language.",
+        "operationId": "createTranscription",
+        "tags": [
+          "Audio"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTranscriptionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTranscriptionResponseJson"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/audio/translations": {
+      "post": {
+        "summary": "Translates audio into English.",
+        "operationId": "createTranslation",
+        "tags": [
+          "Audio"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTranslationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTranslationResponseJson"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/video/generations": {
+      "post": {
+        "summary": "Creates a video given a prompt.",
+        "operationId": "createVideoGeneration",
+        "tags": [
+          "Video"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVideoGenerationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

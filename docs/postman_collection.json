@@ -1,0 +1,422 @@
+{
+	"info": {
+		"name": "AI Load API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"description": "欢迎使用 **AI Load**！本文档是您与 AI Load 服务进行交互的终极指南。AI Load 的核心价值在于其强大的**智能路由**与**协议转换**能力，让您可以无缝调用所有已接入的大模型。"
+	},
+	"item": [
+		{
+			"name": "Create Chat Completion",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{api_key}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/v1/chat/completions",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"chat",
+						"completions"
+					]
+				},
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"model\": \"gpt-4\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"你好，AI Load！\"\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"description": "这是最核心、最常用的端点，用于与所有支持的聊天模型进行对话。\n\n**请求体遵循 OpenAI `chat.completions` 的标准格式。**\n\n| 字段                 | 类型      | 是否必须 | 描述                                                                            |\n| :------------------- | :-------- | :------- | :------------------------------------------------------------------------------ |\n| `model`              | `string`  | **是**   | 您希望调用的模型名称。AI Load 会根据此名称自动路由到后台配置的正确模型供应商。  |\n| `messages`           | `array`   | **是**   | 一个消息对象数组，用于描述对话上下文。                                          |\n| `messages[].role`    | `string`  | **是**   | 消息发送者的角色，可以是 `user`, `assistant`, 或 `system`。                     |\n| `messages[].content` | `string`  | **是**   | 消息的具体内容。                                                                |\n| `stream`             | `boolean` | 否       | 是否使用流式传输。如果为 `true`，响应将以 Server-Sent Events (SSE) 的形式返回。 |\n| `temperature`        | `number`  | 否       | 控制生成文本的随机性，介于 0 和 2 之间。                                        |\n| `max_tokens`         | `integer` | 否       | 生成响应的最大 token 数量。                                                     |"
+			},
+			"response": []
+		},
+		{
+			"name": "Embeddings",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"model\": \"text-embedding-ada-002\",\n  \"input\": \"The food was delicious and the waiter...\",\n  \"encoding_format\": \"float\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/v1/embeddings",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"v1",
+						"embeddings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rerank",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"model\": \"rerank-english-v2.0\",\n    \"query\": \"What is the capital of the United States?\",\n    \"documents\": [\n        \"The capital of the United States is Washington, D.C.\",\n        \"The capital of France is Paris.\"\n    ],\n    \"top_n\": 1,\n    \"return_documents\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/v1/rerank",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"v1",
+						"rerank"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Images",
+			"item": [
+				{
+					"name": "Create image generation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"prompt\": \"A cute baby sea otter\",\n  \"n\": 1,\n  \"size\": \"512x512\"\n}"
+						},
+						"url": {
+							"raw": "{{baseURL}}/v1/images/generations",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"images",
+								"generations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create image edit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/path/to/file"
+								},
+								{
+									"key": "prompt",
+									"type": "text",
+									"value": "A cute baby sea otter wearing a beret"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseURL}}/v1/images/edits",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"images",
+								"edits"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create image variation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/path/to/file"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseURL}}/v1/images/variations",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"images",
+								"variations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Audio",
+			"item": [
+				{
+					"name": "Create speech",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"model\": \"tts-1\",\n  \"input\": \"The quick brown fox jumped over the lazy dog.\",\n  \"voice\": \"alloy\"\n}"
+						},
+						"url": {
+							"raw": "{{baseURL}}/v1/audio/speech",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"audio",
+								"speech"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create transcription",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/path/to/file"
+								},
+								{
+									"key": "model",
+									"type": "text",
+									"value": "whisper-1"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseURL}}/v1/audio/transcriptions",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"audio",
+								"transcriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create translation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/path/to/file"
+								},
+								{
+									"key": "model",
+									"type": "text",
+									"value": "whisper-1"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseURL}}/v1/audio/translations",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"audio",
+								"translations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Video",
+			"item": [
+				{
+					"name": "Create video generation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"prompt\": \"A cinematic shot of a puppy playing in the autumn leaves.\",\n  \"model\": \"sora-1\"\n}"
+						},
+						"url": {
+							"raw": "{{baseURL}}/v1/video/generations",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"video",
+								"generations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Models",
+			"item": [
+				{
+					"name": "List models",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseURL}}/v1/models",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"models"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:14004"
+		},
+		{
+			"key": "api_key",
+			"value": "your_configured_key"
+		}
+	]
+}
