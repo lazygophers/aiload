@@ -4,6 +4,10 @@
 
 ---
 
+### 行为准则 (Code of Conduct)
+
+我们致力于为所有参与者提供一个友好、安全、欢迎的环境。所有贡献者、评论者和维护者都应遵守我们的 **[行为准则](./CODE_OF_CONDUCT.md)**。在参与贡献之前，请仔细阅读。
+
 ### 报告问题 (Reporting Bugs)
 
 如果您发现了 Bug，请通过 [GitHub Issues](https://github.com/lazygophers/aiload/issues) 提交。一个高质量的 Bug 报告应包含以下信息：

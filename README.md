@@ -42,14 +42,18 @@ AI Load 作为透明代理服务，完整保留了各大 AI 服务商的原生 A
 
 更详细的文档请访问 [docs](./docs) 目录。
 
-- [项目介绍](./docs/introduction.md)
-- [部署指南](./docs/deployment.md)
-- [配置说明](./docs/configuration.md)
-- [API 参考](./docs/api-reference)
+- **核心指南**
+  - [🚀 项目介绍](./docs/introduction.md): 了解 AI Load 的核心理念与价值。
+  - [🛠️ 部署指南](./docs/deployment.md): 一步步完成服务的部署与启动。
+  - [⚙️ 配置说明](./docs/configuration.md): 掌握所有配置项，释放全部潜能。
+- **开发与贡献**
+  - [📚 API 参考](./docs/api.md): 查阅完整的 API 接口文档。
+  - [🏛️ 架构设计](./docs/architecture.md): 深入理解系统的设计哲学。
+  - [🤝 贡献指南](./docs/contributing.md): 加入我们，共同建设。
 
 ## 🤝 贡献
 
-我们欢迎任何形式的贡献！请阅读 **[贡献指南](./docs/contributing.md)** 来了解如何参与项目。
+我们欢迎任何形式的贡献！请阅读 **[贡献指南](./docs/contributing.md)** 和 **[行为准则](./CODE_OF_CONDUCT.md)** 来了解如何参与项目。
 
 ## 📄 许可证
 

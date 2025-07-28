@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:14004/v1"
+      "url": "http://localhost:14004"
     }
   ],
   "components": {
@@ -314,7 +314,7 @@
     }
   ],
   "paths": {
-    "/chat/completions": {
+    "/v1/chat/completions": {
       "post": {
         "summary": "创建聊天补全",
         "description": "这是最核心、最常用的端点，用于与所有支持的聊天模型进行对话。",
