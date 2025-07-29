@@ -1,40 +1,42 @@
-# Makefile for the Go project
+LANG := zh_CN.UTF-8
+LC_ALL := zh_CN.UTF-8
+TZ := UTC
 
-.PHONY: run build test
+PWD=$(shell pwd)
+Organization=lazygophers
+ProjectName=aiload
+Version=$(shell git rev-parse --short=12 HEAD)
+MihomoVersion=$(shell cd /Users/luoxin/persons/go/lazygophers/barbecue/pkg/mihomo && git rev-parse --short=12 HEAD)
 
-# Go parameters
-GOBASE := $(shell pwd)
-GOPACKAGES := $(shell go list ./... | grep -v /vendor/)
-GOFILES := $(shell find . -name "*.go" -not -path "./vendor/*")
+BUILDTIME=$(shell date -u '+%Y-%m-%d %H:%M')
+GOMODCACHE=$(shell go env GOMODCACHE)
+GOCACHE=$(shell go env GOCACHE)
+GONOPROXY=$(shell go env GONOPROXY)
+GONOSUMDB=$(shell go env GONOSUMDB)
+GOPRIVATE=$(shell go env GOPRIVATE)
+GOOS=$(shell go env GOOS)
+GOARCH=$(shell go env GOARCH)
+GOARM=$(shell go env GOARM)
+GOAMD64=$(shell go env GOAMD64)
+GOMIPS=$(shell go env GOMIPS)
+GOVERSION := $(shell go version | awk -F'go' '{print $$3}' | awk '{print $$1}')
 
-# Variables
-APP_NAME=aiload
-CMD_PATH=./cmd
+.PHONY: gen
+gen: ## 代码生成
+	codegen g pb -i ./aiload.proto -d \
+	--go-module-prefix="github.com/lazygophers/" \
+	--add-proto-files="/Users/luoxin/persons/go/lazygophers/barbecue"
 
-# Default target
-all: build
+	codegen g impl -i ./aiload.proto -d \
+	--go-module-prefix="github.com/lazygophers/" \
+	--template-impl-route="scripts/template/rpc_route.gtpl" \
+	--template-impl-path="scripts/template/rpc_path.gtpl"
 
-# Run the application using air for live reloading
-run:
-	@echo "Running the application with air..."
-	@air
+	codegen g table -i ./aiload.proto -d \
+	--go-module-prefix="github.com/lazygophers/"
 
-# Build the application
-build:
-	@echo "Building the application..."
-	@go build -o $(APP_NAME) $(CMD_PATH)/main.go
+	#go run -v ./scripts/gen/
 
-# Run tests
-test:
-	@echo "Running tests..."
-	@CGO_ENABLED=1 go test -v -cover $(GOPACKAGES)
-
-# Tidy dependencies
-tidy:
-	@echo "Tidying dependencies..."
-	@go mod tidy
-
-# Clean build artifacts
-clean:
-	@echo "Cleaning up..."
-	@rm -f $(APP_NAME)
+.PHONY: fmt
+fmt: ## 格式化
+	gofmt -w .
