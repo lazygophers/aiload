@@ -115,7 +115,25 @@ service aiload {
 
 enum ErrCode {
 	Success = 0;
-	ERR = 10000; // 错误
+
+	ModelAliasNotFound = 10000;// 模型别名未找到
+	ModelAliasDuplicateKey = 10001;// 模型别名重复
+	ChannelNotFound = 10002;// 渠道未找到
+	ChannelDuplicateKey = 10003;// 渠道重复
+	UserTokenNotFound = 10004;// 用户token未找到
+	UserTokenDuplicateKey = 10005;// 用户token重复
+	UserDuplicateKey = 10006;// 用户重复
+	UserNotFound = 10007;// 用户未找到
+	UserAccessNotFound = 10008;// 用户访问未找到
+	UserAccessDuplicateKey = 10009;// 用户访问重复
+	ChannelAccessNotFound = 10010;// 渠道访问未找到
+	ChannelAccessDuplicateKey = 10011;// 渠道访问重复
+}
+
+enum UserRole {
+	Public = 0;
+	Admin = 1;
+	User = 2;
 }
 
 enum Platform {
@@ -161,12 +179,6 @@ message ModelModelAlias {
 	string model = 5;
 	// gorm: index:idx_alias,unique
 	string model_alias = 6;
-}
-
-enum UserRole {
-	Public = 0;
-	Admin = 1;
-	User = 2;
 }
 
 message ModelUser {

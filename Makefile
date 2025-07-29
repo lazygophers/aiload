@@ -40,3 +40,7 @@ gen: ## 代码生成
 .PHONY: fmt
 fmt: ## 格式化
 	gofmt -w .
+
+ .PHONY: run
+ run: ## 运行
+	go run -v ./cmd
