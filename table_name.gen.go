@@ -2,26 +2,26 @@
 //	versions:
 //		codegen	v0.0.0-SNAPSHOT-35b9c92
 //		go		go1.24.5
-//	update:	1753803775
+//	update:	1753804280
 //	source: aiload.proto
 
 package aiload
 
+func (ModelChannel) TableName() string {
+	return "aiload_channel"
+}
+func (ModelUserAccess) TableName() string {
+	return "aiload_user_access"
+}
 func (ModelChannelAccess) TableName() string {
 	return "aiload_channel_access"
-}
-func (ModelModelAlias) TableName() string {
-	return "aiload_model_alias"
 }
 func (ModelUser) TableName() string {
 	return "aiload_user"
 }
-func (ModelChannel) TableName() string {
-	return "aiload_channel"
+func (ModelModelAlias) TableName() string {
+	return "aiload_model_alias"
 }
 func (ModelUserToken) TableName() string {
 	return "aiload_user_token"
-}
-func (ModelUserAccess) TableName() string {
-	return "aiload_user_access"
 }

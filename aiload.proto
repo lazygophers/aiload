@@ -139,7 +139,11 @@ enum UserRole {
 
 enum Platform {
 	Nil = 0;
-	OpenAI = 1;
+	OpenAiCompatible = 1;
+	Siliconflow = 2;
+	Gemini = 3;
+	Ollama = 4;
+	OpenAi = 5;
 }
 
 message ModelChannel {
