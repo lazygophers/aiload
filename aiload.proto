@@ -154,7 +154,14 @@ message ModelModelAlias {
 	string model_alias = 6;
 }
 
+
 message ModelUser {
+	enum Role {
+		Nil = 0;
+		Admin = 1;
+		User = 2;
+	}
+
 	uint64 id = 1;
 	int64 created_at = 2;
 	int64 updated_at = 3;
@@ -165,6 +172,8 @@ message ModelUser {
 	string username = 5;
 	string password = 6;
 	string name = 7;
+
+	Role role = 8;
 }
 
 message ModelUserToken {
