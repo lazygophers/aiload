@@ -6,7 +6,6 @@ PWD=$(shell pwd)
 Organization=lazygophers
 ProjectName=aiload
 Version=$(shell git rev-parse --short=12 HEAD)
-MihomoVersion=$(shell cd /Users/luoxin/persons/go/lazygophers/barbecue/pkg/mihomo && git rev-parse --short=12 HEAD)
 
 BUILDTIME=$(shell date -u '+%Y-%m-%d %H:%M')
 GOMODCACHE=$(shell go env GOMODCACHE)
@@ -34,6 +33,7 @@ gen: ## 代码生成
 
 	codegen g table -i ./aiload.proto -d \
 	--go-module-prefix="github.com/lazygophers/"
+	@$(MAKE) fmt
 
 	#go run -v ./scripts/gen/
 
@@ -42,5 +42,17 @@ fmt: ## 格式化
 	gofmt -w .
 
  .PHONY: run
- run: ## 运行
-	go run -v ./cmd
+ run: fmt ## 运行
+	CGO_ENABLED=0 \
+	GODEBUG=madvdontneed=1,asyncpreemptoff=1 \
+	go build \
+		-trimpath \
+		--gcflags '-N -l' \
+		--tags netgo,osusergo \
+		--ldflags '-checklinkname=0 -s -w --extldflags "-fpic" -X "github.com/lazygophers/utils/app.Name=${ProjectName}" -X "github.com/lazygophers/utils/app.Version=${Version}" -X "github.com/lazygophers/utils/app.Organization=${Organization}" -X "github.com/lazygophers/utils/app.GoVersion=${GOVERSION}" -X "github.com/lazygophers/utils/app.GoOS=${GOOS}" -X "github.com/lazygophers/utils/app.Goarch=${GOARCH}"' \
+		 ./cmd
+
+
+.PHONY: help
+help: ## 显示此帮助消息
+	@awk 'BEGIN {FS = ":.*##"; printf "Usage: make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
