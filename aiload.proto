@@ -103,6 +103,16 @@ service aiload {
 		};
 	};
 
+	rpc Login (LoginReq) returns (LoginRsp) {
+		option (lazygophers.lrpc.core.http) = {
+			method: "POST",
+			path: "Login",
+		};
+		option (lazygophers.lrpc.core.lazygen) = {
+			role: "public",
+		};
+	};
+
 }
 
 enum ErrCode {
@@ -271,4 +281,17 @@ message DelUserAdminReq {
 }
 
 message DelUserAdminRsp {
+}
+
+message LoginReq {
+	// @validate: required
+	string username = 1;
+	// @validate: required
+	string password = 2;
+}
+
+message LoginRsp {
+	ModelUser user = 1;
+	string token = 2;
+	int64 expires_at = 3;
 }
