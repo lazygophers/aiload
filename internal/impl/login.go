@@ -2,10 +2,10 @@ package impl
 
 import (
 	"fmt"
+	"github.com/gofiber/fiber/v2"
 	"github.com/lazygophers/aiload"
 	"github.com/lazygophers/aiload/internal/state"
 	"github.com/lazygophers/log"
-	"github.com/lazygophers/lrpc"
 	"github.com/lazygophers/utils/cryptox"
 	"github.com/lazygophers/utils/xtime"
 	"time"
@@ -27,7 +27,7 @@ func Login(ctx *fiber.Ctx, req *aiload.LoginReq) (*aiload.LoginRsp, error) {
 		return nil, err
 	}
 
-	rsp.Token = "user:" + cryptox.UUID()
+	rsp.Token = "us-" + cryptox.UUID()
 
 	err = state.Cache().SetEx(fmt.Sprintf(state.CacheKeySession, rsp.Token), user, xtime.Day)
 	if err != nil {

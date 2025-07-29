@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/lazygophers/aiload"
+	"github.com/lazygophers/aiload/internal/state"
 	"github.com/lazygophers/log"
 	"github.com/lazygophers/lrpc"
 	"github.com/lazygophers/lrpc/middleware/core"
@@ -15,6 +16,11 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 	"reflect"
 	"strings"
+)
+
+const (
+	HeaderUid      = "X-Uid"
+	HeaderUserRole = "X-User-Role"
 )
 
 func ParseBody(ctx *fiber.Ctx, v any) error {
@@ -179,67 +185,59 @@ func sendError(ctx *fiber.Ctx, err error) error {
 	})
 }
 
-func roleCheck(ctx *fiber.Ctx, pathRole aiload.ModelUser_Role) error {
+func roleCheck(ctx *fiber.Ctx, pathRole aiload.UserRole) error {
 	// 先通过 token 获取信息
 	ctx.Set(fiber.HeaderRetryAfter, "30")
 
-	//info, err := session.Get(ctx)
-	//if err != nil {
-	//	log.Errorf("err:%v", err)
-	//	if !xerror.CheckCode(err, xerror.ErrNoAuth) {
-	//		log.Errorf("err:%v", err)
-	//		return err
-	//	}
-	//
-	//	if ctx.Get(lrpc.HeaderToken) != "" {
-	//		return err
-	//	}
-	//
-	//	if pathRole != aiload.ModelUser_Role_Public {
-	//		ctx.Status(401)
-	//		return err
-	//	}
-	//
-	//	info = &session.Info{
-	//		Role: aiload.ModelUser_Role_Public,
-	//		User: &barbecue.ModelUser{
-	//			Type:     aiload.ModelUser_Role_Public,
-	//			Language: GetLang(ctx),
-	//		},
-	//	}
-	//}
-	//
-	//if info.User != nil && info.User.Language != "" {
-	//	i18n.SetLanguage(info.User.Language)
-	//}
-	//
-	//if !pathRole.IsInclude(info.Role) {
-	//	return xerror.NewError(xerror.ErrNoAuth)
-	//}
-	//
-	//log.Debugf("user rule %s", info.Role)
-	//ctx.Context().SetUserValue("info", info)
-	//ctx.Context().SetUserValue("role", info.Role)
+	ctx.Context().SetUserValue(HeaderUid, 0)
+	ctx.Context().SetUserValue(HeaderUserRole, aiload.UserRole_Public)
+
+	if strings.HasPrefix(ctx.Get(lrpc.HeaderToken), "us-") {
+		var user aiload.ModelUser
+		err := state.Cache().GetJson(fmt.Sprintf(state.CacheKeySession, ctx.Get(lrpc.HeaderToken)), &user)
+		if err != nil {
+			log.Errorf("err:%v", err)
+		} else {
+			ctx.Context().SetUserValue(HeaderUid, user.Id)
+			ctx.Context().SetUserValue(HeaderUserRole, user.Role)
+		}
+	}
+
+	// 其它类型
+	if !GetRole(ctx).Accessible(pathRole) {
+		return xerror.NewError(xerror.ErrNoAuth)
+	}
 
 	return nil
 }
 
-func parseRole(role string) aiload.ModelUser_Role {
+func GetUid(ctx *fiber.Ctx) (uid uint64) {
+	if value, ok := ctx.Context().UserValue(HeaderUid).(uint64); ok {
+		return value
+	}
+	return 0
+}
+
+func GetRole(ctx *fiber.Ctx) (role aiload.UserRole) {
+	if value, ok := ctx.Context().UserValue(HeaderUserRole).(aiload.UserRole); ok {
+		return value
+	}
+	return aiload.UserRole_Public
+}
+
+func parseRole(role string) aiload.UserRole {
 	switch strings.ToLower(role) {
 	case "user", "u", "":
-		return aiload.ModelUser_User
+		return aiload.UserRole_User
 
 	case "p", "public":
-		return aiload.ModelUser_Public
+		return aiload.UserRole_Public
 
 	case "admin", "a":
-		return aiload.ModelUser_Admin
-
-	default:
-		log.Panicf("unsuppost user type %s", role)
+		return aiload.UserRole_Admin
 	}
 
-	return aiload.ModelUser_User
+	return aiload.UserRole_Admin
 }
 
 func ToHandler(logic any, role string) fiber.Handler {
