@@ -31,3 +31,4 @@ aiload
 *.db
 *.cache
 *.bbolt
+config.yaml
