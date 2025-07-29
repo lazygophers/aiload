@@ -25,4 +25,3 @@ func (ModelUser) TableName() string {
 func (ModelUserToken) TableName() string {
 	return "aiload_user_token"
 }
-

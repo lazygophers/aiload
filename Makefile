@@ -45,7 +45,8 @@ fmt: ## 格式化
  run: fmt ## 运行
 	CGO_ENABLED=0 \
 	GODEBUG=madvdontneed=1,asyncpreemptoff=1 \
-	go build \
+	go run \
+		-v \
 		-trimpath \
 		--gcflags '-N -l' \
 		--tags netgo,osusergo \

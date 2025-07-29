@@ -8,12 +8,12 @@
 package aiload
 
 const (
-RpcPathAddUserAdmin = "/AddUserAdmin"
-RpcPathGetUser = "/GetUser"
-RpcPathGetUserAdmin = "/GetUserAdmin"
-RpcPathListUserAdmin = "/ListUserAdmin"
-RpcPathSetUser = "/SetUser"
-RpcPathSetUserAdmin = "/SetUserAdmin"
-RpcPathDelUserAdmin = "/DelUserAdmin"
-RpcPathLogin = "/Login"
+	RpcPathAddUserAdmin  = "/AddUserAdmin"
+	RpcPathGetUser       = "/GetUser"
+	RpcPathGetUserAdmin  = "/GetUserAdmin"
+	RpcPathListUserAdmin = "/ListUserAdmin"
+	RpcPathSetUser       = "/SetUser"
+	RpcPathSetUserAdmin  = "/SetUserAdmin"
+	RpcPathDelUserAdmin  = "/DelUserAdmin"
+	RpcPathLogin         = "/Login"
 )

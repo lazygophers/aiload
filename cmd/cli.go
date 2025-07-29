@@ -31,6 +31,12 @@ var rootCmd = &cobra.Command{
 		//	return err
 		//}
 
+		err = api.Listen()
+		if err != nil {
+			log.Errorf("err:%s", err)
+			return err
+		}
+
 		return nil
 	},
 }

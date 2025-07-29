@@ -7,7 +7,6 @@
 
 package aiload
 
-
 import (
 	"database/sql/driver"
 	"github.com/lazygophers/utils"
@@ -60,5 +59,3 @@ func (m *ModelUserToken) Scan(value interface{}) error {
 func (m *ModelUserToken) Value() (driver.Value, error) {
 	return utils.Value(m)
 }
-
-
