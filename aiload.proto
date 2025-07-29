@@ -132,8 +132,9 @@ enum ErrCode {
 
 enum UserRole {
 	Public = 0;
-	Admin = 1;
-	User = 2;
+	User = 1;
+	Admin = 2;
+	System = 3;
 }
 
 enum Platform {
