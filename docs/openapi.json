@@ -1,711 +1,2349 @@
 {
-  "openapi": "3.0.0",
   "info": {
-    "title": "🚀 AI Load 统一 API",
-    "version": "1.0.0",
-    "description": "欢迎使用 **AI Load**！本文档是您与 AI Load 服务进行交互的终极指南。AI Load 的核心价值在于其强大的**智能路由**与**协议转换**能力，让您可以无缝调用所有已接入的大模型。"
+    "title": "OpenAI（ChatGPT）",
+    "description": "Open AI（ChatGPT）几乎可以应用于任何涉及理解或生成自然语言或代码的任务。我们提供一系列具有不同功率级别的模型，适用于不同的任务，并且能够微调您自己的自定义模型。这些模型可用于从内容生成到语义搜索和分类的所有领域。\n\n",
+    "version": "1.0.0"
   },
-  "servers": [
+  "tags": [
     {
-      "url": "http://localhost:14004"
-    }
-  ],
-  "components": {
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "API Key"
-      }
+      "name": "音频（Audio）"
     },
-    "schemas": {
-      "Model": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "The model identifier, which can be referenced in the API endpoints."
-          },
-          "object": {
-            "type": "string",
-            "description": "The object type, which is always `model`."
-          },
-          "created": {
-            "type": "integer",
-            "description": "The Unix timestamp (in seconds) of when the model was created."
-          },
-          "owned_by": {
-            "type": "string",
-            "description": "The organization that owns the model."
-          }
-        },
-        "required": [
-          "id",
-          "object",
-          "created",
-          "owned_by"
-        ]
-      },
-      "ModelList": {
-        "type": "object",
-        "properties": {
-          "object": {
-            "type": "string",
-            "description": "The object type, which is always `list`."
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Model"
-            }
-          }
-        },
-        "required": [
-          "object",
-          "data"
-        ]
-      },
-      "CreateEmbeddingRequest": {
-        "type": "object",
-        "properties": {
-          "model": {
-            "type": "string"
-          },
-          "input": {
-            "oneOf": [
-              { "type": "string" },
-              { "type": "array", "items": { "type": "string" } }
-            ]
-          },
-          "encoding_format": {
-            "type": "string",
-            "enum": ["float", "base64"],
-            "default": "float"
-          },
-          "user": {
-            "type": "string"
-          }
-        },
-        "required": ["model", "input"]
-      },
-      "CreateEmbeddingResponse": {
-        "type": "object",
-        "properties": {
-          "object": {
-            "type": "string"
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "object": { "type": "string" },
-                "index": { "type": "integer" },
-                "embedding": {
-                  "type": "array",
-                  "items": { "type": "number", "format": "float" }
-                }
-              }
-            }
-          },
-          "model": {
-            "type": "string"
-          },
-          "usage": {
-            "type": "object",
-            "properties": {
-              "prompt_tokens": { "type": "integer" },
-              "total_tokens": { "type": "integer" }
-            }
-          }
-        }
-      },
-      "RerankRequest": {
-        "type": "object",
-        "properties": {
-          "model": {
-            "type": "string"
-          },
-          "query": {
-            "type": "string"
-          },
-          "documents": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "top_n": {
-            "type": "integer"
-          },
-          "return_documents": {
-            "type": "boolean",
-            "default": false
-          }
-        },
-        "required": ["model", "query", "documents"]
-      },
-      "RerankResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "results": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "index": { "type": "integer" },
-                "relevance_score": { "type": "number", "format": "float" },
-                "document": {
-                  "type": "object",
-                  "properties": {
-                    "text": { "type": "string" }
-                  }
-                }
-              }
-            }
-          },
-          "usage": {
-            "type": "object",
-            "properties": {
-              "total_tokens": { "type": "integer" }
-            }
-          }
-        }
-      }
-    },
-    "CreateImageRequest": {
-      "type": "object",
-      "properties": {
-        "prompt": { "type": "string", "maxLength": 1000 },
-        "model": { "type": "string", "default": "dall-e-2" },
-        "n": { "type": "integer", "minimum": 1, "maximum": 10 },
-        "size": { "type": "string", "enum": ["256x256", "512x512", "1024x1024"] }
-      },
-      "required": ["prompt"]
-    },
-    "ImagesResponse": {
-      "type": "object",
-      "properties": {
-        "created": { "type": "integer" },
-        "data": { "type": "array", "items": { "$ref": "#/components/schemas/Image" } }
-      },
-      "required": ["created", "data"]
-    },
-    "Image": {
-      "type": "object",
-      "properties": {
-        "url": { "type": "string" },
-        "b64_json": { "type": "string" }
-      }
-    },
-    "CreateImageEditRequest": {
-      "type": "object",
-      "properties": {
-        "image": { "type": "string", "format": "binary" },
-        "prompt": { "type": "string", "maxLength": 1000 },
-        "mask": { "type": "string", "format": "binary" },
-        "n": { "type": "integer", "minimum": 1, "maximum": 10 },
-        "size": { "type": "string", "enum": ["256x256", "512x512", "1024x1024"] }
-      },
-      "required": ["image", "prompt"]
-    },
-    "CreateImageVariationRequest": {
-      "type": "object",
-      "properties": {
-        "image": { "type": "string", "format": "binary" },
-        "n": { "type": "integer", "minimum": 1, "maximum": 10 },
-        "size": { "type": "string", "enum": ["256x256", "512x512", "1024x1024"] }
-      },
-      "required": ["image"]
-    },
-    "CreateSpeechRequest": {
-        "type": "object",
-        "properties": {
-            "model": { "type": "string", "enum": ["tts-1", "tts-1-hd"] },
-            "input": { "type": "string", "maxLength": 4096 },
-            "voice": { "type": "string", "enum": ["alloy", "echo", "fable", "onyx", "nova", "shimmer"] },
-            "speed": { "type": "number", "minimum": 0.25, "maximum": 4.0, "default": 1.0 }
-        },
-        "required": ["model", "input", "voice"]
-    },
-    "CreateTranscriptionRequest": {
-      "type": "object",
-      "properties": {
-        "file": { "type": "string", "format": "binary" },
-        "model": { "type": "string", "enum": ["whisper-1"] },
-        "prompt": { "type": "string" },
-        "language": { "type": "string" }
-      },
-      "required": ["file", "model"]
-    },
-    "CreateTranscriptionResponseJson": {
-        "type": "object",
-        "properties": {
-            "text": { "type": "string" }
-        },
-        "required": ["text"]
-    },
-    "CreateTranslationRequest": {
-      "type": "object",
-      "properties": {
-    "/v1/models": {
-      "get": {
-        "summary": "List models",
-        "description": "Retrieves a list of available models.",
-        "tags": ["Models"],
-        "responses": {
-          "200": {
-            "description": "A list of available models.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ModelList"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-        "file": { "type": "string", "format": "binary" },
-        "model": { "type": "string", "enum": ["whisper-1"] },
-        "prompt": { "type": "string" }
-      },
-      "required": ["file", "model"]
-    },
-    "CreateTranslationResponseJson": {
-        "type": "object",
-        "properties": {
-            "text": { "type": "string" }
-        },
-        "required": ["text"]
-    },
-    "CreateVideoGenerationRequest": {
-      "type": "object",
-      "properties": {
-        "prompt": { "type": "string", "maxLength": 4000 },
-        "model": { "type": "string", "default": "sora-1" },
-        "n": { "type": "integer", "default": 1 },
-        "size": { "type": "string", "default": "1920x1080" },
-        "duration": { "type": "integer" }
-      },
-      "required": ["prompt"]
-    },
-    "VideoResponse": {
-        "type": "object",
-        "properties": {
-            "created": { "type": "integer" },
-            "data": { "type": "array", "items": { "$ref": "#/components/schemas/Video" } }
-        },
-        "required": ["created", "data"]
-    },
-    "Video": {
-        "type": "object",
-        "properties": {
-            "url": { "type": "string" },
-            "b64_json": { "type": "string" }
-        }
-    }
-  },
-  "security": [
     {
-      "bearerAuth": []
+      "name": "聊天（Chat）"
+    },
+    {
+      "name": "自动补全（Completions）"
+    },
+    {
+      "name": "嵌入（Embeddings）"
+    },
+    {
+      "name": "微调（Fine-tuning）"
+    },
+    {
+      "name": "图像（Images）"
+    },
+    {
+      "name": "模型（Models）"
+    },
+    {
+      "name": "文件（Files）"
     }
   ],
   "paths": {
-    "/v1/chat/completions": {
-      "post": {
-        "summary": "创建聊天补全",
-        "description": "这是最核心、最常用的端点，用于与所有支持的聊天模型进行对话。",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "model": {
-                    "type": "string",
-                    "description": "您希望调用的模型名称。AI Load 会根据此名称自动路由到后台配置的正确模型供应商。",
-                    "example": "gpt-4"
-                  },
-                  "messages": {
-                    "type": "array",
-                    "description": "一个消息对象数组，用于描述对话上下文。",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "role": {
-                          "type": "string",
-                          "enum": ["user", "assistant", "system"],
-                          "description": "消息发送者的角色。"
-                        },
-                        "content": {
-                          "type": "string",
-                          "description": "消息的具体内容。"
-                        }
-                      },
-                      "required": ["role", "content"]
-                    }
-                  },
-                  "stream": {
-                    "type": "boolean",
-                    "description": "是否使用流式传输。如果为 true，响应将以 Server-Sent Events (SSE) 的形式返回。",
-                    "default": false
-                  },
-                  "temperature": {
-                    "type": "number",
-                    "description": "控制生成文本的随机性，介于 0 和 2 之间。",
-                    "default": 1
-                  },
-                  "max_tokens": {
-                    "type": "integer",
-                    "description": "生成响应的最大 token 数量。"
-                  }
-                },
-                "required": ["model", "messages"]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "成功的响应",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "object": {
-                      "type": "string"
-                    },
-                    "created": {
-                      "type": "integer"
-                    },
-                    "model": {
-                      "type": "string"
-                    },
-                    "choices": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "index": {
-                            "type": "integer"
-                          },
-                          "message": {
-                            "type": "object",
-                            "properties": {
-                              "role": {
-                                "type": "string"
-                              },
-                              "content": {
-                                "type": "string"
-                              }
-                            }
-                          },
-                          "finish_reason": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    },
-                    "usage": {
-                      "type": "object",
-                      "properties": {
-                        "prompt_tokens": {
-                          "type": "integer"
-                        },
-                        "completion_tokens": {
-                          "type": "integer"
-                        },
-                        "total_tokens": {
-                          "type": "integer"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/embeddings": {
-      "post": {
-        "summary": "Create embeddings",
-        "operationId": "createEmbeddings",
-        "tags": ["Embeddings"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateEmbeddingRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateEmbeddingResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/rerank": {
-      "post": {
-        "summary": "Rerank documents",
-        "operationId": "rerankDocuments",
-        "tags": ["Rerank"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RerankRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RerankResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/images/generations": {
-      "post": {
-        "summary": "Creates an image given a prompt.",
-        "operationId": "createImage",
-        "tags": [
-          "Images"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateImageRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImagesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/images/edits": {
-      "post": {
-        "summary": "Creates an edited or extended image given an original image and a prompt.",
-        "operationId": "createImageEdit",
-        "tags": [
-          "Images"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateImageEditRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImagesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/images/variations": {
-      "post": {
-        "summary": "Creates a variation of a given image.",
-        "operationId": "createImageVariation",
-        "tags": [
-          "Images"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateImageVariationRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImagesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/audio/speech": {
       "post": {
-        "summary": "Generates audio from the input text.",
-        "operationId": "createSpeech",
+        "summary": "创建语音",
+        "deprecated": false,
+        "description": "",
         "tags": [
-          "Audio"
+          "音频（Audio）"
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSpeechRequest"
-              }
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "description": "可用的 TTS 模型之一:tts-1 或 tts-1-hd"
+                },
+                "input": {
+                  "type": "string",
+                  "description": "要生成音频的文本。最大长度为4096个字符。"
+                },
+                "voice": {
+                  "type": "string",
+                  "description": "生成音频时使用的语音。支持的语音有:alloy、echo、fable、onyx、nova 和 shimmer。"
+                },
+                "response_format": {
+                  "type": "string",
+                  "description": "默认为 mp3 音频的格式。支持的格式有:mp3、opus、aac 和 flac。"
+                },
+                "speed": {
+                  "type": "number",
+                  "description": "默认为 1 生成的音频速度。选择0.25到4.0之间的值。1.0是默认值。"
+                }
+              },
+              "required": [
+                "model",
+                "input",
+                "voice"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "schema": {
+              "type": "object",
+              "properties": {}
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/octet-stream": {}
-            }
+        "security": [
+          {
+            "bearer": []
           }
-        }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ]
       }
     },
     "/v1/audio/transcriptions": {
       "post": {
-        "summary": "Transcribes audio into the input language.",
-        "operationId": "createTranscription",
+        "summary": "创建转录",
+        "deprecated": false,
+        "description": "",
         "tags": [
-          "Audio"
+          "音频（Audio）"
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateTranscriptionRequest"
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "required": true,
+            "format": "binary",
+            "type": "string",
+            "description": "要转录的音频文件对象(不是文件名),格式为:flac、mp3、mp4、mpeg、mpga、m4a、ogg、wav 或 webm。\n\n"
+          },
+          {
+            "name": "model",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": "要使用的模型 ID。目前只有 whisper-1 是可用的。\n\n"
+          },
+          {
+            "name": "language",
+            "in": "formData",
+            "type": "string",
+            "description": "输入音频的语言。以 ISO-639-1 格式提供输入语言可以提高准确性和延迟。\n\n"
+          },
+          {
+            "name": "prompt",
+            "in": "formData",
+            "type": "string",
+            "description": "一个可选的文本来指导模型的风格或继续之前的音频段落。提示应该与音频语言匹配。\n\n"
+          },
+          {
+            "name": "response_format",
+            "in": "formData",
+            "type": "string",
+            "description": "默认为 json\n转录输出的格式,可选择:json、text、srt、verbose_json 或 vtt。"
+          },
+          {
+            "name": "temperature",
+            "in": "formData",
+            "type": "number",
+            "description": "默认为 0\n采样温度,between 0 和 1。更高的值像 0.8 会使输出更随机,而更低的值像 0.2 会使其更集中和确定性。如果设置为 0,模型将使用对数概率自动增加温度直到达到特定阈值。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": {
+                "text": "Imagine the wildest idea that you've ever had, and you're curious about how it might scale to something that's a 100, a 1,000 times bigger. This is a place where you can get to do that."
               }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "text"
+              ]
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateTranscriptionResponseJson"
-                }
-              }
-            }
+        "security": [
+          {
+            "bearer": []
           }
-        }
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ]
       }
     },
     "/v1/audio/translations": {
       "post": {
-        "summary": "Translates audio into English.",
-        "operationId": "createTranslation",
+        "summary": "创建翻译",
+        "deprecated": false,
+        "description": "",
         "tags": [
-          "Audio"
+          "音频（Audio）"
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateTranslationRequest"
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "required": true,
+            "format": "binary",
+            "type": "string",
+            "description": "要翻译的音频文件对象(不是文件名),格式为:flac、mp3、mp4、mpeg、mpga、m4a、ogg、wav 或 webm。\n\n"
+          },
+          {
+            "name": "model",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": "要使用的模型 ID。目前只有 whisper-1 是可用的。\n\n"
+          },
+          {
+            "name": "prompt",
+            "in": "formData",
+            "type": "string",
+            "description": "一个可选的文本,用于指导模型的风格或继续之前的音频段落。提示文本应该是英文。\n\n"
+          },
+          {
+            "name": "response_format",
+            "in": "formData",
+            "type": "string",
+            "description": "翻译结果的格式,可选择:json、text、srt、verbose_json 或 vtt。\n\n"
+          },
+          {
+            "name": "temperature",
+            "in": "formData",
+            "type": "number",
+            "description": "默认为 0\n采样温度,介于 0 和 1 之间。更高的值如 0.8 会使输出更随机,而较低的值如 0.2 会使其更聚焦和确定性。如果设置为 0,模型将使用对数概率自动提高温度直到达到特定阈值。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": {
+                "text": "Hello, my name is Wolfgang and I come from Germany. Where are you heading today?"
               }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "text"
+              ]
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateTranslationResponseJson"
-                }
-              }
-            }
+        "security": [
+          {
+            "bearer": []
           }
-        }
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ]
       }
     },
-    "/v1/video/generations": {
+    "/v1/chat/completions": {
       "post": {
-        "summary": "Creates a video given a prompt.",
-        "operationId": "createVideoGeneration",
+        "summary": "创建 Chat Completions",
+        "deprecated": false,
+        "description": "给定一个提示，该模型将返回一个或多个预测的完成，并且还可以返回每个位置的替代标记的概率。\n\n为提供的提示和参数创建完成\n\n",
         "tags": [
-          "Video"
+          "聊天（Chat）"
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateVideoGenerationRequest"
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "x-example": "application/json"
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "x-example": "application/json"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "type": "string",
+            "x-example": "Bearer {{YOUR_API_KEY}}"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "description": "要使用的模型的 ID。有关哪些模型可与聊天 API 一起使用的详细信息,请参阅模型端点兼容性表。\n\n"
+                },
+                "messages": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "role": {
+                        "type": "string"
+                      },
+                      "content": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "description": "至今为止对话所包含的消息列表。Python 代码示例。"
+                },
+                "temperature": {
+                  "type": "integer",
+                  "description": "使用什么采样温度，介于 0 和 2 之间。较高的值（如 0.8）将使输出更加随机，而较低的值（如 0.2）将使输出更加集中和确定。  我们通常建议改变这个或`top_p`但不是两者。"
+                },
+                "top_p": {
+                  "type": "integer",
+                  "description": "一种替代温度采样的方法，称为核采样，其中模型考虑具有 top_p 概率质量的标记的结果。所以 0.1 意味着只考虑构成前 10% 概率质量的标记。  我们通常建议改变这个或`temperature`但不是两者。"
+                },
+                "n": {
+                  "type": "integer",
+                  "description": "默认为 1\n为每个输入消息生成多少个聊天补全选择。"
+                },
+                "stream": {
+                  "type": "boolean",
+                  "description": "默认为 false 如果设置,则像在 ChatGPT 中一样会发送部分消息增量。标记将以仅数据的服务器发送事件的形式发送,这些事件在可用时,并在 data: [DONE] 消息终止流。Python 代码示例。"
+                },
+                "stop": {
+                  "type": "string",
+                  "description": "默认为 null 最多 4 个序列,API 将停止进一步生成标记。"
+                },
+                "max_tokens": {
+                  "type": "integer",
+                  "description": "默认为 inf\n在聊天补全中生成的最大标记数。\n\n输入标记和生成标记的总长度受模型的上下文长度限制。计算标记的 Python 代码示例。"
+                },
+                "presence_penalty": {
+                  "type": "number",
+                  "description": "-2.0 和 2.0 之间的数字。正值会根据到目前为止是否出现在文本中来惩罚新标记，从而增加模型谈论新主题的可能性。  [查看有关频率和存在惩罚的更多信息。](https://platform.openai.com/docs/api-reference/parameter-details)"
+                },
+                "frequency_penalty": {
+                  "type": "number",
+                  "description": "默认为 0 -2.0 到 2.0 之间的数字。正值根据文本目前的存在频率惩罚新标记,降低模型重复相同行的可能性。  有关频率和存在惩罚的更多信息。"
+                },
+                "logit_bias": {
+                  "type": "null",
+                  "description": "修改指定标记出现在补全中的可能性。\n\n接受一个 JSON 对象,该对象将标记(由标记器指定的标记 ID)映射到相关的偏差值(-100 到 100)。从数学上讲,偏差在对模型进行采样之前添加到模型生成的 logit 中。确切效果因模型而异,但-1 和 1 之间的值应减少或增加相关标记的选择可能性;如-100 或 100 这样的值应导致相关标记的禁用或独占选择。"
+                },
+                "user": {
+                  "type": "string",
+                  "description": "代表您的最终用户的唯一标识符，可以帮助 OpenAI 监控和检测滥用行为。[了解更多](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids)。"
+                },
+                "response_format": {
+                  "type": "object",
+                  "properties": {},
+                  "description": "指定模型必须输出的格式的对象。  将 { \"type\": \"json_object\" } 启用 JSON 模式,这可以确保模型生成的消息是有效的 JSON。  重要提示:使用 JSON 模式时,还必须通过系统或用户消息指示模型生成 JSON。如果不这样做,模型可能会生成无休止的空白流,直到生成达到令牌限制,从而导致延迟增加和请求“卡住”的外观。另请注意,如果 finish_reason=\"length\",则消息内容可能会被部分切断,这表示生成超过了 max_tokens 或对话超过了最大上下文长度。  显示属性"
+                },
+                "seen": {
+                  "type": "integer",
+                  "description": "此功能处于测试阶段。如果指定,我们的系统将尽最大努力确定性地进行采样,以便使用相同的种子和参数进行重复请求应返回相同的结果。不能保证确定性,您应该参考 system_fingerprint 响应参数来监控后端的更改。"
+                },
+                "tools": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "模型可以调用的一组工具列表。目前,只支持作为工具的函数。使用此功能来提供模型可以为之生成 JSON 输入的函数列表。"
+                },
+                "tool_choice": {
+                  "type": "object",
+                  "properties": {},
+                  "description": "控制模型调用哪个函数(如果有的话)。none 表示模型不会调用函数,而是生成消息。auto 表示模型可以在生成消息和调用函数之间进行选择。通过 {\"type\": \"function\", \"function\": {\"name\": \"my_function\"}} 强制模型调用该函数。  如果没有函数存在,默认为 none。如果有函数存在,默认为 auto。  显示可能的类型"
+                }
+              },
+              "required": [
+                "model",
+                "messages",
+                "tools",
+                "tool_choice"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": {
+                "id": "chatcmpl-123",
+                "object": "chat.completion",
+                "created": 1677652288,
+                "choices": [
+                  {
+                    "index": 0,
+                    "message": {
+                      "role": "assistant",
+                      "content": "\n\nHello there, how may I assist you today?"
+                    },
+                    "finish_reason": "stop"
+                  }
+                ],
+                "usage": {
+                  "prompt_tokens": 9,
+                  "completion_tokens": 12,
+                  "total_tokens": 21
+                }
               }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "object": {
+                  "type": "string"
+                },
+                "created": {
+                  "type": "integer"
+                },
+                "choices": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "index": {
+                        "type": "integer"
+                      },
+                      "message": {
+                        "type": "object",
+                        "properties": {
+                          "role": {
+                            "type": "string"
+                          },
+                          "content": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "role",
+                          "content"
+                        ]
+                      },
+                      "finish_reason": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "usage": {
+                  "type": "object",
+                  "properties": {
+                    "prompt_tokens": {
+                      "type": "integer"
+                    },
+                    "completion_tokens": {
+                      "type": "integer"
+                    },
+                    "total_tokens": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "prompt_tokens",
+                    "completion_tokens",
+                    "total_tokens"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "object",
+                "created",
+                "choices",
+                "usage"
+              ]
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VideoResponse"
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/completions": {
+      "post": {
+        "summary": "创建 Completions",
+        "deprecated": false,
+        "description": "给定一个提示，该模型将返回一个或多个预测的完成，并且还可以返回每个位置的替代标记的概率。\n\n为提供的提示和参数创建完成\n\n",
+        "tags": [
+          "自动补全（Completions）"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "type": "string",
+            "x-example": "Bearer {{YOUR_API_KEY}}"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "title": "",
+                  "description": "要使用的模型的 ID。您可以使用[List models](https://platform.openai.com/docs/api-reference/models/list) API 来查看所有可用模型，或查看我们的[模型概述](https://platform.openai.com/docs/models/overview)以了解它们的描述。"
+                },
+                "prompt": {
+                  "type": "string",
+                  "title": "",
+                  "description": "生成完成的提示，编码为字符串、字符串数组、标记数组或标记数组数组。  请注意，<|endoftext|> 是模型在训练期间看到的文档分隔符，因此如果未指定提示，模型将生成新文档的开头。"
+                },
+                "best_of": {
+                  "type": "integer",
+                  "description": "默认为1 在服务器端生成best_of个补全,并返回“最佳”补全(每个令牌的日志概率最高的那个)。无法流式传输结果。  与n一起使用时,best_of控制候选补全的数量,n指定要返回的数量 – best_of必须大于n。  注意:因为这个参数会生成许多补全,所以它可以快速消耗您的令牌配额。请谨慎使用,并确保您对max_tokens和stop有合理的设置。"
+                },
+                "echo": {
+                  "type": "boolean",
+                  "description": "默认为false 除了补全之外,还回显提示"
+                },
+                "frequency_penalty": {
+                  "type": "number",
+                  "description": "默认为0 -2.0和2.0之间的数字。正值根据文本目前的现有频率处罚新令牌,降低模型逐字重复相同行的可能性。"
+                },
+                "logit_bias": {
+                  "type": "object",
+                  "properties": {},
+                  "description": "默认为null 修改完成中指定令牌出现的可能性。  接受一个JSON对象,该对象将令牌(由GPT令牌化器中的令牌ID指定)映射到关联偏差值,-100到100。您可以使用这个令牌化器工具(适用于GPT-2和GPT-3)将文本转换为令牌ID。从数学上讲,偏差在对模型进行采样之前添加到生成的logit中。确切效果因模型而异,但-1至1之间的值应降低或提高选择的可能性;像-100或100这样的值应导致相关令牌的禁用或专属选择。  例如,您可以传递{\"50256\": -100}来防止生成<|endoftext|>令牌。"
+                },
+                "logprobs": {
+                  "type": "null",
+                  "title": "",
+                  "description": "默认为null\n包括logprobs个最可能令牌的日志概率,以及所选令牌。例如,如果logprobs为5,API将返回5个最有可能令牌的列表。 API总会返回采样令牌的logprob,因此响应中最多可能有logprobs+1个元素。\n\nlogprobs的最大值是5。"
+                },
+                "max_tokens": {
+                  "type": "integer",
+                  "title": "",
+                  "description": "默认为16\n在补全中生成的最大令牌数。\n\n提示的令牌计数加上max_tokens不能超过模型的上下文长度。 计数令牌的Python代码示例。"
+                },
+                "n": {
+                  "type": "integer",
+                  "description": "默认为1\n为每个提示生成的补全数量。\n\n注意:因为这个参数会生成许多补全,所以它可以快速消耗您的令牌配额。请谨慎使用,并确保您对max_tokens和stop有合理的设置。"
+                },
+                "presence_penalty": {
+                  "type": "number",
+                  "description": "默认为0 -2.0和2.0之间的数字。正值根据它们是否出现在目前的文本中来惩罚新令牌,增加模型讨论新话题的可能性。  有关频率和存在惩罚的更多信息,请参阅。"
+                },
+                "seed": {
+                  "type": "integer",
+                  "description": "如果指定,我们的系统将尽最大努力确定性地进行采样,以便使用相同的种子和参数的重复请求应返回相同的结果。  不保证确定性,您应该参考system_fingerprint响应参数来监视后端的更改。"
+                },
+                "stop": {
+                  "type": "string",
+                  "title": "",
+                  "description": "默认为null 最多4个序列,API将停止在其中生成更多令牌。返回的文本不会包含停止序列。"
+                },
+                "stream": {
+                  "type": "boolean",
+                  "title": "",
+                  "description": "默认为false 是否流回部分进度。如果设置,令牌将作为可用时发送为仅数据的服务器发送事件,流由数据 Terminated by a data: [DONE] message. 对象消息终止。 Python代码示例。"
+                },
+                "suffix": {
+                  "type": "string",
+                  "description": "默认为null 在插入文本的补全之后出现的后缀。"
+                },
+                "temperature": {
+                  "type": "integer",
+                  "title": "",
+                  "description": "默认为1 要使用的采样温度,介于0和2之间。更高的值(如0.8)将使输出更随机,而更低的值(如0.2)将使其更集中和确定。  我们通常建议更改这个或top_p,而不是两者都更改。"
+                },
+                "user": {
+                  "type": "string"
+                },
+                "top_p": {
+                  "type": "integer",
+                  "description": "表示最终用户的唯一标识符,这可以帮助OpenAI监控和检测滥用。 了解更多。"
                 }
-              }
+              },
+              "required": [
+                "model",
+                "prompt",
+                "user"
+              ]
             }
           }
-        }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": {
+                "id": "cmpl-uqkvlQyYK7bGYrRHQ0eXlWi7",
+                "object": "text_completion",
+                "created": 1589478378,
+                "model": "gpt-3.5-turbo-instruct",
+                "system_fingerprint": "fp_44709d6fcb",
+                "choices": [
+                  {
+                    "text": "\n\nThis is indeed a test",
+                    "index": 0,
+                    "logprobs": null,
+                    "finish_reason": "length"
+                  }
+                ],
+                "usage": {
+                  "prompt_tokens": 5,
+                  "completion_tokens": 7,
+                  "total_tokens": 12
+                }
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "object": {
+                  "type": "string"
+                },
+                "created": {
+                  "type": "integer"
+                },
+                "model": {
+                  "type": "string"
+                },
+                "system_fingerprint": {
+                  "type": "string"
+                },
+                "choices": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string"
+                      },
+                      "index": {
+                        "type": "integer"
+                      },
+                      "logprobs": {
+                        "type": "null"
+                      },
+                      "finish_reason": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "usage": {
+                  "type": "object",
+                  "properties": {
+                    "prompt_tokens": {
+                      "type": "integer"
+                    },
+                    "completion_tokens": {
+                      "type": "integer"
+                    },
+                    "total_tokens": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "prompt_tokens",
+                    "completion_tokens",
+                    "total_tokens"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "object",
+                "created",
+                "model",
+                "system_fingerprint",
+                "choices",
+                "usage"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/embeddings": {
+      "post": {
+        "summary": "创建嵌入",
+        "deprecated": false,
+        "description": "获取给定输入的矢量表示，机器学习模型和算法可以轻松使用该表示。\n\n相关指南：[嵌入](https://platform.openai.com/docs/guides/embeddings)\n\n创建表示输入文本的嵌入向量。\n\n",
+        "tags": [
+          "嵌入（Embeddings）"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "type": "string",
+            "x-example": "Bearer {{YOUR_API_KEY}}"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "description": "要使用的模型的 ID。您可以使用[List models](https://platform.openai.com/docs/api-reference/models/list) API 来查看所有可用模型，或查看我们的[模型概述](https://platform.openai.com/docs/models/overview)以了解它们的描述。"
+                },
+                "input": {
+                  "type": "string",
+                  "description": "输入文本以获取嵌入，编码为字符串或标记数组。要在单个请求中获取多个输入的嵌入，请传递一个字符串数组或令牌数组数组。每个输入的长度不得超过 8192 个标记。"
+                }
+              },
+              "required": [
+                "model",
+                "input"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": "{\n  \"object\": \"list\",\n  \"data\": [\n    {\n      \"object\": \"embedding\",\n      \"embedding\": [\n        0.0023064255,\n        -0.009327292,\n        .... (1536 floats total for ada-002)\n        -0.0028842222\n      ],\n      \"index\": 0\n    }\n  ],\n  \"model\": \"text-embedding-ada-002\",\n  \"usage\": {\n    \"prompt_tokens\": 8,\n    \"total_tokens\": 8\n  }\n}"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "object": {
+                        "type": "string"
+                      },
+                      "embedding": {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        }
+                      },
+                      "index": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "model": {
+                  "type": "string"
+                },
+                "usage": {
+                  "type": "object",
+                  "properties": {
+                    "prompt_tokens": {
+                      "type": "integer"
+                    },
+                    "total_tokens": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "prompt_tokens",
+                    "total_tokens"
+                  ]
+                }
+              },
+              "required": [
+                "object",
+                "data",
+                "model",
+                "usage"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/fine_tuning/jobs": {
+      "post": {
+        "summary": "创建微调作业",
+        "deprecated": false,
+        "description": "创建一个作业，根据给定的数据集微调指定的模型。\n\n响应包括排队作业的详细信息，包括作业状态和完成后微调模型的名称。\n\n[了解有关微调的更多信息](https://platform.openai.com/docs/guides/fine-tuning)\n\n",
+        "tags": [
+          "微调（Fine-tuning）"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "training_file": {
+                  "type": "string",
+                  "description": "包含训练数据的上传文件的 ID。  有关如何上传文件的信息，请参阅[上传文件。](https://platform.openai.com/docs/api-reference/files/upload)  您的数据集必须格式化为 JSONL 文件。此外，您必须上传带有目的的文件`fine-tune`。  有关更多详细信息，请参阅[微调指南。](https://platform.openai.com/docs/guides/fine-tuning)"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "要微调的模型的名称。您可以选择支持的模型之一。"
+                },
+                "hyperparameters": {
+                  "type": "object",
+                  "properties": {
+                    "batch_size": {
+                      "type": "string",
+                      "description": "每批中的示例数。批量大小越大意味着模型参数的更新频率越低，但方差越小。"
+                    },
+                    "learning_rate_multiplier": {
+                      "type": "string",
+                      "description": "学习率的比例因子。较小的学习率可能有助于避免过度拟合。"
+                    },
+                    "n_epochs": {
+                      "type": "string",
+                      "description": "训练模型的纪元数。一个纪元是指训练数据集的一个完整周期。"
+                    }
+                  },
+                  "description": "用于微调工作的超参数。"
+                },
+                "suffix": {
+                  "type": "string",
+                  "description": "最多 18 个字符的字符串，将添加到您的微调模型名称中。  例如，`suffix`“custom-model-name”的 a 将生成类似 的模型名称`ft:gpt-3.5-turbo:openai:custom-model-name:7p4lURel`。"
+                },
+                "validation_file": {
+                  "type": "string",
+                  "description": "如果您提供此文件，则数据将用于在微调期间定期生成验证指标。这些指标可以在微调结果文件中查看。相同的数据不应同时出现在训练文件和验证文件中。  您的数据集必须格式化为 JSONL 文件。您必须以特定目的上传文件`fine-tune`。  有关更多详细信息，请参阅[微调指南。](https://platform.openai.com/docs/guides/fine-tuning)"
+                }
+              },
+              "required": [
+                "training_file",
+                "model",
+                "validation_file",
+                "suffix"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": "{\r\n  \"object\": \"fine_tuning.job\",\r\n  \"id\": \"ftjob-abc123\",\r\n  \"model\": \"gpt-3.5-turbo-0613\",\r\n  \"created_at\": 1614807352,\r\n  \"fine_tuned_model\": null,\r\n  \"organization_id\": \"org-123\",\r\n  \"result_files\": [],\r\n  \"status\": \"queued\",\r\n  \"validation_file\": null,\r\n  \"training_file\": \"file-abc123\",\r\n}"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string",
+                  "description": "对象类型,总是为\"fine_tuning.job\""
+                },
+                "id": {
+                  "type": "string",
+                  "description": "对象标识符,可以在API端点中引用"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "被微调的基础模型"
+                },
+                "created_at": {
+                  "type": "integer",
+                  "description": "创建微调作业的Unix时间戳(秒)"
+                },
+                "fine_tuned_model": {
+                  "type": "null",
+                  "description": "正在创建的微调模型的名称。如果微调作业仍在运行,则值为null"
+                },
+                "organization_id": {
+                  "type": "string",
+                  "description": "拥有微调作业的组织"
+                },
+                "result_files": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "微调作业的编译结果文件ID。可以使用文件API检索结果"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "微调作业的当前状态,可以是validating_files、queued、running、succeeded、failed或cancelled"
+                },
+                "validation_file": {
+                  "type": "null",
+                  "description": "用于验证的文件ID。可以使用文件API检索验证结果"
+                },
+                "training_file": {
+                  "type": "string",
+                  "description": "用于训练的文件ID。可以使用文件API检索训练数据"
+                }
+              },
+              "required": [
+                "object",
+                "id",
+                "model",
+                "created_at",
+                "fine_tuned_model",
+                "organization_id",
+                "result_files",
+                "status",
+                "validation_file",
+                "training_file"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ]
+      },
+      "get": {
+        "summary": "列出微调作业",
+        "deprecated": false,
+        "description": "列出您组织的微调工作\n\n",
+        "tags": [
+          "微调（Fine-tuning）"
+        ],
+        "parameters": [
+          {
+            "name": "after",
+            "in": "query",
+            "description": "上一个分页请求中最后一个作业的标识符。\n\n",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "要检索的微调作业的数量。\n\n",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": "{\r\n  \"object\": \"list\",\r\n  \"data\": [\r\n    {\r\n      \"object\": \"fine_tuning.job.event\",\r\n      \"id\": \"ft-event-TjX0lMfOniCZX64t9PUQT5hn\",\r\n      \"created_at\": 1689813489,\r\n      \"level\": \"warn\",\r\n      \"message\": \"Fine tuning process stopping due to job cancellation\",\r\n      \"data\": null,\r\n      \"type\": \"message\"\r\n    },\r\n    { ... },\r\n    { ... }\r\n  ], \"has_more\": true\r\n}"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string",
+                  "description": "对象类型,总是为\"fine_tuning.job\""
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "object": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "integer"
+                      },
+                      "level": {
+                        "type": "string"
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "type": "null"
+                      },
+                      "type": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "has_more": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "object",
+                "data",
+                "has_more"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/fine_tuning/jobs/{fine_tuning_job_id}": {
+      "get": {
+        "summary": "检索微调作业",
+        "deprecated": false,
+        "description": "获取有关微调工作的信息。\n\n[了解有关微调的更多信息](https://platform.openai.com/docs/guides/fine-tuning)\n\n",
+        "tags": [
+          "微调（Fine-tuning）"
+        ],
+        "parameters": [
+          {
+            "name": "fine_tuning_job_id",
+            "in": "path",
+            "description": "微调作业的 ID。\n\n",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": "{\r\n  \"object\": \"fine_tuning.job\",\r\n  \"id\": \"ftjob-abc123\",\r\n  \"model\": \"davinci-002\",\r\n  \"created_at\": 1692661014,\r\n  \"finished_at\": 1692661190,\r\n  \"fine_tuned_model\": \"ft:davinci-002:my-org:custom_suffix:7q8mpxmy\",\r\n  \"organization_id\": \"org-123\",\r\n  \"result_files\": [\r\n      \"file-abc123\"\r\n  ],\r\n  \"status\": \"succeeded\",\r\n  \"validation_file\": null,\r\n  \"training_file\": \"file-abc123\",\r\n  \"hyperparameters\": {\r\n      \"n_epochs\": 4,\r\n  },\r\n  \"trained_tokens\": 5768\r\n}"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string",
+                  "description": "对象类型,总是为\"fine_tuning.job\""
+                },
+                "id": {
+                  "type": "string",
+                  "description": "对象标识符,可以在API端点中引用"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "被微调的基础模型"
+                },
+                "created_at": {
+                  "type": "integer",
+                  "description": "创建微调作业的Unix时间戳(秒)"
+                },
+                "finished_at": {
+                  "type": "integer",
+                  "description": "微调作业完成的Unix时间戳(秒)。如果微调作业仍在运行,则值为null"
+                },
+                "fine_tuned_model": {
+                  "type": "string",
+                  "description": "正在创建的微调模型的名称。如果微调作业仍在运行,则值为null"
+                },
+                "organization_id": {
+                  "type": "string",
+                  "description": "拥有微调作业的组织"
+                },
+                "result_files": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "微调作业的编译结果文件ID。可以使用文件API检索结果"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "微调作业的当前状态,可以是validating_files、queued、running、succeeded、failed或cancelled"
+                },
+                "validation_file": {
+                  "type": "null",
+                  "description": "用于验证的文件ID。可以使用文件API检索验证结果"
+                },
+                "training_file": {
+                  "type": "string",
+                  "description": "用于训练的文件ID。可以使用文件API检索训练数据"
+                },
+                "hyperparameters": {
+                  "type": "object",
+                  "properties": {
+                    "n_epochs": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "n_epochs"
+                  ],
+                  "description": "微调作业使用的超参数。更多详细信息请参阅微调指南"
+                },
+                "trained_tokens": {
+                  "type": "integer",
+                  "description": "此微调作业处理的计费标记总数。如果微调作业仍在运行,则值为null"
+                }
+              },
+              "required": [
+                "object",
+                "id",
+                "model",
+                "created_at",
+                "finished_at",
+                "fine_tuned_model",
+                "organization_id",
+                "result_files",
+                "status",
+                "validation_file",
+                "training_file",
+                "hyperparameters",
+                "trained_tokens"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/fine_tuning/jobs/{fine_tuning_job_id}/cancel": {
+      "post": {
+        "summary": "取消微调",
+        "deprecated": false,
+        "description": "立即取消微调工作。\n\n",
+        "tags": [
+          "微调（Fine-tuning）"
+        ],
+        "parameters": [
+          {
+            "name": "fine_tuning_job_id",
+            "in": "path",
+            "description": "要取消的微调作业的 ID。\n\n",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": {
+                "object": "fine_tuning.job",
+                "id": "ftjob-abc123",
+                "model": "gpt-3.5-turbo-0613",
+                "created_at": 1689376978,
+                "fine_tuned_model": null,
+                "organization_id": "org-123",
+                "result_files": [],
+                "hyperparameters": {
+                  "n_epochs": "auto"
+                },
+                "status": "cancelled",
+                "validation_file": "file-abc123",
+                "training_file": "file-abc123"
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string",
+                  "description": "对象类型,总是为\"fine_tuning.job\""
+                },
+                "id": {
+                  "type": "string",
+                  "description": "对象标识符,可以在API端点中引用"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "被微调的基础模型"
+                },
+                "created_at": {
+                  "type": "integer",
+                  "description": "创建微调作业的Unix时间戳(秒)"
+                },
+                "fine_tuned_model": {
+                  "type": "null",
+                  "description": "正在创建的微调模型的名称。如果微调作业仍在运行,则值为null"
+                },
+                "organization_id": {
+                  "type": "string",
+                  "description": "拥有微调作业的组织"
+                },
+                "result_files": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "微调作业的编译结果文件ID。可以使用文件API检索结果"
+                },
+                "hyperparameters": {
+                  "type": "object",
+                  "properties": {
+                    "n_epochs": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "n_epochs"
+                  ],
+                  "description": "微调作业使用的超参数。更多详细信息请参阅微调指南"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "微调作业的当前状态,可以是validating_files、queued、running、succeeded、failed或cancelled"
+                },
+                "validation_file": {
+                  "type": "string",
+                  "description": "用于验证的文件ID。可以使用文件API检索验证结果"
+                },
+                "training_file": {
+                  "type": "string",
+                  "description": "用于训练的文件ID。可以使用文件API检索训练数据"
+                }
+              },
+              "required": [
+                "object",
+                "id",
+                "model",
+                "created_at",
+                "fine_tuned_model",
+                "organization_id",
+                "result_files",
+                "hyperparameters",
+                "status",
+                "validation_file",
+                "training_file"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/fine_tuning/jobs/{fine_tuning_job_id}/events": {
+      "get": {
+        "summary": "列出微调事件",
+        "deprecated": false,
+        "description": "获取微调作业的状态更新。\n\n",
+        "tags": [
+          "微调（Fine-tuning）"
+        ],
+        "parameters": [
+          {
+            "name": "fine_tuning_job_id",
+            "in": "path",
+            "description": "要为其获取事件的微调作业的 ID。\n\n",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "上一个分页请求中最后一个事件的标识符。\n\n",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "要检索的事件数。\n\n",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": {
+                "object": "list",
+                "data": [
+                  {
+                    "object": "fine_tuning.job.event",
+                    "id": "ft-event-ddTJfwuMVpfLXseO0Am0Gqjm",
+                    "created_at": 1692407401,
+                    "level": "info",
+                    "message": "Fine tuning job successfully completed",
+                    "data": null,
+                    "type": "message"
+                  },
+                  {
+                    "object": "fine_tuning.job.event",
+                    "id": "ft-event-tyiGuB72evQncpH87xe505Sv",
+                    "created_at": 1692407400,
+                    "level": "info",
+                    "message": "New fine-tuned model created: ft:gpt-3.5-turbo:openai::7p4lURel",
+                    "data": null,
+                    "type": "message"
+                  }
+                ],
+                "has_more": true
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string",
+                  "description": "对象类型,总是为\"fine_tuning.job\""
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "object": {
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "integer"
+                      },
+                      "level": {
+                        "type": "string"
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "type": "null"
+                      },
+                      "type": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "object",
+                      "id",
+                      "created_at",
+                      "level",
+                      "message",
+                      "data",
+                      "type"
+                    ]
+                  }
+                },
+                "has_more": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "object",
+                "data",
+                "has_more"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/images/generations": {
+      "post": {
+        "summary": "创建图像",
+        "deprecated": false,
+        "description": "[图片](https://platform.openai.com/docs/api-reference/images)\n\n给定提示和/或输入图像，模型将生成新图像。\n\n相关指南：[图像生成](https://platform.openai.com/docs/guides/images)\n\n根据提示创建图像。\n\n",
+        "tags": [
+          "图像（Images）"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "type": "string",
+            "x-example": "Bearer {{YOUR_API_KEY}}"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "description": "所需图像的文本描述。最大长度为 1000 个字符。"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "用于图像生成的模型。"
+                },
+                "n": {
+                  "type": "integer",
+                  "description": "要生成的图像数。必须介于 1 和 10 之间。"
+                },
+                "quality": {
+                  "type": "string",
+                  "description": "将生成的图像的质量。`hd`创建具有更精细细节和更高一致性的图像。此参数仅支持`dall-e-3`."
+                },
+                "response_format": {
+                  "type": "string",
+                  "description": "返回生成的图像的格式。必须是 或url之一b64_json。"
+                },
+                "style": {
+                  "type": "string",
+                  "description": "生成图像的大小。必须是`256x256`、`512x512`或`1024x1024`for之一`dall-e-2`。对于模型来说，必须是`1024x1024`、`1792x1024`、 或之一。`1024x1792``dall-e-3`"
+                },
+                "user": {
+                  "type": "string",
+                  "description": "生成图像的风格。必须是 或`vivid`之一`natural`。生动使模型倾向于生成超真实和戏剧性的图像。自然使模型生成更自然、不太真实的图像。此参数仅支持`dall-e-3`."
+                },
+                "size": {
+                  "type": "string",
+                  "description": "生成图像的大小。必须是256x256、512x512或 1024x1024之一。"
+                }
+              },
+              "required": [
+                "prompt"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": {
+                "created": 1589478378,
+                "data": [
+                  {
+                    "url": "https://..."
+                  },
+                  {
+                    "url": "https://..."
+                  }
+                ]
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created": {
+                  "type": "integer"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "created",
+                "data"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/images/edits": {
+      "post": {
+        "summary": "创建图片编辑",
+        "deprecated": false,
+        "description": "在给定原始图像和提示的情况下创建编辑或扩展图像。\n\n",
+        "tags": [
+          "图像（Images）"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "type": "string",
+            "x-example": "Bearer {{YOUR_API_KEY}}"
+          },
+          {
+            "name": "image",
+            "in": "formData",
+            "required": true,
+            "format": "binary",
+            "type": "string",
+            "description": "要编辑的图像。必须是有效的 PNG 文件，小于 4MB，并且是方形的。如果未提供遮罩，图像必须具有透明度，将用作遮罩。"
+          },
+          {
+            "name": "mask",
+            "in": "formData",
+            "format": "binary",
+            "type": "string",
+            "description": "附加图像，其完全透明区域（例如，alpha 为零的区域）指示image应编辑的位置。必须是有效的 PNG 文件，小于 4MB，并且尺寸与原始image相同。"
+          },
+          {
+            "name": "prompt",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": "所需图像的文本描述。最大长度为 1000 个字符。"
+          },
+          {
+            "name": "n",
+            "in": "formData",
+            "type": "string",
+            "description": "要生成的图像数。必须介于 1 和 10 之间。"
+          },
+          {
+            "name": "size",
+            "in": "formData",
+            "type": "string",
+            "description": "生成图像的大小。必须是`256x256`、`512x512`或 `1024x1024`之一。"
+          },
+          {
+            "name": "response_format",
+            "in": "formData",
+            "type": "string",
+            "description": "生成的图像返回的格式。必须是`url`或`b64_json`。"
+          },
+          {
+            "name": "user",
+            "in": "formData",
+            "type": "string",
+            "description": "代表您的最终用户的唯一标识符，可以帮助 OpenAI 监控和检测滥用行为。[了解更多](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids)。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": {
+                "created": 1589478378,
+                "data": [
+                  {
+                    "url": "https://..."
+                  },
+                  {
+                    "url": "https://..."
+                  }
+                ]
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created": {
+                  "type": "integer"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "created",
+                "data"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/images/variations": {
+      "post": {
+        "summary": "创建图像变体",
+        "deprecated": false,
+        "description": "创建给定图像的变体。\n",
+        "tags": [
+          "图像（Images）"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "type": "string",
+            "x-example": "Bearer {{YOUR_API_KEY}}"
+          },
+          {
+            "name": "image",
+            "in": "formData",
+            "required": true,
+            "format": "binary",
+            "type": "string",
+            "description": "用作变体基础的图像。必须是有效的 PNG 文件，小于 4MB，并且是方形的。\n\n"
+          },
+          {
+            "name": "n",
+            "in": "formData",
+            "type": "string",
+            "description": "要生成的图像数。必须介于 1 和 10 之间。\n\n"
+          },
+          {
+            "name": "size",
+            "in": "formData",
+            "type": "string",
+            "description": "生成图像的大小。必须是`256x256`、`512x512`或 之一`1024x1024`。"
+          },
+          {
+            "name": "response_format",
+            "in": "formData",
+            "type": "string",
+            "description": "生成的图像返回的格式。必须是 或`url`之一`b64_json`。\n\n"
+          },
+          {
+            "name": "user",
+            "in": "formData",
+            "type": "string",
+            "description": "代表您的最终用户的唯一标识符，可以帮助 OpenAI 监控和检测滥用行为。[了解更多](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids)。\n\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": {
+                "created": 1589478378,
+                "data": [
+                  {
+                    "url": "https://..."
+                  },
+                  {
+                    "url": "https://..."
+                  }
+                ]
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created": {
+                  "type": "integer"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "created",
+                "data"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/models": {
+      "get": {
+        "summary": "列出模型",
+        "deprecated": false,
+        "description": "列出当前可用的型号，并提供每个型号的基本信息，例如所有者和可用性。\n\n",
+        "tags": [
+          "模型（Models）"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "type": "string",
+            "x-example": "Bearer {{YOUR_API_KEY}}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": "{\n  \"object\": \"list\",\n  \"data\": [\n    {\n      \"id\": \"model-id-0\",\n      \"object\": \"model\",\n      \"created\": 1686935002,\n      \"owned_by\": \"organization-owner\"\n    },\n    {\n      \"id\": \"model-id-1\",\n      \"object\": \"model\",\n      \"created\": 1686935002,\n      \"owned_by\": \"organization-owner\",\n    },\n    {\n      \"id\": \"model-id-2\",\n      \"object\": \"model\",\n      \"created\": 1686935002,\n      \"owned_by\": \"openai\"\n    },\n  ],\n  \"object\": \"list\"\n}"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "object": {
+                        "type": "string"
+                      },
+                      "created": {
+                        "type": "integer"
+                      },
+                      "owned_by": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "object",
+                      "created",
+                      "owned_by"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "object",
+                "data"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/models/{modelid}": {
+      "get": {
+        "summary": "检索模型",
+        "deprecated": false,
+        "description": "检索模型实例，提供有关模型的基本信息，例如所有者和权限。\n\n",
+        "tags": [
+          "模型（Models）"
+        ],
+        "parameters": [
+          {
+            "name": "modelid",
+            "in": "path",
+            "description": "用于此请求的模型的 ID",
+            "required": true,
+            "type": "string",
+            "x-example": "babbage"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "type": "string",
+            "x-example": "Bearer {{YOUR_API_KEY}}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": {
+                "id": "gpt-3.5-turbo-instruct",
+                "object": "model",
+                "created": 1686935002,
+                "owned_by": "openai"
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "object": {
+                  "type": "string"
+                },
+                "created": {
+                  "type": "integer"
+                },
+                "owned_by": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "object",
+                "created",
+                "owned_by"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/models/{model}": {
+      "get": {
+        "summary": "删除微调模型",
+        "deprecated": false,
+        "description": "删除微调模型。您必须在组织中具有所有者角色才能删除模型。\n\n",
+        "tags": [
+          "模型（Models）"
+        ],
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "description": "要删除的模型\n\n",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "object": {
+                  "type": "string"
+                },
+                "deleted": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "object",
+                "deleted"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/files": {
+      "get": {
+        "summary": "列出文件",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件（Files）"
+        ],
+        "parameters": [
+          {
+            "name": "purpose",
+            "in": "query",
+            "description": "Only return files with the given purpose.\n\n",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": "{\r\n  \"data\": [\r\n    {\r\n      \"id\": \"file-abc123\",\r\n      \"object\": \"file\",\r\n      \"bytes\": 175,\r\n      \"created_at\": 1613677385,\r\n      \"filename\": \"salesOverview.pdf\",\r\n      \"purpose\": \"assistants\",\r\n    },\r\n    {\r\n      \"id\": \"file-abc123\",\r\n      \"object\": \"file\",\r\n      \"bytes\": 140,\r\n      \"created_at\": 1613779121,\r\n      \"filename\": \"puppy.jsonl\",\r\n      \"purpose\": \"fine-tune\",\r\n    }\r\n  ],\r\n  \"object\": \"list\"\r\n}"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "object": {
+                        "type": "string"
+                      },
+                      "bytes": {
+                        "type": "integer"
+                      },
+                      "created_at": {
+                        "type": "integer"
+                      },
+                      "filename": {
+                        "type": "string"
+                      },
+                      "purpose": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "object",
+                      "bytes",
+                      "created_at",
+                      "filename",
+                      "purpose"
+                    ]
+                  }
+                },
+                "object": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "data",
+                "object"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ]
+      },
+      "post": {
+        "summary": "上传文件",
+        "deprecated": false,
+        "description": "上传可跨各种端点/功能使用的文件。一个组织上传的所有文件大小最大可达 100 GB。\n\n单个文件的大小最大为 512MB。请参阅[助手工具指南](https://platform.openai.com/docs/assistants/tools)以了解有关支持的文件类型的更多信息。Fine-tuning API 仅支持`.jsonl`文件。\n\n如果您需要增加这些存储限制，请[联系我们。](https://help.openai.com/)",
+        "tags": [
+          "文件（Files）"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "type": "string",
+            "x-example": "Bearer {{YOUR_API_KEY}}"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "required": true,
+            "format": "binary",
+            "type": "string",
+            "description": "要上传的[JSONL](https://jsonlines.readthedocs.io/en/latest/)文件的名称。\n\n如果`purpose`设置为“微调”，则每一行都是一个 JSON 记录，其中包含代表您的[训练示例](https://platform.openai.com/docs/guides/fine-tuning/prepare-training-data)的“提示”和“完成”字段。\n\n"
+          },
+          {
+            "name": "purpose",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": "上传文件的预期目的。\n\n使用“fine-tune”进行[微调](https://platform.openai.com/docs/api-reference/fine-tuning)，使用“assistants”进行[助手](https://platform.openai.com/docs/api-reference/assistants)和[消息](https://platform.openai.com/docs/api-reference/messages)。这使我们能够验证上传文件的格式是否正确以进行微调。"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": "{\r\n  \"id\": \"file-BK7bzQj3FfZFXr7DbL6xJwfo\",\r\n  \"object\": \"file\",\r\n  \"bytes\": 120000,\r\n  \"created_at\": 1677610602,\r\n  \"filename\": \"mydata.jsonl\",\r\n  \"purpose\": \"fine-tune\",\r\n}"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "object": {
+                  "type": "string"
+                },
+                "bytes": {
+                  "type": "integer"
+                },
+                "created_at": {
+                  "type": "integer"
+                },
+                "filename": {
+                  "type": "string"
+                },
+                "purpose": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "object",
+                "bytes",
+                "created_at",
+                "filename",
+                "purpose"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/files/{file_id}": {
+      "delete": {
+        "summary": "删除文件",
+        "deprecated": false,
+        "description": "删除文件。\n",
+        "tags": [
+          "文件（Files）"
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "description": "用于此请求的文件的 ID。",
+            "required": true,
+            "type": "string",
+            "x-example": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "type": "string",
+            "x-example": "Bearer {{YOUR_API_KEY}}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": {
+                "id": "file-abc123",
+                "object": "file",
+                "deleted": true
+              }
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "object": {
+                  "type": "string"
+                },
+                "deleted": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "object",
+                "deleted"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ]
+      },
+      "get": {
+        "summary": "检索文件",
+        "deprecated": false,
+        "description": "返回有关特定文件的信息。\n\n",
+        "tags": [
+          "文件（Files）"
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "description": "用于此请求的文件的 ID。",
+            "required": true,
+            "type": "string",
+            "x-example": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "type": "string",
+            "x-example": "Bearer {{YOUR_API_KEY}}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "examples": {
+              "application/json": "{\r\n  \"id\": \"file-BK7bzQj3FfZFXr7DbL6xJwfo\",\r\n  \"object\": \"file\",\r\n  \"bytes\": 120000,\r\n  \"created_at\": 1677610602,\r\n  \"filename\": \"mydata.jsonl\",\r\n  \"purpose\": \"fine-tune\",\r\n}"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "object": {
+                  "type": "string"
+                },
+                "bytes": {
+                  "type": "integer"
+                },
+                "created_at": {
+                  "type": "integer"
+                },
+                "filename": {
+                  "type": "string"
+                },
+                "purpose": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "object",
+                "bytes",
+                "created_at",
+                "filename",
+                "purpose"
+              ]
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/files/{file_id}/content": {
+      "get": {
+        "summary": "检索文件内容",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "文件（Files）"
+        ],
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "description": "用于此请求的文件的 ID。",
+            "required": true,
+            "type": "string",
+            "x-example": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "type": "string",
+            "x-example": "Bearer {{YOUR_API_KEY}}"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {},
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "produces": [
+          "application/octet-stream"
+        ]
       }
     }
-  }
+  },
+  "security": [
+    {
+      "bearer": []
+    }
+  ],
+  "swagger": "2.0",
+  "definitions": {},
+  "securityDefinitions": {
+    "bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "x-components": {}
 }
