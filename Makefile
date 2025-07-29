@@ -25,7 +25,7 @@ GOVERSION := $(shell go version | awk -F'go' '{print $$3}' | awk '{print $$1}')
 gen: ## 代码生成
 	codegen g pb -i ./aiload.proto -d \
 	--go-module-prefix="github.com/lazygophers/" \
-	--add-proto-files="/Users/luoxin/persons/go/lazygophers/barbecue"
+	--add-proto-files="../proto"
 
 	codegen g impl -i ./aiload.proto -d \
 	--go-module-prefix="github.com/lazygophers/" \
