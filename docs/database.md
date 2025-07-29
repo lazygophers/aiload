@@ -1,225 +1,146 @@
 # AI Load 数据库设计
 
-本 文档定义了 `AI Load` 项目的数据库结构。
+本文档定义了 `AI Load` 项目的数据库结构。
 
-## 关系图 (ERD)
+## 🧬 Mermaid ERD 关系图
+
+此 **实体关系图 (ERD)** 清晰地展示了各个数据模型之间的结构与关联，助您一目了然地把握整个系统的核心数据架构。
 
 ```mermaid
 erDiagram
-    platform {
-        uint64 id PK
-        int64 created_at
-        int64 updated_at
-        int64 deleted_at
-        string name
-        string base_url
-        string default_models
+    ModelUser {
+        uint64 id PK "主键"
+        int64 created_at "创建时间"
+        int64 updated_at "更新时间"
+        int64 deleted_at "删除时间 (软删除)"
+        string username "用户名 (唯一)"
+        string password "密码"
+        string name "姓名"
+        Role role "角色"
     }
 
-    api_key {
-        uint64 id PK
-        int64 created_at
-        int64 updated_at
-        int64 deleted_at
-        uint64 platform_id
-        string key
+    ModelUserToken {
+        uint64 id PK "主键"
+        int64 created_at "创建时间"
+        int64 updated_at "更新时间"
+        int64 deleted_at "删除时间 (软删除)"
+        uint64 user_id FK "用户ID (外键, 唯一)"
+        string token "令牌 (唯一)"
+        int64 limit "限制"
     }
 
-    model {
-        uint64 id PK
-        int64 created_at
-        int64 updated_at
-        int64 deleted_at
-        uint64 platform_id
-        string name
+    ModelUserAccess {
+        uint64 id PK "主键"
+        int64 created_at "创建时间"
+        int64 updated_at "更新时间"
+        int64 deleted_at "删除时间 (软删除)"
+        uint64 token "令牌ID (外键, 唯一)"
+        string model "模型名称 (唯一)"
     }
 
-    model_alias {
-        uint64 id PK
-        int64 created_at
-        int64 updated_at
-        int64 deleted_at
-        string alias_name
+    ModelChannel {
+        uint64 id PK "主键"
+        int64 created_at "创建时间"
+        int64 updated_at "更新时间"
+        int64 deleted_at "删除时间 (软删除)"
+        string name "渠道名称"
+        string token "令牌 (唯一)"
+        Platform platform "平台 (唯一)"
     }
 
-    user {
-        uint64 id PK
-        int64 created_at
-        int64 updated_at
-        int64 deleted_at
-        string username
-        string password
+    ModelChannelAccess {
+        uint64 id PK "主键"
+        int64 created_at "创建时间"
+        int64 updated_at "更新时间"
+        int64 deleted_at "删除时间 (软删除)"
+        uint64 channel_id FK "渠道ID (外键, 唯一)"
+        string model "模型名称 (唯一)"
     }
 
-    user_token {
-        uint64 id PK
-        int64 created_at
-        int64 updated_at
-        int64 deleted_at
-        uint64 user_id
-        string token
-        int64 token_limit
+    ModelModelAlias {
+        uint64 id PK "主键"
+        int64 created_at "创建时间"
+        int64 updated_at "更新时间"
+        int64 deleted_at "删除时间 (软删除)"
+        string model "模型名称 (唯一)"
+        string model_alias "模型别名 (唯一)"
     }
 
-    api_key_model_access {
-        uint64 id PK
-        int64 created_at
-        int64 updated_at
-        int64 deleted_at
-        uint64 api_key_id
-        uint64 model_id
-    }
-
-    model_alias_mapping {
-        uint64 id PK
-        int64 created_at
-        int64 updated_at
-        int64 deleted_at
-        uint64 model_alias_id
-        uint64 model_id
-    }
-
-    user_token_model_access {
-        uint64 id PK
-        int64 created_at
-        int64 updated_at
-        int64 deleted_at
-        uint64 user_token_id
-        uint64 model_id
-    }
-
-    platform ||--o{ api_key : "包含"
-    platform ||--o{ model : "包含"
-    user ||--o{ user_token : "包含"
-
-    api_key }o--o{ api_key_model_access : "定义访问权限"
-    model }o--o{ api_key_model_access : "被定义访问权限"
-
-    model_alias }o--o{ model_alias_mapping : "定义映射"
-    model }o--o{ model_alias_mapping : "被映射"
-
-    user_token }o--o{ user_token_model_access : "定义访问权限"
-    model }o--o{ user_token_model_access : "被定义访问权限"
+    ModelUser         ||--|{ ModelUserToken : "拥有"
+    ModelUserToken    ||--|{ ModelUserAccess : "授权"
+    ModelChannel      ||--|{ ModelChannelAccess : "拥有"
 ```
 
-## 核心实体与关系
+## 📜 Protobuf Message 详细定义
 
-### 1. platform
+下方是将每个 `message` 结构化的 **Markdown 表格**，其中包含了字段名、类型、编号以及从注释中提取的 **GORM 数据库约束** 等关键信息。
 
-`platform` 表存储了支持的第三方 AI 平台信息。
+### [`ModelChannel`](aiload.proto:129)
 
-| 字段             | 类型     | 描述                           | 默认值   | 数据库兼容性说明                                                               |
-| ---------------- | -------- | ------------------------------ | -------- | ------------------------------------------------------------------------------ |
-| `id`             | `uint64` | **主键**，唯一标识             | 自增     | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL, 注意范围), `INTEGER` (SQLite) |
-| `created_at`     | `int64`  | 创建时间 (Unix timestamp)      | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `updated_at`     | `int64`  | 更新时间 (Unix timestamp)      | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `deleted_at`     | `int64`  | 软删除时间 (Unix timestamp)    | `0`      | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `name`           | `string` | 平台名称，如 `OpenAI`, `Azure` | `''`     | `VARCHAR(255)` (MySQL/PostgreSQL), `TEXT` (SQLite)                             |
-| `base_url`       | `string` | 平台 API 的基础 URL            | `''`     | `VARCHAR(255)` (MySQL/PostgreSQL), `TEXT` (SQLite)                             |
-| `default_models` | `string` | 平台默认支持的模型列表         | `''`     | `TEXT` (MySQL/PostgreSQL/SQLite)                                               |
+| 字段名       | 字段类型   | 字段编号 | 备注                                                      |
+| :----------- | :--------- | :------- | :-------------------------------------------------------- |
+| `id`         | `uint64`   | 1        | 主键                                                      |
+| `created_at` | `int64`    | 2        | 创建时间                                                  |
+| `updated_at` | `int64`    | 3        | 更新时间                                                  |
+| `deleted_at` | `int64`    | 4        | `@gorm: index: idx_channel,unique` (软删除标记，唯一索引) |
+| `name`       | `string`   | 5        | 渠道名称                                                  |
+| `token`      | `string`   | 6        | `@gorm: index: idx_channel,unique` (唯一索引)             |
+| `platform`   | `Platform` | 7        | `@gorm: index: idx_channel,unique` (唯一索引)             |
 
-### 2. api_key
+### [`ModelChannelAccess`](aiload.proto:143)
 
-`api_key` 表存储了用于访问第三方平台的 API 密钥。
+| 字段名       | 字段类型 | 字段编号 | 备注                                                             |
+| :----------- | :------- | :------- | :--------------------------------------------------------------- |
+| `id`         | `uint64` | 1        | 主键                                                             |
+| `created_at` | `int64`  | 2        | 创建时间                                                         |
+| `updated_at` | `int64`  | 3        | 更新时间                                                         |
+| `deleted_at` | `int64`  | 4        | `@gorm: index: idx_channel_access,unique` (软删除标记，唯一索引) |
+| `channel_id` | `uint64` | 5        | `@gorm: index: idx_channel_access,unique` (外键，唯一索引)       |
+| `model`      | `string` | 6        | `@gorm: index: idx_channel_access,unique` (唯一索引)             |
 
-| 字段          | 类型     | 描述                        | 默认值   | 数据库兼容性说明                                                               |
-| ------------- | -------- | --------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `id`          | `uint64` | **主键**，唯一标识          | 自增     | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL, 注意范围), `INTEGER` (SQLite) |
-| `created_at`  | `int64`  | 创建时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `updated_at`  | `int64`  | 更新时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `deleted_at`  | `int64`  | 软删除时间 (Unix timestamp) | `0`      | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `platform_id` | `uint64` | 逻辑关联 `platform.id`      | `0`      | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL), `INTEGER` (SQLite)           |
-| `key`         | `string` | API 密钥                    | `''`     | `VARCHAR(255)` (MySQL/PostgreSQL), `TEXT` (SQLite)                             |
+### [`ModelModelAlias`](aiload.proto:156)
 
-### 3. model
+| 字段名        | 字段类型 | 字段编号 | 备注                                                   |
+| :------------ | :------- | :------- | :----------------------------------------------------- |
+| `id`          | `uint64` | 1        | 主键                                                   |
+| `created_at`  | `int64`  | 2        | 创建时间                                               |
+| `updated_at`  | `int64`  | 3        | 更新时间                                               |
+| `deleted_at`  | `int64`  | 4        | `@gorm: index:idx_alias,unique` (软删除标记，唯一索引) |
+| `model`       | `string` | 5        | `@gorm: index:idx_alias,unique` (唯一索引)             |
+| `model_alias` | `string` | 6        | `@gorm: index:idx_alias,unique` (唯一索引)             |
 
-`model` 表存储了平台提供的具体 AI 模型。
+### [`ModelUser`](aiload.proto:170)
 
-| 字段          | 类型     | 描述                        | 默认值   | 数据库兼容性说明                                                               |
-| ------------- | -------- | --------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `id`          | `uint64` | **主键**，唯一标识          | 自增     | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL, 注意范围), `INTEGER` (SQLite) |
-| `created_at`  | `int64`  | 创建时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `updated_at`  | `int64`  | 更新时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `deleted_at`  | `int64`  | 软删除时间 (Unix timestamp) | `0`      | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `platform_id` | `uint64` | 逻辑关联 `platform.id`      | `0`      | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL), `INTEGER` (SQLite)           |
-| `name`        | `string` | 模型名称, 如 `gpt-4-turbo`  | `''`     | `VARCHAR(255)` (MySQL/PostgreSQL), `TEXT` (SQLite)                             |
+| 字段名       | 字段类型 | 字段编号 | 备注                                                  |
+| :----------- | :------- | :------- | :---------------------------------------------------- |
+| `id`         | `uint64` | 1        | 主键                                                  |
+| `created_at` | `int64`  | 2        | 创建时间                                              |
+| `updated_at` | `int64`  | 3        | 更新时间                                              |
+| `deleted_at` | `int64`  | 4        | `@gorm: index:idx_user,unique` (软删除标记，唯一索引) |
+| `username`   | `string` | 5        | `@gorm: index:idx_user,unique` (唯一索引)             |
+| `password`   | `string` | 6        | 密码                                                  |
+| `name`       | `string` | 7        | 姓名                                                  |
+| `role`       | `Role`   | 8        | 内嵌枚举 `Role { Nil = 0; Admin = 1; User = 2; }`     |
 
-### 4. model_alias
+### [`ModelUserToken`](aiload.proto:191)
 
-`model_alias` 表用于为模型创建别名。
+| 字段名       | 字段类型 | 字段编号 | 备注                                                   |
+| :----------- | :------- | :------- | :----------------------------------------------------- |
+| `id`         | `uint64` | 1        | 主键                                                   |
+| `created_at` | `int64`  | 2        | 创建时间                                               |
+| `updated_at` | `int64`  | 3        | 更新时间                                               |
+| `deleted_at` | `int64`  | 4        | `@gorm: index:idx_token,unique` (软删除标记，唯一索引) |
+| `user_id`    | `uint64` | 5        | `@gorm: index:idx_token,unique` (外键，唯一索引)       |
+| `token`      | `string` | 6        | `@gorm: index:idx_token,unique` (唯一索引)             |
+| `limit`      | `int64`  | 7        | 限制                                                   |
 
-| 字段         | 类型     | 描述                        | 默认值   | 数据库兼容性说明                                                               |
-| ------------ | -------- | --------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `id`         | `uint64` | **主键**，唯一标识          | 自增     | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL, 注意范围), `INTEGER` (SQLite) |
-| `created_at` | `int64`  | 创建时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `updated_at` | `int64`  | 更新时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `deleted_at` | `int64`  | 软删除时间 (Unix timestamp) | `0`      | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `alias_name` | `string` | 模型的别名, 如 `gpt-4`      | `''`     | `VARCHAR(255)` (MySQL/PostgreSQL), `TEXT` (SQLite)                             |
+### [`ModelUserAccess`](aiload.proto:206)
 
-### 5. user
-
-`user` 表存储了应用的用户信息。
-
-| 字段         | 类型     | 描述                        | 默认值   | 数据库兼容性说明                                                               |
-| ------------ | -------- | --------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `id`         | `uint64` | **主键**，唯一标识          | 自增     | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL, 注意范围), `INTEGER` (SQLite) |
-| `created_at` | `int64`  | 创建时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `updated_at` | `int64`  | 更新时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `deleted_at` | `int64`  | 软删除时间 (Unix timestamp) | `0`      | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `username`   | `string` | 用户名                      | `''`     | `VARCHAR(255)` (MySQL/PostgreSQL), `TEXT` (SQLite)                             |
-| `password`   | `string` | 哈希后的密码                | `''`     | `VARCHAR(255)` (MySQL/PostgreSQL), `TEXT` (SQLite)                             |
-
-### 6. user_token
-
-`user_token` 表存储了用户的访问令牌。
-
-| 字段          | 类型     | 描述                        | 默认值   | 数据库兼容性说明                                                               |
-| ------------- | -------- | --------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `id`          | `uint64` | **主键**，唯一标识          | 自增     | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL, 注意范围), `INTEGER` (SQLite) |
-| `created_at`  | `int64`  | 创建时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `updated_at`  | `int64`  | 更新时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `deleted_at`  | `int64`  | 软删除时间 (Unix timestamp) | `0`      | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `user_id`     | `uint64` | 逻辑关联 `user.id`          | `0`      | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL), `INTEGER` (SQLite)           |
-| `token`       | `string` | 访问令牌                    | `''`     | `VARCHAR(255)` (MySQL/PostgreSQL), `TEXT` (SQLite)                             |
-| `token_limit` | `int64`  | 令牌的总可用额度            | `0`      | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-
-## 关联关系表
-
-### 7. api_key_model_access
-
-`api_key_model_access` 是 `api_key` 和 `model` 之间的多对多关系表。
-
-| 字段         | 类型     | 描述                        | 默认值   | 数据库兼容性说明                                                               |
-| ------------ | -------- | --------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `id`         | `uint64` | **主键**，唯一标识          | 自增     | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL, 注意范围), `INTEGER` (SQLite) |
-| `created_at` | `int64`  | 创建时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `updated_at` | `int64`  | 更新时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `deleted_at` | `int64`  | 软删除时间 (Unix timestamp) | `0`      | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `api_key_id` | `uint64` | 逻辑关联 `api_key.id`       | `0`      | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL), `INTEGER` (SQLite)           |
-| `model_id`   | `uint64` | 逻辑关联 `model.id`         | `0`      | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL), `INTEGER` (SQLite)           |
-
-### 8. model_alias_mapping
-
-`model_alias_mapping` 是 `model_alias` 和 `model` 之间的多对多关系表。
-
-| 字段             | 类型     | 描述                        | 默认值   | 数据库兼容性说明                                                               |
-| ---------------- | -------- | --------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `id`             | `uint64` | **主键**，唯一标识          | 自增     | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL, 注意范围), `INTEGER` (SQLite) |
-| `created_at`     | `int64`  | 创建时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `updated_at`     | `int64`  | 更新时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `deleted_at`     | `int64`  | 软删除时间 (Unix timestamp) | `0`      | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `model_alias_id` | `uint64` | 逻辑关联 `model_alias.id`   | `0`      | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL), `INTEGER` (SQLite)           |
-| `model_id`       | `uint64` | 逻辑关联 `model.id`         | `0`      | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL), `INTEGER` (SQLite)           |
-
-### 9. user_token_model_access
-
-`user_token_model_access` 是 `user_token` 和 `model` 之间的多对多关系表。
-
-| 字段            | 类型     | 描述                        | 默认值   | 数据库兼容性说明                                                               |
-| --------------- | -------- | --------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `id`            | `uint64` | **主键**，唯一标识          | 自增     | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL, 注意范围), `INTEGER` (SQLite) |
-| `created_at`    | `int64`  | 创建时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `updated_at`    | `int64`  | 更新时间 (Unix timestamp)   | 当前时间 | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `deleted_at`    | `int64`  | 软删除时间 (Unix timestamp) | `0`      | `BIGINT` (MySQL/PostgreSQL), `INTEGER` (SQLite)                                |
-| `user_token_id` | `uint64` | 逻辑关联 `user_token.id`    | `0`      | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL), `INTEGER` (SQLite)           |
-| `model_id`      | `uint64` | 逻辑关联 `model.id`         | `0`      | `BIGINT UNSIGNED` (MySQL), `BIGINT` (PostgreSQL), `INTEGER` (SQLite)           |
+| 字段名       | 字段类型 | 字段编号 | 备注                                                                                 |
+| :----------- | :------- | :------- | :----------------------------------------------------------------------------------- |
+| `id`         | `uint64` | 1        | 主键                                                                                 |
+| `created_at` | `int64`  | 2        | 创建时间                                                                             |
+| `updated_at` | `int64`  | 3        | 更新时间                                                                             |
+| `deleted_at` | `int64`  | 4        | `@gorm: index:idx_user_access,unique` (软删除标记，唯一索引)                         |
+| `token`      | `uint64` | 5        | `@gorm: index:idx_user_access,unique` (外键，唯一索引)，推测关联 `ModelUserToken.id` |
+| `model`      | `string` | 6        | `@gorm: index:idx_user_access,unique` (唯一索引)                                     |
