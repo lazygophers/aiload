@@ -3,10 +3,6 @@ syntax = "proto3";
 package aiload;
 
 import "core.proto";
-import "google/protobuf/timestamp.proto";
-import "google/protobuf/descriptor.proto";
-import "google/protobuf/any.proto";
-import "google/protobuf/duration.proto";
 
 option cc_enable_arenas = true;
 option go_package = "/aiload";
@@ -119,6 +115,7 @@ service aiload {
 
 enum ErrCode {
 	Success = 0;
+	ERR = 10000; // 错误
 }
 
 enum Platform {

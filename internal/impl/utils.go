@@ -2,6 +2,7 @@ package impl
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/lazygophers/aiload/internal/state"
 	"github.com/lazygophers/utils/network"
 	"github.com/valyala/fasthttp"
 	"net"
@@ -23,7 +24,6 @@ func ToHeader(ctx *fasthttp.RequestCtx) map[string]string {
 	ctx.Request.Header.VisitAll(func(key, value []byte) {
 		header[string(key)] = string(value)
 	})
-
 	return header
 }
 

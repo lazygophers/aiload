@@ -94,9 +94,6 @@ func init() {
 		// 压缩
 		compress.New(compress.Config{
 			Next: func(c *fiber.Ctx) bool {
-				if strings.HasPrefix(c.Path(), "/resource/") {
-					return true
-				}
 				if strings.HasSuffix(c.Path(), ".tar.gz") {
 					return true
 				}
@@ -132,7 +129,7 @@ func init() {
 
 			err = ctx.Next()
 
-			ctx.Set(lrpc.HeaderTrance, string(log.GetTrace()))
+			ctx.Set(lrpc.HeaderTrance, log.GetTrace())
 			used := time.Since(ctx.Context().Time())
 			if err != nil {
 				ctx.Status(500)

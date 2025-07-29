@@ -11,7 +11,7 @@ var (
 )
 
 const (
-	CacheKeyUser = "user:%d"
+	CacheKeySession = "session:%s"
 )
 
 func ConnectCache() (err error) {
