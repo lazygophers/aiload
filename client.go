@@ -54,3 +54,11 @@ func DelUserAdmin(ctx *lrpc.Ctx, req *DelUserAdminReq) (*DelUserAdminRsp, error)
 		ServicePath: RpcPathDelUserAdmin,
 	}, req, &rsp)
 }
+
+func Login(ctx *lrpc.Ctx, req *LoginReq) (*LoginRsp, error) {
+	var rsp LoginRsp
+	return &rsp, lrpc.Call(ctx, &core.ServiceDiscoveryClient{
+		ServiceName: ServerName,
+		ServicePath: RpcPathLogin,
+	}, req, &rsp)
+}
