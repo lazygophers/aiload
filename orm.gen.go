@@ -2,7 +2,7 @@
 //	versions:
 //		codegen	v0.0.0-SNAPSHOT-5c1b1b5
 //		go		go1.24.5
-//	update:	1753781604
+//	update:	1753781820
 //	source: aiload.proto
 
 package aiload
@@ -12,27 +12,27 @@ import (
 	"github.com/lazygophers/utils"
 )
 
-func (m *ModelApi) Scan(value interface{}) error {
+func (m *ModelChannel) Scan(value interface{}) error {
 	return utils.Scan(m, value)
 }
 
-func (m *ModelApi) Value() (driver.Value, error) {
+func (m *ModelChannel) Value() (driver.Value, error) {
 	return utils.Value(m)
 }
 
-func (m *ModelApiAccess) Scan(value interface{}) error {
+func (m *ModelChannelAccess) Scan(value interface{}) error {
 	return utils.Scan(m, value)
 }
 
-func (m *ModelApiAccess) Value() (driver.Value, error) {
+func (m *ModelChannelAccess) Value() (driver.Value, error) {
 	return utils.Value(m)
 }
 
-func (m *ModelModelAliasMap) Scan(value interface{}) error {
+func (m *ModelModelAlias) Scan(value interface{}) error {
 	return utils.Scan(m, value)
 }
 
-func (m *ModelModelAliasMap) Value() (driver.Value, error) {
+func (m *ModelModelAlias) Value() (driver.Value, error) {
 	return utils.Value(m)
 }
 

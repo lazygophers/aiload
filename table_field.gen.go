@@ -2,13 +2,13 @@
 //	versions:
 //		codegen	v0.0.0-SNAPSHOT-5c1b1b5
 //		go		go1.24.5
-//	update:	1753781604
+//	update:	1753781820
 //	source: aiload.proto
 
 package aiload
 
 const (
-	DbApiId      = "api_id"
+	DbChannelId  = "channel_id"
 	DbCreatedAt  = "created_at"
 	DbDeletedAt  = "deleted_at"
 	DbId         = "id"
