@@ -8,7 +8,7 @@ import (
 	"github.com/lazygophers/lrpc/middleware/xerror"
 )
 
-func GetUser(ctx *lrpc.Ctx, req *aiload.GetUserReq) (*aiload.GetUserRsp, error) {
+func GetUser(ctx *fiber.Ctx, req *aiload.GetUserReq) (*aiload.GetUserRsp, error) {
 	var rsp aiload.GetUserRsp
 
 	user, err := state.User.
@@ -25,7 +25,7 @@ func GetUser(ctx *lrpc.Ctx, req *aiload.GetUserReq) (*aiload.GetUserRsp, error) 
 	return &rsp, nil
 }
 
-func GetUserAdmin(ctx *lrpc.Ctx, req *aiload.GetUserAdminReq) (*aiload.GetUserAdminRsp, error) {
+func GetUserAdmin(ctx *fiber.Ctx, req *aiload.GetUserAdminReq) (*aiload.GetUserAdminRsp, error) {
 	var rsp aiload.GetUserAdminRsp
 
 	user, err := state.User.
@@ -42,7 +42,7 @@ func GetUserAdmin(ctx *lrpc.Ctx, req *aiload.GetUserAdminReq) (*aiload.GetUserAd
 	return &rsp, nil
 }
 
-func ListUserAdmin(ctx *lrpc.Ctx, req *aiload.ListUserAdminReq) (*aiload.ListUserAdminRsp, error) {
+func ListUserAdmin(ctx *fiber.Ctx, req *aiload.ListUserAdminReq) (*aiload.ListUserAdminRsp, error) {
 	var rsp aiload.ListUserAdminRsp
 
 	scoop := state.User.NewScoop()
@@ -68,7 +68,7 @@ func ListUserAdmin(ctx *lrpc.Ctx, req *aiload.ListUserAdminReq) (*aiload.ListUse
 	return &rsp, nil
 }
 
-func SetUser(ctx *lrpc.Ctx, req *aiload.SetUserReq) (*aiload.SetUserRsp, error) {
+func SetUser(ctx *fiber.Ctx, req *aiload.SetUserReq) (*aiload.SetUserRsp, error) {
 	var rsp aiload.SetUserRsp
 
 	//goland:noinspection GoVetCopyLock
@@ -96,7 +96,7 @@ func SetUser(ctx *lrpc.Ctx, req *aiload.SetUserReq) (*aiload.SetUserRsp, error) 
 	return &rsp, nil
 }
 
-func SetUserAdmin(ctx *lrpc.Ctx, req *aiload.SetUserAdminReq) (*aiload.SetUserAdminRsp, error) {
+func SetUserAdmin(ctx *fiber.Ctx, req *aiload.SetUserAdminReq) (*aiload.SetUserAdminRsp, error) {
 	var rsp aiload.SetUserAdminRsp
 
 	//goland:noinspection GoVetCopyLock
@@ -124,7 +124,7 @@ func SetUserAdmin(ctx *lrpc.Ctx, req *aiload.SetUserAdminReq) (*aiload.SetUserAd
 	return &rsp, nil
 }
 
-func DelUserAdmin(ctx *lrpc.Ctx, req *aiload.DelUserAdminReq) (*aiload.DelUserAdminRsp, error) {
+func DelUserAdmin(ctx *fiber.Ctx, req *aiload.DelUserAdminReq) (*aiload.DelUserAdminRsp, error) {
 	var rsp aiload.DelUserAdminRsp
 
 	err := state.User.
@@ -140,7 +140,7 @@ func DelUserAdmin(ctx *lrpc.Ctx, req *aiload.DelUserAdminReq) (*aiload.DelUserAd
 	return &rsp, nil
 }
 
-func AddUserAdmin(ctx *lrpc.Ctx, req *aiload.AddUserAdminReq) (*aiload.AddUserAdminRsp, error) {
+func AddUserAdmin(ctx *fiber.Ctx, req *aiload.AddUserAdminReq) (*aiload.AddUserAdminRsp, error) {
 	var rsp aiload.AddUserAdminRsp
 
 	//goland:noinspection GoVetCopyLock
@@ -159,4 +159,3 @@ func AddUserAdmin(ctx *lrpc.Ctx, req *aiload.AddUserAdminReq) (*aiload.AddUserAd
 
 	return &rsp, nil
 }
-

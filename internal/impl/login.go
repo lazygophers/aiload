@@ -8,7 +8,7 @@ import (
 	"github.com/lazygophers/lrpc/middleware/xerror"
 )
 
-func Login(ctx *lrpc.Ctx, req *aiload.LoginReq) (*aiload.LoginRsp, error) {
+func Login(ctx *fiber.Ctx, req *aiload.LoginReq) (*aiload.LoginRsp, error) {
 	var rsp aiload.LoginRsp
 
 	return &rsp, nil
