@@ -169,7 +169,7 @@ message ModelModelAlias {
 
 message ModelUser {
 	enum Role {
-		Nil = 0;
+		Public = 0;
 		Admin = 1;
 		User = 2;
 	}
