@@ -2,64 +2,64 @@
 //	versions:
 //		codegen	v0.0.0-SNAPSHOT-35b9c92
 //		go		go1.24.5
-//	update:	1753795430
+//	update:	1753797444
 //	source: aiload.proto
 
 package main
 
 import (
 	"github.com/lazygophers/aiload"
-	"github.com/lazygophers/aiload/internal/api"
-	"github.com/lazygophers/aiload/internal/impl"
+	"github.com/lazygophers/aiload/internal/impl" 
+"github.com/lazygophers/aiload/internal/api"
 )
 
-var Routes = []*api.Route{
+var Routes = []*api.Route{ 
 	{
-		Method:  "POST",
-		Path:    aiload.RpcPathAddUserAdmin,
-		Handler: impl.ToHandler(impl.AddUserAdmin, "admin"),
-		Role:    "admin",
+	Method:  "POST",
+	Path:    aiload.RpcPathAddUserAdmin,
+	Handler: impl.ToHandler(impl.AddUserAdmin, "admin"),
+	Role: "admin",
 	},
 	{
-		Method:  "POST",
-		Path:    aiload.RpcPathGetUser,
-		Handler: impl.ToHandler(impl.GetUser, "user"),
-		Role:    "public",
+	Method:  "POST",
+	Path:    aiload.RpcPathGetUser,
+	Handler: impl.ToHandler(impl.GetUser, "user"),
+	Role: "public",
 	},
 	{
-		Method:  "POST",
-		Path:    aiload.RpcPathGetUserAdmin,
-		Handler: impl.ToHandler(impl.GetUserAdmin, "admin"),
-		Role:    "admin",
+	Method:  "POST",
+	Path:    aiload.RpcPathGetUserAdmin,
+	Handler: impl.ToHandler(impl.GetUserAdmin, "admin"),
+	Role: "admin",
 	},
 	{
-		Method:  "POST",
-		Path:    aiload.RpcPathListUserAdmin,
-		Handler: impl.ToHandler(impl.ListUserAdmin, "admin"),
-		Role:    "admin",
+	Method:  "POST",
+	Path:    aiload.RpcPathListUserAdmin,
+	Handler: impl.ToHandler(impl.ListUserAdmin, "admin"),
+	Role: "admin",
 	},
 	{
-		Method:  "POST",
-		Path:    aiload.RpcPathSetUser,
-		Handler: impl.ToHandler(impl.SetUser, "user"),
-		Role:    "public",
+	Method:  "POST",
+	Path:    aiload.RpcPathSetUser,
+	Handler: impl.ToHandler(impl.SetUser, "user"),
+	Role: "public",
 	},
 	{
-		Method:  "POST",
-		Path:    aiload.RpcPathSetUserAdmin,
-		Handler: impl.ToHandler(impl.SetUserAdmin, "admin"),
-		Role:    "admin",
+	Method:  "POST",
+	Path:    aiload.RpcPathSetUserAdmin,
+	Handler: impl.ToHandler(impl.SetUserAdmin, "admin"),
+	Role: "admin",
 	},
 	{
-		Method:  "POST",
-		Path:    aiload.RpcPathDelUserAdmin,
-		Handler: impl.ToHandler(impl.DelUserAdmin, "admin"),
-		Role:    "admin",
+	Method:  "POST",
+	Path:    aiload.RpcPathDelUserAdmin,
+	Handler: impl.ToHandler(impl.DelUserAdmin, "admin"),
+	Role: "admin",
 	},
 	{
-		Method:  "POST",
-		Path:    aiload.RpcPathLogin,
-		Handler: impl.ToHandler(impl.Login, "public"),
-		Role:    "public",
+	Method:  "POST",
+	Path:    aiload.RpcPathLogin,
+	Handler: impl.ToHandler(impl.Login, "public"),
+	Role: "public",
 	},
 }
