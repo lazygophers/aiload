@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func Login(ctx *lrpc.Ctx, req *aiload.LoginReq) (*aiload.LoginRsp, error) {
+func Login(ctx *fiber.Ctx, req *aiload.LoginReq) (*aiload.LoginRsp, error) {
 	var rsp aiload.LoginRsp
 	user, err := state.User.
 		NewScoop().
