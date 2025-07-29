@@ -32,3 +32,6 @@ aiload
 *.cache
 *.bbolt
 config.yaml
+
+data/
+!data/mysql/conf/my.cnf
