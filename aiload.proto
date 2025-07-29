@@ -28,11 +28,13 @@ message ModelApi {
   uint64 id = 1;
   int64 created_at = 2;
   int64 updated_at = 3;
+  // @gorm: index: idx_api,unique
   int64 deleted_at = 4;
 
   string name = 5;
+  // @gorm: index: idx_api,unique
   string token = 6;
-
+  // @gorm: index: idx_api,unique
   Platform platform = 7;
 }
 
@@ -40,10 +42,12 @@ message ModelApiAccess {
   uint64 id = 1;
   int64 created_at = 2;
   int64 updated_at = 3;
+  // @gorm: index: idx_api_access,unique
   int64 deleted_at = 4;
 
+  // @gorm: index: idx_api_access,unique
   uint64 api_id = 5;
-  // 对应平台的
+  // @gorm: index: idx_api_access,unique
   string model = 6;
 }
 
@@ -51,9 +55,12 @@ message ModelModelAliasMap {
   uint64 id = 1;
   int64 created_at = 2;
   int64 updated_at = 3;
+  // gorm: index:idx_alias,unique
   int64 deleted_at = 4;
 
+  // gorm: index:idx_alias,unique
   string model = 5;
+  // gorm: index:idx_alias,unique
   string model_alias = 6;
 }
 
@@ -61,8 +68,10 @@ message ModelUser {
   uint64 id = 1;
   int64 created_at = 2;
   int64 updated_at = 3;
+  // gorm: index:idx_user,unique
   int64 deleted_at = 4;
 
+  // gorm: index:idx_user,unique
   string username = 5;
   string password = 6;
 }
@@ -71,22 +80,26 @@ message ModelUserToken {
   uint64 id = 1;
   int64 created_at = 2;
   int64 updated_at = 3;
+  // gorm: index:idx_token,unique
   int64 deleted_at = 4;
 
+  // gorm: index:idx_token,unique
   uint64 user_id = 5;
 
+  // gorm: index:idx_token,unique
   string token = 6;
   int64 limit = 7;
 }
 
-message ModelTokenModelAccess {
+message ModelUserAccess {
   uint64 id = 1;
   int64 created_at = 2;
   int64 updated_at = 3;
+  // @gorm: index:idx_user_access,unique
   int64 deleted_at = 4;
-
+  // @gorm: index:idx_user_access,unique
   uint64 token = 5;
-  // 跨平台
+  // @gorm: index:idx_user_access,unique
   string model = 6;
 }
 
