@@ -1,10 +1,10 @@
 package impl
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"github.com/lazygophers/aiload"
 	"github.com/lazygophers/aiload/internal/state"
 	"github.com/lazygophers/log"
-	"github.com/lazygophers/lrpc"
 	"github.com/lazygophers/lrpc/middleware/xerror"
 )
 
