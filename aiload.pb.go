@@ -106,21 +106,24 @@ type UserRole int32
 
 const (
 	UserRole_Public UserRole = 0
-	UserRole_Admin  UserRole = 1
-	UserRole_User   UserRole = 2
+	UserRole_User   UserRole = 1
+	UserRole_Admin  UserRole = 2
+	UserRole_System UserRole = 3
 )
 
 // Enum value maps for UserRole.
 var (
 	UserRole_name = map[int32]string{
 		0: "Public",
-		1: "Admin",
-		2: "User",
+		1: "User",
+		2: "Admin",
+		3: "System",
 	}
 	UserRole_value = map[string]int32{
 		"Public": 0,
-		"Admin":  1,
-		"User":   2,
+		"User":   1,
+		"Admin":  2,
+		"System": 3,
 	}
 )
 
@@ -253,16 +256,16 @@ type ModelChannel struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT;column:id"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"not null;default:0;autoUpdateTime;column:updated_at"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" toml:"created_at,omitempty" gorm:"default:0;autoCreateTime;column:created_at;not null" yaml:"created_at,omitempty"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0"`
 	// @gorm: index: idx_channel,unique
-	DeletedAt int64  `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" gorm:"not null;default:0;index:idx_channel,unique;column:deleted_at" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty"`
-	Name      string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty" yaml:"name,omitempty" toml:"name,omitempty" gorm:"default:'';column:name;type:varchar(255);not null"`
+	DeletedAt int64  `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" gorm:"index:idx_channel,unique;column:deleted_at;not null;default:0" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty"`
+	Name      string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty" yaml:"name,omitempty" toml:"name,omitempty" gorm:"not null;default:'';column:name;type:varchar(255)"`
 	// @gorm: index: idx_channel,unique
-	Token string `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty" gorm:"index:idx_channel,unique;type:varchar(255);not null;default:'';column:token" yaml:"token,omitempty" toml:"token,omitempty"`
+	Token string `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty" yaml:"token,omitempty" toml:"token,omitempty" gorm:"not null;default:'';column:token;index:idx_channel,unique;type:varchar(255)"`
 	// @gorm: index: idx_channel,unique
-	Platform Platform `protobuf:"varint,7,opt,name=platform,proto3,enum=aiload.Platform" json:"platform,omitempty" gorm:"index:idx_channel,unique;not null;default:0;column:platform" yaml:"platform,omitempty" toml:"platform,omitempty"`
+	Platform Platform `protobuf:"varint,7,opt,name=platform,proto3,enum=aiload.Platform" json:"platform,omitempty" gorm:"column:platform;index:idx_channel,unique;not null;default:0" yaml:"platform,omitempty" toml:"platform,omitempty"`
 }
 
 func (x *ModelChannel) Reset() {
@@ -351,15 +354,15 @@ type ModelChannelAccess struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" gorm:"AUTOINCREMENT;column:id;primaryKey;PRIMARY KEY;autoIncrement" yaml:"id,omitempty" toml:"id,omitempty"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" gorm:"default:0;autoCreateTime;column:created_at;not null" yaml:"created_at,omitempty" toml:"created_at,omitempty"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"column:updated_at;not null;default:0;autoUpdateTime"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"PRIMARY KEY;autoIncrement;AUTOINCREMENT;column:id;primaryKey"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0" yaml:"updated_at,omitempty"`
 	// @gorm: index: idx_channel_access,unique
-	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" gorm:"index:idx_channel_access,unique;column:deleted_at;not null;default:0" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty"`
+	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"default:0;index:idx_channel_access,unique;column:deleted_at;not null" yaml:"deleted_at,omitempty"`
 	// @gorm: index: idx_channel_access,unique
 	ChannelId uint64 `protobuf:"varint,5,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty" gorm:"not null;default:0;column:channel_id;index:idx_channel_access,unique" yaml:"channel_id,omitempty" toml:"channel_id,omitempty"`
 	// @gorm: index: idx_channel_access,unique
-	Model string `protobuf:"bytes,6,opt,name=model,proto3" json:"model,omitempty" gorm:"index:idx_channel_access,unique;type:varchar(255);not null;default:'';column:model" yaml:"model,omitempty" toml:"model,omitempty"`
+	Model string `protobuf:"bytes,6,opt,name=model,proto3" json:"model,omitempty" gorm:"type:varchar(255);not null;default:'';column:model;index:idx_channel_access,unique" yaml:"model,omitempty" toml:"model,omitempty"`
 }
 
 func (x *ModelChannelAccess) Reset() {
@@ -441,15 +444,15 @@ type ModelModelAlias struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"PRIMARY KEY;autoIncrement;AUTOINCREMENT;column:id;primaryKey"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" toml:"created_at,omitempty" gorm:"default:0;autoCreateTime;column:created_at;not null" yaml:"created_at,omitempty"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0" yaml:"updated_at,omitempty"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"column:updated_at;not null;default:0;autoUpdateTime"`
 	// gorm: index:idx_alias,unique
-	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"not null;default:0;column:deleted_at"`
+	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"column:deleted_at;not null;default:0"`
 	// gorm: index:idx_alias,unique
 	Model string `protobuf:"bytes,5,opt,name=model,proto3" json:"model,omitempty" yaml:"model,omitempty" toml:"model,omitempty" gorm:"type:varchar(255);not null;default:'';column:model"`
 	// gorm: index:idx_alias,unique
-	ModelAlias string `protobuf:"bytes,6,opt,name=model_alias,json=modelAlias,proto3" json:"model_alias,omitempty" yaml:"model_alias,omitempty" toml:"model_alias,omitempty" gorm:"default:'';column:model_alias;type:varchar(255);not null"`
+	ModelAlias string `protobuf:"bytes,6,opt,name=model_alias,json=modelAlias,proto3" json:"model_alias,omitempty" gorm:"default:'';column:model_alias;type:varchar(255);not null" yaml:"model_alias,omitempty" toml:"model_alias,omitempty"`
 }
 
 func (x *ModelModelAlias) Reset() {
@@ -531,16 +534,16 @@ type ModelUser struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT" yaml:"id,omitempty" toml:"id,omitempty"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"autoIncrement;AUTOINCREMENT;column:id;primaryKey;PRIMARY KEY"`
 	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"column:updated_at;not null;default:0;autoUpdateTime"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0"`
 	// gorm: index:idx_user,unique
 	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"column:deleted_at;not null;default:0"`
 	// gorm: index:idx_user,unique
 	Username string   `protobuf:"bytes,5,opt,name=username,proto3" json:"username,omitempty" yaml:"username,omitempty" toml:"username,omitempty" gorm:"type:varchar(255);not null;default:'';column:username"`
 	Password string   `protobuf:"bytes,6,opt,name=password,proto3" json:"password,omitempty" yaml:"password,omitempty" toml:"password,omitempty" gorm:"type:varchar(255);not null;default:'';column:password"`
-	Name     string   `protobuf:"bytes,7,opt,name=name,proto3" json:"name,omitempty" yaml:"name,omitempty" toml:"name,omitempty" gorm:"type:varchar(255);not null;default:'';column:name"`
-	Role     UserRole `protobuf:"varint,8,opt,name=role,proto3,enum=aiload.UserRole" json:"role,omitempty" gorm:"not null;default:0;column:role" yaml:"role,omitempty" toml:"role,omitempty"`
+	Name     string   `protobuf:"bytes,7,opt,name=name,proto3" json:"name,omitempty" yaml:"name,omitempty" toml:"name,omitempty" gorm:"default:'';column:name;type:varchar(255);not null"`
+	Role     UserRole `protobuf:"varint,8,opt,name=role,proto3,enum=aiload.UserRole" json:"role,omitempty" yaml:"role,omitempty" toml:"role,omitempty" gorm:"column:role;not null;default:0"`
 }
 
 func (x *ModelUser) Reset() {
@@ -636,16 +639,16 @@ type ModelUserToken struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0" yaml:"created_at,omitempty" toml:"created_at,omitempty"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT" yaml:"id,omitempty"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0" yaml:"updated_at,omitempty" toml:"updated_at,omitempty"`
 	// gorm: index:idx_token,unique
-	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"default:0;column:deleted_at;not null"`
+	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"column:deleted_at;not null;default:0"`
 	// gorm: index:idx_token,unique
-	UserId uint64 `protobuf:"varint,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty" yaml:"user_id,omitempty" toml:"user_id,omitempty" gorm:"not null;default:0;column:user_id"`
+	UserId uint64 `protobuf:"varint,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty" yaml:"user_id,omitempty" toml:"user_id,omitempty" gorm:"column:user_id;not null;default:0"`
 	// gorm: index:idx_token,unique
 	Token string `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty" yaml:"token,omitempty" toml:"token,omitempty" gorm:"type:varchar(255);not null;default:'';column:token"`
-	Limit int64  `protobuf:"varint,7,opt,name=limit,proto3" json:"limit,omitempty" yaml:"limit,omitempty" toml:"limit,omitempty" gorm:"default:0;column:limit;not null"`
+	Limit int64  `protobuf:"varint,7,opt,name=limit,proto3" json:"limit,omitempty" yaml:"limit,omitempty" toml:"limit,omitempty" gorm:"column:limit;not null;default:0"`
 }
 
 func (x *ModelUserToken) Reset() {
@@ -734,15 +737,15 @@ type ModelUserAccess struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" gorm:"autoIncrement;AUTOINCREMENT;column:id;primaryKey;PRIMARY KEY" yaml:"id,omitempty" toml:"id,omitempty"`
 	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0" yaml:"updated_at,omitempty" toml:"updated_at,omitempty"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"column:updated_at;not null;default:0;autoUpdateTime"`
 	// @gorm: index:idx_user_access,unique
-	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"index:idx_user_access,unique;column:deleted_at;not null;default:0"`
+	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" gorm:"index:idx_user_access,unique;column:deleted_at;not null;default:0" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty"`
 	// @gorm: index:idx_user_access,unique
-	Token uint64 `protobuf:"varint,5,opt,name=token,proto3" json:"token,omitempty" gorm:"column:token;index:idx_user_access,unique;not null;default:0" yaml:"token,omitempty" toml:"token,omitempty"`
+	Token uint64 `protobuf:"varint,5,opt,name=token,proto3" json:"token,omitempty" gorm:"default:0;column:token;index:idx_user_access,unique;not null" yaml:"token,omitempty" toml:"token,omitempty"`
 	// @gorm: index:idx_user_access,unique
-	Model string `protobuf:"bytes,6,opt,name=model,proto3" json:"model,omitempty" toml:"model,omitempty" gorm:"default:'';column:model;index:idx_user_access,unique;type:varchar(255);not null" yaml:"model,omitempty"`
+	Model string `protobuf:"bytes,6,opt,name=model,proto3" json:"model,omitempty" gorm:"index:idx_user_access,unique;type:varchar(255);not null;default:'';column:model" yaml:"model,omitempty" toml:"model,omitempty"`
 }
 
 func (x *ModelUserAccess) Reset() {
@@ -825,7 +828,7 @@ type AddUserAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" validate:"required" yaml:"user,omitempty" toml:"user,omitempty" gorm:"serializer:json;column:user;type:json"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" validate:"required" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
 }
 
 func (x *AddUserAdminReq) Reset() {
@@ -872,7 +875,7 @@ type AddUserAdminRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user" yaml:"user,omitempty"`
 }
 
 func (x *AddUserAdminRsp) Reset() {
@@ -957,7 +960,7 @@ type GetUserRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"column:user;type:json;serializer:json"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
 }
 
 func (x *GetUserRsp) Reset() {
@@ -1005,7 +1008,7 @@ type GetUserAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT" validate:"required"`
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" validate:"required" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
 }
 
 func (x *GetUserAdminReq) Reset() {
@@ -1100,7 +1103,7 @@ type ListUserAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	ListOption *core.ListOption `protobuf:"bytes,1,opt,name=list_option,json=listOption,proto3" json:"list_option,omitempty" gorm:"column:list_option" validate:"required" yaml:"list_option,omitempty" toml:"list_option,omitempty"`
+	ListOption *core.ListOption `protobuf:"bytes,1,opt,name=list_option,json=listOption,proto3" json:"list_option,omitempty" validate:"required" yaml:"list_option,omitempty" toml:"list_option,omitempty" gorm:"column:list_option"`
 }
 
 func (x *ListUserAdminReq) Reset() {
@@ -1147,8 +1150,8 @@ type ListUserAdminRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Paginate *core.Paginate `protobuf:"bytes,1,opt,name=paginate,proto3" json:"paginate,omitempty" yaml:"paginate,omitempty" toml:"paginate,omitempty" gorm:"column:paginate"`
-	List     []*ModelUser   `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty" gorm:"type:json;serializer:json;column:list" yaml:"list,omitempty" toml:"list,omitempty"`
+	Paginate *core.Paginate `protobuf:"bytes,1,opt,name=paginate,proto3" json:"paginate,omitempty" gorm:"column:paginate" yaml:"paginate,omitempty" toml:"paginate,omitempty"`
+	List     []*ModelUser   `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty" yaml:"list,omitempty" toml:"list,omitempty" gorm:"type:json;serializer:json;column:list"`
 }
 
 func (x *ListUserAdminRsp) Reset() {
@@ -1203,7 +1206,7 @@ type SetUserReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" validate:"required" yaml:"user,omitempty" toml:"user,omitempty" gorm:"column:user;type:json;serializer:json"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" gorm:"type:json;serializer:json;column:user" validate:"required" yaml:"user,omitempty" toml:"user,omitempty"`
 }
 
 func (x *SetUserReq) Reset() {
@@ -1250,7 +1253,7 @@ type SetUserRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"column:user;type:json;serializer:json"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"serializer:json;column:user;type:json"`
 }
 
 func (x *SetUserRsp) Reset() {
@@ -1298,7 +1301,7 @@ type SetUserAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" validate:"required" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user" validate:"required" yaml:"user,omitempty"`
 }
 
 func (x *SetUserAdminReq) Reset() {
@@ -1393,7 +1396,7 @@ type DelUserAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" validate:"required" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT" validate:"required"`
 }
 
 func (x *DelUserAdminReq) Reset() {
@@ -1479,9 +1482,9 @@ type LoginReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty" validate:"required" yaml:"username,omitempty" toml:"username,omitempty" gorm:"type:varchar(255);not null;default:'';column:username"`
+	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty" validate:"required" yaml:"username,omitempty" toml:"username,omitempty" gorm:"default:'';column:username;type:varchar(255);not null"`
 	// @validate: required
-	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty" validate:"required" yaml:"password,omitempty" toml:"password,omitempty" gorm:"type:varchar(255);not null;default:'';column:password"`
+	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty" toml:"password,omitempty" gorm:"not null;default:'';column:password;type:varchar(255)" validate:"required" yaml:"password,omitempty"`
 }
 
 func (x *LoginReq) Reset() {
@@ -1535,9 +1538,9 @@ type LoginRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	User      *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
-	Token     string     `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty" yaml:"token,omitempty" toml:"token,omitempty" gorm:"not null;default:'';column:token;type:varchar(255)"`
-	ExpiresAt int64      `protobuf:"varint,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty" toml:"expires_at,omitempty" gorm:"not null;default:0;column:expires_at" yaml:"expires_at,omitempty"`
+	User      *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" gorm:"column:user;type:json;serializer:json" yaml:"user,omitempty" toml:"user,omitempty"`
+	Token     string     `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty" yaml:"token,omitempty" toml:"token,omitempty" gorm:"type:varchar(255);not null;default:'';column:token"`
+	ExpiresAt int64      `protobuf:"varint,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty" gorm:"not null;default:0;column:expires_at" yaml:"expires_at,omitempty" toml:"expires_at,omitempty"`
 }
 
 func (x *LoginRsp) Reset() {
@@ -1756,61 +1759,61 @@ var file_aiload_proto_rawDesc = []byte{
 	0x15, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x4e, 0x6f,
 	0x74, 0x46, 0x6f, 0x75, 0x6e, 0x64, 0x10, 0x9a, 0x4e, 0x12, 0x1e, 0x0a, 0x19, 0x43, 0x68, 0x61,
 	0x6e, 0x6e, 0x65, 0x6c, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x44, 0x75, 0x70, 0x6c, 0x69, 0x63,
-	0x61, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x10, 0x9b, 0x4e, 0x2a, 0x2b, 0x0a, 0x08, 0x55, 0x73, 0x65,
+	0x61, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x10, 0x9b, 0x4e, 0x2a, 0x37, 0x0a, 0x08, 0x55, 0x73, 0x65,
 	0x72, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x0a, 0x0a, 0x06, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x10,
-	0x00, 0x12, 0x09, 0x0a, 0x05, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x10, 0x01, 0x12, 0x08, 0x0a, 0x04,
-	0x55, 0x73, 0x65, 0x72, 0x10, 0x02, 0x2a, 0x1f, 0x0a, 0x08, 0x50, 0x6c, 0x61, 0x74, 0x66, 0x6f,
-	0x72, 0x6d, 0x12, 0x07, 0x0a, 0x03, 0x4e, 0x69, 0x6c, 0x10, 0x00, 0x12, 0x0a, 0x0a, 0x06, 0x4f,
-	0x70, 0x65, 0x6e, 0x41, 0x49, 0x10, 0x01, 0x32, 0xf3, 0x05, 0x0a, 0x06, 0x61, 0x69, 0x6c, 0x6f,
-	0x61, 0x64, 0x12, 0x65, 0x0a, 0x0c, 0x41, 0x64, 0x64, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d,
-	0x69, 0x6e, 0x12, 0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x41, 0x64, 0x64, 0x55,
-	0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x61, 0x69,
-	0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x41, 0x64, 0x64, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69,
-	0x6e, 0x52, 0x73, 0x70, 0x22, 0x23, 0x82, 0xa6, 0x1d, 0x14, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54,
-	0x12, 0x0c, 0x41, 0x64, 0x64, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x8a, 0xa6,
-	0x1d, 0x07, 0x0a, 0x05, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x4a, 0x0a, 0x07, 0x47, 0x65, 0x74,
-	0x55, 0x73, 0x65, 0x72, 0x12, 0x12, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x47, 0x65,
-	0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x1a, 0x12, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61,
-	0x64, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x73, 0x70, 0x22, 0x17, 0x82, 0xa6,
-	0x1d, 0x0f, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x07, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65,
-	0x72, 0x8a, 0xa6, 0x1d, 0x00, 0x12, 0x65, 0x0a, 0x0c, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72,
-	0x41, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x47,
-	0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x17,
-	0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41,
-	0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x22, 0x23, 0x82, 0xa6, 0x1d, 0x14, 0x0a, 0x04, 0x50,
-	0x4f, 0x53, 0x54, 0x12, 0x0c, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69,
-	0x6e, 0x8a, 0xa6, 0x1d, 0x07, 0x0a, 0x05, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x69, 0x0a, 0x0d,
-	0x4c, 0x69, 0x73, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x18, 0x2e,
-	0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41,
-	0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x18, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64,
-	0x2e, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73,
-	0x70, 0x22, 0x24, 0x82, 0xa6, 0x1d, 0x15, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x0d, 0x4c,
-	0x69, 0x73, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x8a, 0xa6, 0x1d, 0x07,
-	0x0a, 0x05, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x4a, 0x0a, 0x07, 0x53, 0x65, 0x74, 0x55, 0x73,
-	0x65, 0x72, 0x12, 0x12, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x53, 0x65, 0x74, 0x55,
-	0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x1a, 0x12, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e,
-	0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x73, 0x70, 0x22, 0x17, 0x82, 0xa6, 0x1d, 0x0f,
-	0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x07, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x8a,
-	0xa6, 0x1d, 0x00, 0x12, 0x65, 0x0a, 0x0c, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64,
-	0x6d, 0x69, 0x6e, 0x12, 0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x53, 0x65, 0x74,
-	0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x61,
-	0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d,
-	0x69, 0x6e, 0x52, 0x73, 0x70, 0x22, 0x23, 0x82, 0xa6, 0x1d, 0x14, 0x0a, 0x04, 0x50, 0x4f, 0x53,
-	0x54, 0x12, 0x0c, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x8a,
-	0xa6, 0x1d, 0x07, 0x0a, 0x05, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x65, 0x0a, 0x0c, 0x44, 0x65,
-	0x6c, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x17, 0x2e, 0x61, 0x69, 0x6c,
-	0x6f, 0x61, 0x64, 0x2e, 0x44, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e,
-	0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x44, 0x65, 0x6c,
-	0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x22, 0x23, 0x82, 0xa6,
-	0x1d, 0x14, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x0c, 0x44, 0x65, 0x6c, 0x55, 0x73, 0x65,
-	0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x8a, 0xa6, 0x1d, 0x07, 0x0a, 0x05, 0x61, 0x64, 0x6d, 0x69,
-	0x6e, 0x12, 0x4a, 0x0a, 0x05, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x12, 0x10, 0x2e, 0x61, 0x69, 0x6c,
-	0x6f, 0x61, 0x64, 0x2e, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x10, 0x2e, 0x61,
-	0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x22, 0x1d,
-	0x82, 0xa6, 0x1d, 0x0d, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x05, 0x4c, 0x6f, 0x67, 0x69,
-	0x6e, 0x8a, 0xa6, 0x1d, 0x08, 0x0a, 0x06, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x42, 0x0c, 0x5a,
-	0x07, 0x2f, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0xf8, 0x01, 0x01, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x00, 0x12, 0x08, 0x0a, 0x04, 0x55, 0x73, 0x65, 0x72, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x41,
+	0x64, 0x6d, 0x69, 0x6e, 0x10, 0x02, 0x12, 0x0a, 0x0a, 0x06, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d,
+	0x10, 0x03, 0x2a, 0x1f, 0x0a, 0x08, 0x50, 0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72, 0x6d, 0x12, 0x07,
+	0x0a, 0x03, 0x4e, 0x69, 0x6c, 0x10, 0x00, 0x12, 0x0a, 0x0a, 0x06, 0x4f, 0x70, 0x65, 0x6e, 0x41,
+	0x49, 0x10, 0x01, 0x32, 0xf3, 0x05, 0x0a, 0x06, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x12, 0x65,
+	0x0a, 0x0c, 0x41, 0x64, 0x64, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x17,
+	0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x41, 0x64, 0x64, 0x55, 0x73, 0x65, 0x72, 0x41,
+	0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64,
+	0x2e, 0x41, 0x64, 0x64, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70,
+	0x22, 0x23, 0x82, 0xa6, 0x1d, 0x14, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x0c, 0x41, 0x64,
+	0x64, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x8a, 0xa6, 0x1d, 0x07, 0x0a, 0x05,
+	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x4a, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72,
+	0x12, 0x12, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65,
+	0x72, 0x52, 0x65, 0x71, 0x1a, 0x12, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x47, 0x65,
+	0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x73, 0x70, 0x22, 0x17, 0x82, 0xa6, 0x1d, 0x0f, 0x0a, 0x04,
+	0x50, 0x4f, 0x53, 0x54, 0x12, 0x07, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x8a, 0xa6, 0x1d,
+	0x00, 0x12, 0x65, 0x0a, 0x0c, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69,
+	0x6e, 0x12, 0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73,
+	0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x61, 0x69, 0x6c,
+	0x6f, 0x61, 0x64, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e,
+	0x52, 0x73, 0x70, 0x22, 0x23, 0x82, 0xa6, 0x1d, 0x14, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12,
+	0x0c, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x8a, 0xa6, 0x1d,
+	0x07, 0x0a, 0x05, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x69, 0x0a, 0x0d, 0x4c, 0x69, 0x73, 0x74,
+	0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x18, 0x2e, 0x61, 0x69, 0x6c, 0x6f,
+	0x61, 0x64, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e,
+	0x52, 0x65, 0x71, 0x1a, 0x18, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x4c, 0x69, 0x73,
+	0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x22, 0x24, 0x82,
+	0xa6, 0x1d, 0x15, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x0d, 0x4c, 0x69, 0x73, 0x74, 0x55,
+	0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x8a, 0xa6, 0x1d, 0x07, 0x0a, 0x05, 0x61, 0x64,
+	0x6d, 0x69, 0x6e, 0x12, 0x4a, 0x0a, 0x07, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x12, 0x12,
+	0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52,
+	0x65, 0x71, 0x1a, 0x12, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x53, 0x65, 0x74, 0x55,
+	0x73, 0x65, 0x72, 0x52, 0x73, 0x70, 0x22, 0x17, 0x82, 0xa6, 0x1d, 0x0f, 0x0a, 0x04, 0x50, 0x4f,
+	0x53, 0x54, 0x12, 0x07, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x8a, 0xa6, 0x1d, 0x00, 0x12,
+	0x65, 0x0a, 0x0c, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x12,
+	0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72,
+	0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61,
+	0x64, 0x2e, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73,
+	0x70, 0x22, 0x23, 0x82, 0xa6, 0x1d, 0x14, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x0c, 0x53,
+	0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x8a, 0xa6, 0x1d, 0x07, 0x0a,
+	0x05, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x65, 0x0a, 0x0c, 0x44, 0x65, 0x6c, 0x55, 0x73, 0x65,
+	0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e,
+	0x44, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a,
+	0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x44, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72,
+	0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x22, 0x23, 0x82, 0xa6, 0x1d, 0x14, 0x0a, 0x04,
+	0x50, 0x4f, 0x53, 0x54, 0x12, 0x0c, 0x44, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d,
+	0x69, 0x6e, 0x8a, 0xa6, 0x1d, 0x07, 0x0a, 0x05, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x4a, 0x0a,
+	0x05, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x12, 0x10, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e,
+	0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x10, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61,
+	0x64, 0x2e, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x22, 0x1d, 0x82, 0xa6, 0x1d, 0x0d,
+	0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x05, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x8a, 0xa6, 0x1d,
+	0x08, 0x0a, 0x06, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x42, 0x0c, 0x5a, 0x07, 0x2f, 0x61, 0x69,
+	0x6c, 0x6f, 0x61, 0x64, 0xf8, 0x01, 0x01, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
