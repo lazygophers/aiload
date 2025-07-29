@@ -9,7 +9,7 @@
 package aiload
 
 import (
-	_ "github.com/lazygophers/lrpc/middleware/core"
+	core "github.com/lazygophers/lrpc/middleware/core"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	_ "google.golang.org/protobuf/types/descriptorpb"
@@ -116,21 +116,72 @@ func (Platform) EnumDescriptor() ([]byte, []int) {
 	return file_aiload_proto_rawDescGZIP(), []int{1}
 }
 
+type ListUserAdminReq_ListOption int32
+
+const (
+	ListUserAdminReq_ListOptionNil ListUserAdminReq_ListOption = 0
+	// @type: like
+	ListUserAdminReq_ListOptionName ListUserAdminReq_ListOption = 1
+	// @type: like
+	ListUserAdminReq_ListOptionUsername ListUserAdminReq_ListOption = 2
+)
+
+// Enum value maps for ListUserAdminReq_ListOption.
+var (
+	ListUserAdminReq_ListOption_name = map[int32]string{
+		0: "ListOptionNil",
+		1: "ListOptionName",
+		2: "ListOptionUsername",
+	}
+	ListUserAdminReq_ListOption_value = map[string]int32{
+		"ListOptionNil":      0,
+		"ListOptionName":     1,
+		"ListOptionUsername": 2,
+	}
+)
+
+func (x ListUserAdminReq_ListOption) Enum() *ListUserAdminReq_ListOption {
+	p := new(ListUserAdminReq_ListOption)
+	*p = x
+	return p
+}
+
+func (x ListUserAdminReq_ListOption) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ListUserAdminReq_ListOption) Descriptor() protoreflect.EnumDescriptor {
+	return file_aiload_proto_enumTypes[2].Descriptor()
+}
+
+func (ListUserAdminReq_ListOption) Type() protoreflect.EnumType {
+	return &file_aiload_proto_enumTypes[2]
+}
+
+func (x ListUserAdminReq_ListOption) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ListUserAdminReq_ListOption.Descriptor instead.
+func (ListUserAdminReq_ListOption) EnumDescriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{12, 0}
+}
+
 type ModelChannel struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
 	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"default:0;autoUpdateTime;column:updated_at;not null" yaml:"updated_at,omitempty"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"not null;default:0;autoCreateTime;column:created_at"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0" yaml:"updated_at,omitempty" toml:"updated_at,omitempty"`
 	// @gorm: index: idx_channel,unique
-	DeletedAt int64  `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" gorm:"not null;default:0;index:idx_channel,unique;column:deleted_at" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty"`
+	DeletedAt int64  `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" gorm:"index:idx_channel,unique;column:deleted_at;not null;default:0" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty"`
 	Name      string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty" gorm:"type:varchar(255);not null;default:'';column:name" yaml:"name,omitempty" toml:"name,omitempty"`
 	// @gorm: index: idx_channel,unique
-	Token string `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty" gorm:"default:'';column:token;index:idx_channel,unique;type:varchar(255);not null" yaml:"token,omitempty" toml:"token,omitempty"`
+	Token string `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty" gorm:"index:idx_channel,unique;type:varchar(255);not null;default:'';column:token" yaml:"token,omitempty" toml:"token,omitempty"`
 	// @gorm: index: idx_channel,unique
-	Platform Platform `protobuf:"varint,7,opt,name=platform,proto3,enum=aiload.Platform" json:"platform,omitempty" gorm:"column:platform;index:idx_channel,unique;not null;default:0" yaml:"platform,omitempty" toml:"platform,omitempty"`
+	Platform Platform `protobuf:"varint,7,opt,name=platform,proto3,enum=aiload.Platform" json:"platform,omitempty" yaml:"platform,omitempty" toml:"platform,omitempty" gorm:"not null;default:0;column:platform;index:idx_channel,unique"`
 }
 
 func (x *ModelChannel) Reset() {
@@ -219,15 +270,15 @@ type ModelChannelAccess struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"AUTOINCREMENT;column:id;primaryKey;PRIMARY KEY;autoIncrement"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0" yaml:"created_at,omitempty" toml:"created_at,omitempty"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"column:updated_at;not null;default:0;autoUpdateTime"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT" yaml:"id,omitempty"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0"`
 	// @gorm: index: idx_channel_access,unique
-	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" gorm:"column:deleted_at;not null;default:0;index:idx_channel_access,unique" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty"`
+	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" gorm:"not null;default:0;index:idx_channel_access,unique;column:deleted_at" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty"`
 	// @gorm: index: idx_channel_access,unique
-	ChannelId uint64 `protobuf:"varint,5,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty" gorm:"column:channel_id;index:idx_channel_access,unique;not null;default:0" yaml:"channel_id,omitempty" toml:"channel_id,omitempty"`
+	ChannelId uint64 `protobuf:"varint,5,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty" gorm:"index:idx_channel_access,unique;not null;default:0;column:channel_id" yaml:"channel_id,omitempty" toml:"channel_id,omitempty"`
 	// @gorm: index: idx_channel_access,unique
-	Model string `protobuf:"bytes,6,opt,name=model,proto3" json:"model,omitempty" gorm:"index:idx_channel_access,unique;type:varchar(255);not null;default:'';column:model" yaml:"model,omitempty" toml:"model,omitempty"`
+	Model string `protobuf:"bytes,6,opt,name=model,proto3" json:"model,omitempty" yaml:"model,omitempty" toml:"model,omitempty" gorm:"index:idx_channel_access,unique;type:varchar(255);not null;default:'';column:model"`
 }
 
 func (x *ModelChannelAccess) Reset() {
@@ -310,14 +361,14 @@ type ModelModelAlias struct {
 	unknownFields protoimpl.UnknownFields
 
 	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"column:updated_at;not null;default:0;autoUpdateTime"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"not null;default:0;autoCreateTime;column:created_at"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"not null;default:0;autoUpdateTime;column:updated_at"`
 	// gorm: index:idx_alias,unique
-	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"default:0;column:deleted_at;not null"`
+	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"column:deleted_at;not null;default:0"`
 	// gorm: index:idx_alias,unique
-	Model string `protobuf:"bytes,5,opt,name=model,proto3" json:"model,omitempty" yaml:"model,omitempty" toml:"model,omitempty" gorm:"type:varchar(255);not null;default:'';column:model"`
+	Model string `protobuf:"bytes,5,opt,name=model,proto3" json:"model,omitempty" yaml:"model,omitempty" toml:"model,omitempty" gorm:"not null;default:'';column:model;type:varchar(255)"`
 	// gorm: index:idx_alias,unique
-	ModelAlias string `protobuf:"bytes,6,opt,name=model_alias,json=modelAlias,proto3" json:"model_alias,omitempty" toml:"model_alias,omitempty" gorm:"type:varchar(255);not null;default:'';column:model_alias" yaml:"model_alias,omitempty"`
+	ModelAlias string `protobuf:"bytes,6,opt,name=model_alias,json=modelAlias,proto3" json:"model_alias,omitempty" yaml:"model_alias,omitempty" toml:"model_alias,omitempty" gorm:"type:varchar(255);not null;default:'';column:model_alias"`
 }
 
 func (x *ModelModelAlias) Reset() {
@@ -399,14 +450,15 @@ type ModelUser struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"column:created_at;not null;default:0;autoCreateTime"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"PRIMARY KEY;autoIncrement;AUTOINCREMENT;column:id;primaryKey"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"default:0;autoCreateTime;column:created_at;not null"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" gorm:"not null;default:0;autoUpdateTime;column:updated_at" yaml:"updated_at,omitempty" toml:"updated_at,omitempty"`
 	// gorm: index:idx_user,unique
 	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"column:deleted_at;not null;default:0"`
 	// gorm: index:idx_user,unique
-	Username string `protobuf:"bytes,5,opt,name=username,proto3" json:"username,omitempty" yaml:"username,omitempty" toml:"username,omitempty" gorm:"type:varchar(255);not null;default:'';column:username"`
-	Password string `protobuf:"bytes,6,opt,name=password,proto3" json:"password,omitempty" yaml:"password,omitempty" toml:"password,omitempty" gorm:"default:'';column:password;type:varchar(255);not null"`
+	Username string `protobuf:"bytes,5,opt,name=username,proto3" json:"username,omitempty" yaml:"username,omitempty" toml:"username,omitempty" gorm:"default:'';column:username;type:varchar(255);not null"`
+	Password string `protobuf:"bytes,6,opt,name=password,proto3" json:"password,omitempty" yaml:"password,omitempty" toml:"password,omitempty" gorm:"column:password;type:varchar(255);not null;default:''"`
+	Name     string `protobuf:"bytes,7,opt,name=name,proto3" json:"name,omitempty" gorm:"type:varchar(255);not null;default:'';column:name" yaml:"name,omitempty" toml:"name,omitempty"`
 }
 
 func (x *ModelUser) Reset() {
@@ -483,20 +535,27 @@ func (x *ModelUser) GetPassword() string {
 	return ""
 }
 
+func (x *ModelUser) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
 type ModelUserToken struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"autoIncrement;AUTOINCREMENT;column:id;primaryKey;PRIMARY KEY"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0" yaml:"created_at,omitempty" toml:"created_at,omitempty"`
 	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0"`
 	// gorm: index:idx_token,unique
-	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"column:deleted_at;not null;default:0"`
+	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"default:0;column:deleted_at;not null"`
 	// gorm: index:idx_token,unique
 	UserId uint64 `protobuf:"varint,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty" yaml:"user_id,omitempty" toml:"user_id,omitempty" gorm:"not null;default:0;column:user_id"`
 	// gorm: index:idx_token,unique
-	Token string `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty" yaml:"token,omitempty" toml:"token,omitempty" gorm:"column:token;type:varchar(255);not null;default:''"`
+	Token string `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty" yaml:"token,omitempty" toml:"token,omitempty" gorm:"not null;default:'';column:token;type:varchar(255)"`
 	Limit int64  `protobuf:"varint,7,opt,name=limit,proto3" json:"limit,omitempty" yaml:"limit,omitempty" toml:"limit,omitempty" gorm:"not null;default:0;column:limit"`
 }
 
@@ -586,13 +645,13 @@ type ModelUserAccess struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"default:0;autoCreateTime;column:created_at;not null"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0" yaml:"updated_at,omitempty" toml:"updated_at,omitempty"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" toml:"id,omitempty" gorm:"AUTOINCREMENT;column:id;primaryKey;PRIMARY KEY;autoIncrement" yaml:"id,omitempty"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" gorm:"column:created_at;not null;default:0;autoCreateTime" yaml:"created_at,omitempty" toml:"created_at,omitempty"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"default:0;autoUpdateTime;column:updated_at;not null"`
 	// @gorm: index:idx_user_access,unique
 	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" gorm:"index:idx_user_access,unique;column:deleted_at;not null;default:0" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty"`
 	// @gorm: index:idx_user_access,unique
-	Token uint64 `protobuf:"varint,5,opt,name=token,proto3" json:"token,omitempty" yaml:"token,omitempty" toml:"token,omitempty" gorm:"column:token;index:idx_user_access,unique;not null;default:0"`
+	Token uint64 `protobuf:"varint,5,opt,name=token,proto3" json:"token,omitempty" yaml:"token,omitempty" toml:"token,omitempty" gorm:"index:idx_user_access,unique;not null;default:0;column:token"`
 	// @gorm: index:idx_user_access,unique
 	Model string `protobuf:"bytes,6,opt,name=model,proto3" json:"model,omitempty" gorm:"index:idx_user_access,unique;type:varchar(255);not null;default:'';column:model" yaml:"model,omitempty" toml:"model,omitempty"`
 }
@@ -671,6 +730,660 @@ func (x *ModelUserAccess) GetModel() string {
 	return ""
 }
 
+type AddUserAdminReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// @validate: required
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" gorm:"type:json;serializer:json;column:user" validate:"required" yaml:"user,omitempty" toml:"user,omitempty"`
+}
+
+func (x *AddUserAdminReq) Reset() {
+	*x = AddUserAdminReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AddUserAdminReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddUserAdminReq) ProtoMessage() {}
+
+func (x *AddUserAdminReq) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddUserAdminReq.ProtoReflect.Descriptor instead.
+func (*AddUserAdminReq) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *AddUserAdminReq) GetUser() *ModelUser {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+type AddUserAdminRsp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
+}
+
+func (x *AddUserAdminRsp) Reset() {
+	*x = AddUserAdminRsp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AddUserAdminRsp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddUserAdminRsp) ProtoMessage() {}
+
+func (x *AddUserAdminRsp) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddUserAdminRsp.ProtoReflect.Descriptor instead.
+func (*AddUserAdminRsp) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *AddUserAdminRsp) GetUser() *ModelUser {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+type GetUserReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *GetUserReq) Reset() {
+	*x = GetUserReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUserReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserReq) ProtoMessage() {}
+
+func (x *GetUserReq) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserReq.ProtoReflect.Descriptor instead.
+func (*GetUserReq) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{8}
+}
+
+type GetUserRsp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" toml:"user,omitempty" gorm:"serializer:json;column:user;type:json" yaml:"user,omitempty"`
+}
+
+func (x *GetUserRsp) Reset() {
+	*x = GetUserRsp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUserRsp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserRsp) ProtoMessage() {}
+
+func (x *GetUserRsp) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserRsp.ProtoReflect.Descriptor instead.
+func (*GetUserRsp) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetUserRsp) GetUser() *ModelUser {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+type GetUserAdminReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// @validate: required
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" validate:"required" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
+}
+
+func (x *GetUserAdminReq) Reset() {
+	*x = GetUserAdminReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUserAdminReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserAdminReq) ProtoMessage() {}
+
+func (x *GetUserAdminReq) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserAdminReq.ProtoReflect.Descriptor instead.
+func (*GetUserAdminReq) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetUserAdminReq) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type GetUserAdminRsp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
+}
+
+func (x *GetUserAdminRsp) Reset() {
+	*x = GetUserAdminRsp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUserAdminRsp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserAdminRsp) ProtoMessage() {}
+
+func (x *GetUserAdminRsp) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserAdminRsp.ProtoReflect.Descriptor instead.
+func (*GetUserAdminRsp) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetUserAdminRsp) GetUser() *ModelUser {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+type ListUserAdminReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// @validate: required
+	ListOption *core.ListOption `protobuf:"bytes,1,opt,name=list_option,json=listOption,proto3" json:"list_option,omitempty" gorm:"column:list_option" validate:"required" yaml:"list_option,omitempty" toml:"list_option,omitempty"`
+}
+
+func (x *ListUserAdminReq) Reset() {
+	*x = ListUserAdminReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListUserAdminReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUserAdminReq) ProtoMessage() {}
+
+func (x *ListUserAdminReq) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUserAdminReq.ProtoReflect.Descriptor instead.
+func (*ListUserAdminReq) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ListUserAdminReq) GetListOption() *core.ListOption {
+	if x != nil {
+		return x.ListOption
+	}
+	return nil
+}
+
+type ListUserAdminRsp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Paginate *core.Paginate `protobuf:"bytes,1,opt,name=paginate,proto3" json:"paginate,omitempty" yaml:"paginate,omitempty" toml:"paginate,omitempty" gorm:"column:paginate"`
+	List     []*ModelUser   `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty" yaml:"list,omitempty" toml:"list,omitempty" gorm:"type:json;serializer:json;column:list"`
+}
+
+func (x *ListUserAdminRsp) Reset() {
+	*x = ListUserAdminRsp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListUserAdminRsp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUserAdminRsp) ProtoMessage() {}
+
+func (x *ListUserAdminRsp) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUserAdminRsp.ProtoReflect.Descriptor instead.
+func (*ListUserAdminRsp) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ListUserAdminRsp) GetPaginate() *core.Paginate {
+	if x != nil {
+		return x.Paginate
+	}
+	return nil
+}
+
+func (x *ListUserAdminRsp) GetList() []*ModelUser {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
+type SetUserReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// @validate: required
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" validate:"required" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
+}
+
+func (x *SetUserReq) Reset() {
+	*x = SetUserReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SetUserReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetUserReq) ProtoMessage() {}
+
+func (x *SetUserReq) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetUserReq.ProtoReflect.Descriptor instead.
+func (*SetUserReq) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *SetUserReq) GetUser() *ModelUser {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+type SetUserRsp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"serializer:json;column:user;type:json"`
+}
+
+func (x *SetUserRsp) Reset() {
+	*x = SetUserRsp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SetUserRsp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetUserRsp) ProtoMessage() {}
+
+func (x *SetUserRsp) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetUserRsp.ProtoReflect.Descriptor instead.
+func (*SetUserRsp) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *SetUserRsp) GetUser() *ModelUser {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+type SetUserAdminReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// @validate: required
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" validate:"required" yaml:"user,omitempty" toml:"user,omitempty" gorm:"serializer:json;column:user;type:json"`
+}
+
+func (x *SetUserAdminReq) Reset() {
+	*x = SetUserAdminReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SetUserAdminReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetUserAdminReq) ProtoMessage() {}
+
+func (x *SetUserAdminReq) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetUserAdminReq.ProtoReflect.Descriptor instead.
+func (*SetUserAdminReq) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *SetUserAdminReq) GetUser() *ModelUser {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+type SetUserAdminRsp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"column:user;type:json;serializer:json"`
+}
+
+func (x *SetUserAdminRsp) Reset() {
+	*x = SetUserAdminRsp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SetUserAdminRsp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetUserAdminRsp) ProtoMessage() {}
+
+func (x *SetUserAdminRsp) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetUserAdminRsp.ProtoReflect.Descriptor instead.
+func (*SetUserAdminRsp) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *SetUserAdminRsp) GetUser() *ModelUser {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+type DelUserAdminReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// @validate: required
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" validate:"required" yaml:"id,omitempty" toml:"id,omitempty" gorm:"autoIncrement;AUTOINCREMENT;column:id;primaryKey;PRIMARY KEY"`
+}
+
+func (x *DelUserAdminReq) Reset() {
+	*x = DelUserAdminReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DelUserAdminReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DelUserAdminReq) ProtoMessage() {}
+
+func (x *DelUserAdminReq) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DelUserAdminReq.ProtoReflect.Descriptor instead.
+func (*DelUserAdminReq) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *DelUserAdminReq) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type DelUserAdminRsp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *DelUserAdminRsp) Reset() {
+	*x = DelUserAdminRsp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_aiload_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DelUserAdminRsp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DelUserAdminRsp) ProtoMessage() {}
+
+func (x *DelUserAdminRsp) ProtoReflect() protoreflect.Message {
+	mi := &file_aiload_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DelUserAdminRsp.ProtoReflect.Descriptor instead.
+func (*DelUserAdminRsp) Descriptor() ([]byte, []int) {
+	return file_aiload_proto_rawDescGZIP(), []int{19}
+}
+
 var File_aiload_proto protoreflect.FileDescriptor
 
 var file_aiload_proto_rawDesc = []byte{
@@ -720,7 +1433,7 @@ var file_aiload_proto_rawDesc = []byte{
 	0x12, 0x14, 0x0a, 0x05, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52,
 	0x05, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x12, 0x1f, 0x0a, 0x0b, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x5f,
 	0x61, 0x6c, 0x69, 0x61, 0x73, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x6d, 0x6f, 0x64,
-	0x65, 0x6c, 0x41, 0x6c, 0x69, 0x61, 0x73, 0x22, 0xb0, 0x01, 0x0a, 0x09, 0x4d, 0x6f, 0x64, 0x65,
+	0x65, 0x6c, 0x41, 0x6c, 0x69, 0x61, 0x73, 0x22, 0xc4, 0x01, 0x0a, 0x09, 0x4d, 0x6f, 0x64, 0x65,
 	0x6c, 0x55, 0x73, 0x65, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64,
 	0x5f, 0x61, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74,
@@ -731,36 +1444,131 @@ var file_aiload_proto_rawDesc = []byte{
 	0x41, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x05,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1a,
 	0x0a, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x22, 0xc2, 0x01, 0x0a, 0x0e, 0x4d,
-	0x6f, 0x64, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x0e, 0x0a,
-	0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1d, 0x0a,
-	0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x03, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x1d, 0x0a, 0x0a,
-	0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03,
-	0x52, 0x09, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x64,
-	0x65, 0x6c, 0x65, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52,
-	0x09, 0x64, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73,
-	0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x05, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x75, 0x73, 0x65,
-	0x72, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x06, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6d,
-	0x69, 0x74, 0x18, 0x07, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x22,
-	0xaa, 0x01, 0x0a, 0x0f, 0x4d, 0x6f, 0x64, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x41, 0x63, 0x63,
-	0x65, 0x73, 0x73, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52,
-	0x02, 0x69, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61,
-	0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64,
-	0x41, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74,
-	0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41,
-	0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x64, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18,
-	0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x64, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x64, 0x41, 0x74,
-	0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x05, 0x20, 0x01, 0x28, 0x04, 0x52,
-	0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x14, 0x0a, 0x05, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x18,
-	0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x2a, 0x16, 0x0a, 0x07,
-	0x45, 0x72, 0x72, 0x43, 0x6f, 0x64, 0x65, 0x12, 0x0b, 0x0a, 0x07, 0x53, 0x75, 0x63, 0x63, 0x65,
-	0x73, 0x73, 0x10, 0x00, 0x2a, 0x1f, 0x0a, 0x08, 0x50, 0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72, 0x6d,
-	0x12, 0x07, 0x0a, 0x03, 0x4e, 0x69, 0x6c, 0x10, 0x00, 0x12, 0x0a, 0x0a, 0x06, 0x4f, 0x70, 0x65,
-	0x6e, 0x41, 0x49, 0x10, 0x01, 0x32, 0x08, 0x0a, 0x06, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x42,
-	0x0c, 0x5a, 0x07, 0x2f, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0xf8, 0x01, 0x01, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61,
+	0x6d, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0xc2,
+	0x01, 0x0a, 0x0e, 0x4d, 0x6f, 0x64, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x54, 0x6f, 0x6b, 0x65,
+	0x6e, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69,
+	0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74,
+	0x12, 0x1d, 0x0a, 0x0a, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12,
+	0x1d, 0x0a, 0x0a, 0x64, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x04, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x09, 0x64, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x17,
+	0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x05, 0x20, 0x01, 0x28, 0x04, 0x52,
+	0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e,
+	0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x14, 0x0a,
+	0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x07, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x6c, 0x69,
+	0x6d, 0x69, 0x74, 0x22, 0xaa, 0x01, 0x0a, 0x0f, 0x4d, 0x6f, 0x64, 0x65, 0x6c, 0x55, 0x73, 0x65,
+	0x72, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74,
+	0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x63, 0x72, 0x65,
+	0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65,
+	0x64, 0x5f, 0x61, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x75, 0x70, 0x64, 0x61,
+	0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x64, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x64,
+	0x5f, 0x61, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x64, 0x65, 0x6c, 0x65, 0x74,
+	0x65, 0x64, 0x41, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x05, 0x20,
+	0x01, 0x28, 0x04, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x14, 0x0a, 0x05, 0x6d, 0x6f,
+	0x64, 0x65, 0x6c, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x6d, 0x6f, 0x64, 0x65, 0x6c,
+	0x22, 0x38, 0x0a, 0x0f, 0x41, 0x64, 0x64, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e,
+	0x52, 0x65, 0x71, 0x12, 0x25, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x11, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x4d, 0x6f, 0x64, 0x65, 0x6c,
+	0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x22, 0x38, 0x0a, 0x0f, 0x41, 0x64,
+	0x64, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x12, 0x25, 0x0a,
+	0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x61, 0x69,
+	0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x4d, 0x6f, 0x64, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04,
+	0x75, 0x73, 0x65, 0x72, 0x22, 0x0c, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52,
+	0x65, 0x71, 0x22, 0x33, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x73, 0x70,
+	0x12, 0x25, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11,
+	0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x4d, 0x6f, 0x64, 0x65, 0x6c, 0x55, 0x73, 0x65,
+	0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x22, 0x21, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x55, 0x73,
+	0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x22, 0x38, 0x0a, 0x0f, 0x47, 0x65,
+	0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x12, 0x25, 0x0a,
+	0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x61, 0x69,
+	0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x4d, 0x6f, 0x64, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04,
+	0x75, 0x73, 0x65, 0x72, 0x22, 0xa3, 0x01, 0x0a, 0x10, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x73, 0x65,
+	0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x12, 0x42, 0x0a, 0x0b, 0x6c, 0x69, 0x73,
+	0x74, 0x5f, 0x6f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21,
+	0x2e, 0x6c, 0x61, 0x7a, 0x79, 0x67, 0x6f, 0x70, 0x68, 0x65, 0x72, 0x73, 0x2e, 0x6c, 0x72, 0x70,
+	0x63, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x70, 0x74, 0x69, 0x6f,
+	0x6e, 0x52, 0x0a, 0x6c, 0x69, 0x73, 0x74, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x4b, 0x0a,
+	0x0a, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x11, 0x0a, 0x0d, 0x4c,
+	0x69, 0x73, 0x74, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x4e, 0x69, 0x6c, 0x10, 0x00, 0x12, 0x12,
+	0x0a, 0x0e, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x4e, 0x61, 0x6d, 0x65,
+	0x10, 0x01, 0x12, 0x16, 0x0a, 0x12, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e,
+	0x55, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x10, 0x02, 0x22, 0x76, 0x0a, 0x10, 0x4c, 0x69,
+	0x73, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x12, 0x3b,
+	0x0a, 0x08, 0x70, 0x61, 0x67, 0x69, 0x6e, 0x61, 0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x1f, 0x2e, 0x6c, 0x61, 0x7a, 0x79, 0x67, 0x6f, 0x70, 0x68, 0x65, 0x72, 0x73, 0x2e, 0x6c,
+	0x72, 0x70, 0x63, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x50, 0x61, 0x67, 0x69, 0x6e, 0x61, 0x74,
+	0x65, 0x52, 0x08, 0x70, 0x61, 0x67, 0x69, 0x6e, 0x61, 0x74, 0x65, 0x12, 0x25, 0x0a, 0x04, 0x6c,
+	0x69, 0x73, 0x74, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x61, 0x69, 0x6c, 0x6f,
+	0x61, 0x64, 0x2e, 0x4d, 0x6f, 0x64, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x6c, 0x69,
+	0x73, 0x74, 0x22, 0x33, 0x0a, 0x0a, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71,
+	0x12, 0x25, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11,
+	0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x4d, 0x6f, 0x64, 0x65, 0x6c, 0x55, 0x73, 0x65,
+	0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x22, 0x33, 0x0a, 0x0a, 0x53, 0x65, 0x74, 0x55, 0x73,
+	0x65, 0x72, 0x52, 0x73, 0x70, 0x12, 0x25, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x4d, 0x6f, 0x64,
+	0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x22, 0x38, 0x0a, 0x0f,
+	0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x12,
+	0x25, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e,
+	0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x4d, 0x6f, 0x64, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72,
+	0x52, 0x04, 0x75, 0x73, 0x65, 0x72, 0x22, 0x38, 0x0a, 0x0f, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65,
+	0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x12, 0x25, 0x0a, 0x04, 0x75, 0x73, 0x65,
+	0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64,
+	0x2e, 0x4d, 0x6f, 0x64, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x75, 0x73, 0x65, 0x72,
+	0x22, 0x21, 0x0a, 0x0f, 0x44, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e,
+	0x52, 0x65, 0x71, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52,
+	0x02, 0x69, 0x64, 0x22, 0x11, 0x0a, 0x0f, 0x44, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64,
+	0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x2a, 0x16, 0x0a, 0x07, 0x45, 0x72, 0x72, 0x43, 0x6f, 0x64,
+	0x65, 0x12, 0x0b, 0x0a, 0x07, 0x53, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x10, 0x00, 0x2a, 0x1f,
+	0x0a, 0x08, 0x50, 0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72, 0x6d, 0x12, 0x07, 0x0a, 0x03, 0x4e, 0x69,
+	0x6c, 0x10, 0x00, 0x12, 0x0a, 0x0a, 0x06, 0x4f, 0x70, 0x65, 0x6e, 0x41, 0x49, 0x10, 0x01, 0x32,
+	0xa7, 0x05, 0x0a, 0x06, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x12, 0x65, 0x0a, 0x0c, 0x41, 0x64,
+	0x64, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x17, 0x2e, 0x61, 0x69, 0x6c,
+	0x6f, 0x61, 0x64, 0x2e, 0x41, 0x64, 0x64, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e,
+	0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x41, 0x64, 0x64,
+	0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x22, 0x23, 0x82, 0xa6,
+	0x1d, 0x14, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x0c, 0x41, 0x64, 0x64, 0x55, 0x73, 0x65,
+	0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x8a, 0xa6, 0x1d, 0x07, 0x0a, 0x05, 0x61, 0x64, 0x6d, 0x69,
+	0x6e, 0x12, 0x4a, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x12, 0x12, 0x2e, 0x61,
+	0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71,
+	0x1a, 0x12, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65,
+	0x72, 0x52, 0x73, 0x70, 0x22, 0x17, 0x82, 0xa6, 0x1d, 0x0f, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54,
+	0x12, 0x07, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x8a, 0xa6, 0x1d, 0x00, 0x12, 0x65, 0x0a,
+	0x0c, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x17, 0x2e,
+	0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64,
+	0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e,
+	0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x22,
+	0x23, 0x82, 0xa6, 0x1d, 0x14, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x0c, 0x47, 0x65, 0x74,
+	0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x8a, 0xa6, 0x1d, 0x07, 0x0a, 0x05, 0x61,
+	0x64, 0x6d, 0x69, 0x6e, 0x12, 0x69, 0x0a, 0x0d, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x73, 0x65, 0x72,
+	0x41, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x18, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x4c,
+	0x69, 0x73, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a,
+	0x18, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x73, 0x65,
+	0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x22, 0x24, 0x82, 0xa6, 0x1d, 0x15, 0x0a,
+	0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x0d, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41,
+	0x64, 0x6d, 0x69, 0x6e, 0x8a, 0xa6, 0x1d, 0x07, 0x0a, 0x05, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x12,
+	0x4a, 0x0a, 0x07, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x12, 0x12, 0x2e, 0x61, 0x69, 0x6c,
+	0x6f, 0x61, 0x64, 0x2e, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x1a, 0x12,
+	0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x52,
+	0x73, 0x70, 0x22, 0x17, 0x82, 0xa6, 0x1d, 0x0f, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x07,
+	0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x8a, 0xa6, 0x1d, 0x00, 0x12, 0x65, 0x0a, 0x0c, 0x53,
+	0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x17, 0x2e, 0x61, 0x69,
+	0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x53, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69,
+	0x6e, 0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x53, 0x65,
+	0x74, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x73, 0x70, 0x22, 0x23, 0x82,
+	0xa6, 0x1d, 0x14, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54, 0x12, 0x0c, 0x53, 0x65, 0x74, 0x55, 0x73,
+	0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x8a, 0xa6, 0x1d, 0x07, 0x0a, 0x05, 0x61, 0x64, 0x6d,
+	0x69, 0x6e, 0x12, 0x65, 0x0a, 0x0c, 0x44, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d,
+	0x69, 0x6e, 0x12, 0x17, 0x2e, 0x61, 0x69, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x44, 0x65, 0x6c, 0x55,
+	0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x61, 0x69,
+	0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x44, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69,
+	0x6e, 0x52, 0x73, 0x70, 0x22, 0x23, 0x82, 0xa6, 0x1d, 0x14, 0x0a, 0x04, 0x50, 0x4f, 0x53, 0x54,
+	0x12, 0x0c, 0x44, 0x65, 0x6c, 0x55, 0x73, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x8a, 0xa6,
+	0x1d, 0x07, 0x0a, 0x05, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x42, 0x0c, 0x5a, 0x07, 0x2f, 0x61, 0x69,
+	0x6c, 0x6f, 0x61, 0x64, 0xf8, 0x01, 0x01, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -775,25 +1583,67 @@ func file_aiload_proto_rawDescGZIP() []byte {
 	return file_aiload_proto_rawDescData
 }
 
-var file_aiload_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_aiload_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_aiload_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_aiload_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_aiload_proto_goTypes = []any{
-	(ErrCode)(0),               // 0: aiload.ErrCode
-	(Platform)(0),              // 1: aiload.Platform
-	(*ModelChannel)(nil),       // 2: aiload.ModelChannel
-	(*ModelChannelAccess)(nil), // 3: aiload.ModelChannelAccess
-	(*ModelModelAlias)(nil),    // 4: aiload.ModelModelAlias
-	(*ModelUser)(nil),          // 5: aiload.ModelUser
-	(*ModelUserToken)(nil),     // 6: aiload.ModelUserToken
-	(*ModelUserAccess)(nil),    // 7: aiload.ModelUserAccess
+	(ErrCode)(0),                     // 0: aiload.ErrCode
+	(Platform)(0),                    // 1: aiload.Platform
+	(ListUserAdminReq_ListOption)(0), // 2: aiload.ListUserAdminReq.ListOption
+	(*ModelChannel)(nil),             // 3: aiload.ModelChannel
+	(*ModelChannelAccess)(nil),       // 4: aiload.ModelChannelAccess
+	(*ModelModelAlias)(nil),          // 5: aiload.ModelModelAlias
+	(*ModelUser)(nil),                // 6: aiload.ModelUser
+	(*ModelUserToken)(nil),           // 7: aiload.ModelUserToken
+	(*ModelUserAccess)(nil),          // 8: aiload.ModelUserAccess
+	(*AddUserAdminReq)(nil),          // 9: aiload.AddUserAdminReq
+	(*AddUserAdminRsp)(nil),          // 10: aiload.AddUserAdminRsp
+	(*GetUserReq)(nil),               // 11: aiload.GetUserReq
+	(*GetUserRsp)(nil),               // 12: aiload.GetUserRsp
+	(*GetUserAdminReq)(nil),          // 13: aiload.GetUserAdminReq
+	(*GetUserAdminRsp)(nil),          // 14: aiload.GetUserAdminRsp
+	(*ListUserAdminReq)(nil),         // 15: aiload.ListUserAdminReq
+	(*ListUserAdminRsp)(nil),         // 16: aiload.ListUserAdminRsp
+	(*SetUserReq)(nil),               // 17: aiload.SetUserReq
+	(*SetUserRsp)(nil),               // 18: aiload.SetUserRsp
+	(*SetUserAdminReq)(nil),          // 19: aiload.SetUserAdminReq
+	(*SetUserAdminRsp)(nil),          // 20: aiload.SetUserAdminRsp
+	(*DelUserAdminReq)(nil),          // 21: aiload.DelUserAdminReq
+	(*DelUserAdminRsp)(nil),          // 22: aiload.DelUserAdminRsp
+	(*core.ListOption)(nil),          // 23: lazygophers.lrpc.core.ListOption
+	(*core.Paginate)(nil),            // 24: lazygophers.lrpc.core.Paginate
 }
 var file_aiload_proto_depIdxs = []int32{
-	1, // 0: aiload.ModelChannel.platform:type_name -> aiload.Platform
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	1,  // 0: aiload.ModelChannel.platform:type_name -> aiload.Platform
+	6,  // 1: aiload.AddUserAdminReq.user:type_name -> aiload.ModelUser
+	6,  // 2: aiload.AddUserAdminRsp.user:type_name -> aiload.ModelUser
+	6,  // 3: aiload.GetUserRsp.user:type_name -> aiload.ModelUser
+	6,  // 4: aiload.GetUserAdminRsp.user:type_name -> aiload.ModelUser
+	23, // 5: aiload.ListUserAdminReq.list_option:type_name -> lazygophers.lrpc.core.ListOption
+	24, // 6: aiload.ListUserAdminRsp.paginate:type_name -> lazygophers.lrpc.core.Paginate
+	6,  // 7: aiload.ListUserAdminRsp.list:type_name -> aiload.ModelUser
+	6,  // 8: aiload.SetUserReq.user:type_name -> aiload.ModelUser
+	6,  // 9: aiload.SetUserRsp.user:type_name -> aiload.ModelUser
+	6,  // 10: aiload.SetUserAdminReq.user:type_name -> aiload.ModelUser
+	6,  // 11: aiload.SetUserAdminRsp.user:type_name -> aiload.ModelUser
+	9,  // 12: aiload.aiload.AddUserAdmin:input_type -> aiload.AddUserAdminReq
+	11, // 13: aiload.aiload.GetUser:input_type -> aiload.GetUserReq
+	13, // 14: aiload.aiload.GetUserAdmin:input_type -> aiload.GetUserAdminReq
+	15, // 15: aiload.aiload.ListUserAdmin:input_type -> aiload.ListUserAdminReq
+	17, // 16: aiload.aiload.SetUser:input_type -> aiload.SetUserReq
+	19, // 17: aiload.aiload.SetUserAdmin:input_type -> aiload.SetUserAdminReq
+	21, // 18: aiload.aiload.DelUserAdmin:input_type -> aiload.DelUserAdminReq
+	10, // 19: aiload.aiload.AddUserAdmin:output_type -> aiload.AddUserAdminRsp
+	12, // 20: aiload.aiload.GetUser:output_type -> aiload.GetUserRsp
+	14, // 21: aiload.aiload.GetUserAdmin:output_type -> aiload.GetUserAdminRsp
+	16, // 22: aiload.aiload.ListUserAdmin:output_type -> aiload.ListUserAdminRsp
+	18, // 23: aiload.aiload.SetUser:output_type -> aiload.SetUserRsp
+	20, // 24: aiload.aiload.SetUserAdmin:output_type -> aiload.SetUserAdminRsp
+	22, // 25: aiload.aiload.DelUserAdmin:output_type -> aiload.DelUserAdminRsp
+	19, // [19:26] is the sub-list for method output_type
+	12, // [12:19] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_aiload_proto_init() }
@@ -874,14 +1724,182 @@ func file_aiload_proto_init() {
 				return nil
 			}
 		}
+		file_aiload_proto_msgTypes[6].Exporter = func(v any, i int) any {
+			switch v := v.(*AddUserAdminReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aiload_proto_msgTypes[7].Exporter = func(v any, i int) any {
+			switch v := v.(*AddUserAdminRsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aiload_proto_msgTypes[8].Exporter = func(v any, i int) any {
+			switch v := v.(*GetUserReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aiload_proto_msgTypes[9].Exporter = func(v any, i int) any {
+			switch v := v.(*GetUserRsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aiload_proto_msgTypes[10].Exporter = func(v any, i int) any {
+			switch v := v.(*GetUserAdminReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aiload_proto_msgTypes[11].Exporter = func(v any, i int) any {
+			switch v := v.(*GetUserAdminRsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aiload_proto_msgTypes[12].Exporter = func(v any, i int) any {
+			switch v := v.(*ListUserAdminReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aiload_proto_msgTypes[13].Exporter = func(v any, i int) any {
+			switch v := v.(*ListUserAdminRsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aiload_proto_msgTypes[14].Exporter = func(v any, i int) any {
+			switch v := v.(*SetUserReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aiload_proto_msgTypes[15].Exporter = func(v any, i int) any {
+			switch v := v.(*SetUserRsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aiload_proto_msgTypes[16].Exporter = func(v any, i int) any {
+			switch v := v.(*SetUserAdminReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aiload_proto_msgTypes[17].Exporter = func(v any, i int) any {
+			switch v := v.(*SetUserAdminRsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aiload_proto_msgTypes[18].Exporter = func(v any, i int) any {
+			switch v := v.(*DelUserAdminReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_aiload_proto_msgTypes[19].Exporter = func(v any, i int) any {
+			switch v := v.(*DelUserAdminRsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_aiload_proto_rawDesc,
-			NumEnums:      2,
-			NumMessages:   6,
+			NumEnums:      3,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

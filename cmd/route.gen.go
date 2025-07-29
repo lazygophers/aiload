@@ -2,13 +2,58 @@
 //	versions:
 //		codegen	v0.0.0-SNAPSHOT-5c1b1b5
 //		go		go1.24.5
-//	update:	1753781819
+//	update:	1753783364
 //	source: aiload.proto
 
 package main
 
 import (
-	"github.com/lazygophers/aiload/internal/api"
+	"github.com/lazygophers/aiload"
+	"github.com/lazygophers/aiload/internal/impl" 
+"github.com/lazygophers/aiload/internal/api"
 )
 
-var Routes = []*api.Route{}
+var Routes = []*api.Route{ 
+	{
+	Method:  "POST",
+	Path:    aiload.RpcPathAddUserAdmin,
+	Handler: impl.ToHandler(impl.AddUserAdmin, "admin"),
+	Role: "admin",
+	},
+	{
+	Method:  "POST",
+	Path:    aiload.RpcPathGetUser,
+	Handler: impl.ToHandler(impl.GetUser, "user"),
+	Role: "public",
+	},
+	{
+	Method:  "POST",
+	Path:    aiload.RpcPathGetUserAdmin,
+	Handler: impl.ToHandler(impl.GetUserAdmin, "admin"),
+	Role: "admin",
+	},
+	{
+	Method:  "POST",
+	Path:    aiload.RpcPathListUserAdmin,
+	Handler: impl.ToHandler(impl.ListUserAdmin, "admin"),
+	Role: "admin",
+	},
+	{
+	Method:  "POST",
+	Path:    aiload.RpcPathSetUser,
+	Handler: impl.ToHandler(impl.SetUser, "user"),
+	Role: "public",
+	},
+	{
+	Method:  "POST",
+	Path:    aiload.RpcPathSetUserAdmin,
+	Handler: impl.ToHandler(impl.SetUserAdmin, "admin"),
+	Role: "admin",
+	},
+	{
+	Method:  "POST",
+	Path:    aiload.RpcPathDelUserAdmin,
+	Handler: impl.ToHandler(impl.DelUserAdmin, "admin"),
+	Role: "admin",
+	},
+}

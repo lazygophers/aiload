@@ -2,10 +2,11 @@
 //	versions:
 //		codegen	v0.0.0-SNAPSHOT-5c1b1b5
 //		go		go1.24.5
-//	update:	1753781820
+//	update:	1753783305
 //	source: aiload.proto
 
 package aiload
+
 
 import (
 	"database/sql/driver"
@@ -59,3 +60,5 @@ func (m *ModelUserToken) Scan(value interface{}) error {
 func (m *ModelUserToken) Value() (driver.Value, error) {
 	return utils.Value(m)
 }
+
+

@@ -2,9 +2,17 @@
 //	versions:
 //		codegen	v0.0.0-SNAPSHOT-5c1b1b5
 //		go		go1.24.5
-//	update:	1753781819
+//	update:	1753783364
 //	source: aiload.proto
 
 package aiload
 
-const ()
+const (
+RpcPathAddUserAdmin = "/AddUserAdmin"
+RpcPathGetUser = "/GetUser"
+RpcPathGetUserAdmin = "/GetUserAdmin"
+RpcPathListUserAdmin = "/ListUserAdmin"
+RpcPathSetUser = "/SetUser"
+RpcPathSetUserAdmin = "/SetUserAdmin"
+RpcPathDelUserAdmin = "/DelUserAdmin"
+)

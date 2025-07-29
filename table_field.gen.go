@@ -2,24 +2,24 @@
 //	versions:
 //		codegen	v0.0.0-SNAPSHOT-5c1b1b5
 //		go		go1.24.5
-//	update:	1753781820
+//	update:	1753783305
 //	source: aiload.proto
 
 package aiload
 
 const (
-	DbChannelId  = "channel_id"
-	DbCreatedAt  = "created_at"
-	DbDeletedAt  = "deleted_at"
-	DbId         = "id"
-	DbLimit      = "limit"
-	DbModel      = "model"
+	DbChannelId = "channel_id"
+	DbCreatedAt = "created_at"
+	DbDeletedAt = "deleted_at"
+	DbId = "id"
+	DbLimit = "limit"
+	DbModel = "model"
 	DbModelAlias = "model_alias"
-	DbName       = "name"
-	DbPassword   = "password"
-	DbPlatform   = "platform"
-	DbToken      = "token"
-	DbUpdatedAt  = "updated_at"
-	DbUserId     = "user_id"
-	DbUsername   = "username"
+	DbName = "name"
+	DbPassword = "password"
+	DbPlatform = "platform"
+	DbToken = "token"
+	DbUpdatedAt = "updated_at"
+	DbUserId = "user_id"
+	DbUsername = "username"
 )
