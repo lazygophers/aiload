@@ -13,6 +13,96 @@ option go_package = "/aiload";
 
 service aiload {
 
+
+	// @gen: user
+	// @model: ModelUser
+	// @action: add
+	rpc AddUserAdmin (AddUserAdminReq) returns (AddUserAdminRsp) {
+			option (lazygophers.lrpc.core.http) = {
+				method: "POST",
+				path: "AddUserAdmin",
+			};
+		option (lazygophers.lrpc.core.lazygen) = {
+			role: "admin",
+		};
+	};
+
+	// @gen: user
+	// @model: ModelUser
+	// @action: get
+	rpc GetUser (GetUserReq) returns (GetUserRsp) {
+			option (lazygophers.lrpc.core.http) = {
+				method: "POST",
+				path: "GetUser",
+			};
+		option (lazygophers.lrpc.core.lazygen) = {
+		};
+	};
+
+	// @gen: user
+	// @model: ModelUser
+	// @action: get
+	rpc GetUserAdmin (GetUserAdminReq) returns (GetUserAdminRsp) {
+			option (lazygophers.lrpc.core.http) = {
+				method: "POST",
+				path: "GetUserAdmin",
+			};
+		option (lazygophers.lrpc.core.lazygen) = {
+			role: "admin",
+		};
+	};
+
+	// @gen: user
+	// @model: ModelUser
+	// @action: list
+	rpc ListUserAdmin (ListUserAdminReq) returns (ListUserAdminRsp) {
+			option (lazygophers.lrpc.core.http) = {
+				method: "POST",
+				path: "ListUserAdmin",
+			};
+		option (lazygophers.lrpc.core.lazygen) = {
+			role: "admin",
+		};
+	};
+
+	// @gen: user
+	// @model: ModelUser
+	// @action: set
+	rpc SetUser (SetUserReq) returns (SetUserRsp) {
+			option (lazygophers.lrpc.core.http) = {
+				method: "POST",
+				path: "SetUser",
+			};
+		option (lazygophers.lrpc.core.lazygen) = {
+		};
+	};
+
+	// @gen: user
+	// @model: ModelUser
+	// @action: set
+	rpc SetUserAdmin (SetUserAdminReq) returns (SetUserAdminRsp) {
+			option (lazygophers.lrpc.core.http) = {
+				method: "POST",
+				path: "SetUserAdmin",
+			};
+		option (lazygophers.lrpc.core.lazygen) = {
+			role: "admin",
+		};
+	};
+
+	// @gen: user
+	// @model: ModelUser
+	// @action: del
+	rpc DelUserAdmin (DelUserAdminReq) returns (DelUserAdminRsp) {
+			option (lazygophers.lrpc.core.http) = {
+				method: "POST",
+				path: "DelUserAdmin",
+			};
+		option (lazygophers.lrpc.core.lazygen) = {
+			role: "admin",
+		};
+	};
+
 }
 
 enum ErrCode {
@@ -74,6 +164,7 @@ message ModelUser {
 	// gorm: index:idx_user,unique
 	string username = 5;
 	string password = 6;
+	string name = 7;
 }
 
 message ModelUserToken {
@@ -101,4 +192,74 @@ message ModelUserAccess {
 	uint64 token = 5;
 	// @gorm: index:idx_user_access,unique
 	string model = 6;
+}
+
+message AddUserAdminReq {
+	// @validate: required
+	ModelUser user = 1;
+}
+
+message AddUserAdminRsp {
+	ModelUser user = 1;
+}
+
+message GetUserReq {
+
+}
+
+message GetUserRsp {
+	ModelUser user = 1;
+}
+
+message GetUserAdminReq {
+	// @validate: required
+	uint64 id = 1;
+}
+
+message GetUserAdminRsp {
+	ModelUser user = 1;
+}
+
+message ListUserAdminReq {
+	enum ListOption {
+		ListOptionNil = 0;
+		// @type: like
+		ListOptionName = 1;
+		// @type: like
+		ListOptionUsername = 2;
+	}
+
+	// @validate: required
+	lazygophers.lrpc.core.ListOption list_option = 1;
+}
+
+message ListUserAdminRsp {
+	lazygophers.lrpc.core.Paginate paginate = 1;
+	repeated ModelUser list = 2;
+}
+
+message SetUserReq {
+	// @validate: required
+	ModelUser user = 1;
+}
+
+message SetUserRsp {
+	ModelUser user = 1;
+}
+
+message SetUserAdminReq {
+	// @validate: required
+	ModelUser user = 1;
+}
+
+message SetUserAdminRsp {
+	ModelUser user = 1;
+}
+
+message DelUserAdminReq {
+	// @validate: required
+	uint64 id = 1;
+}
+
+message DelUserAdminRsp {
 }
