@@ -13,7 +13,7 @@ func GetUser(ctx *fiber.Ctx, req *aiload.GetUserReq) (*aiload.GetUserRsp, error)
 
 	user, err := state.User.
 		NewScoop().
-		Where("id = ?", req.Id).
+		Where("id = ?", GetUid(ctx)).
 		First()
 	if err != nil {
 		log.Errorf("err:%v", err)
