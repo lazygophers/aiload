@@ -10,47 +10,47 @@ import (
 var (
 	_db *db.Client
 
-	Channel       *db.Model[aiload.ModelChannel]
+	UserAccess    *db.Model[aiload.ModelUserAccess]
+	ModelAlias    *db.Model[aiload.ModelModelAlias]
 	User          *db.Model[aiload.ModelUser]
 	UserToken     *db.Model[aiload.ModelUserToken]
+	Channel       *db.Model[aiload.ModelChannel]
 	ChannelAccess *db.Model[aiload.ModelChannelAccess]
-	ModelAlias    *db.Model[aiload.ModelModelAlias]
-	UserAccess    *db.Model[aiload.ModelUserAccess]
 )
 
 func ConnectDatabase() (err error) {
 	log.Info("try init database")
 	_db, err = db.New(State.Config.Db,
-		&aiload.ModelChannel{},
+		&aiload.ModelUserAccess{},
+		&aiload.ModelModelAlias{},
 		&aiload.ModelUser{},
 		&aiload.ModelUserToken{},
+		&aiload.ModelChannel{},
 		&aiload.ModelChannelAccess{},
-		&aiload.ModelModelAlias{},
-		&aiload.ModelUserAccess{},
 	)
 	if err != nil {
 		log.Errorf("err:%v", err)
 		return err
 	}
 
-	Channel = db.NewModel[aiload.ModelChannel](Db()).
-		SetNotFound(xerror.NewError(int32(aiload.ErrCode_ChannelNotFound))).
-		SetDuplicatedKeyError(xerror.NewError(int32(aiload.ErrCode_ChannelDuplicateKey)))
+	UserAccess = db.NewModel[aiload.ModelUserAccess](Db()).
+		SetNotFound(xerror.NewError(int32(aiload.ErrCode_UserAccessNotFound))).
+		SetDuplicatedKeyError(xerror.NewError(int32(aiload.ErrCode_UserAccessDuplicateKey)))
+	ModelAlias = db.NewModel[aiload.ModelModelAlias](Db()).
+		SetNotFound(xerror.NewError(int32(aiload.ErrCode_ModelAliasNotFound))).
+		SetDuplicatedKeyError(xerror.NewError(int32(aiload.ErrCode_ModelAliasDuplicateKey)))
 	User = db.NewModel[aiload.ModelUser](Db()).
 		SetNotFound(xerror.NewError(int32(aiload.ErrCode_UserNotFound))).
 		SetDuplicatedKeyError(xerror.NewError(int32(aiload.ErrCode_UserDuplicateKey)))
 	UserToken = db.NewModel[aiload.ModelUserToken](Db()).
 		SetNotFound(xerror.NewError(int32(aiload.ErrCode_UserTokenNotFound))).
 		SetDuplicatedKeyError(xerror.NewError(int32(aiload.ErrCode_UserTokenDuplicateKey)))
+	Channel = db.NewModel[aiload.ModelChannel](Db()).
+		SetNotFound(xerror.NewError(int32(aiload.ErrCode_ChannelNotFound))).
+		SetDuplicatedKeyError(xerror.NewError(int32(aiload.ErrCode_ChannelDuplicateKey)))
 	ChannelAccess = db.NewModel[aiload.ModelChannelAccess](Db()).
 		SetNotFound(xerror.NewError(int32(aiload.ErrCode_ChannelAccessNotFound))).
 		SetDuplicatedKeyError(xerror.NewError(int32(aiload.ErrCode_ChannelAccessDuplicateKey)))
-	ModelAlias = db.NewModel[aiload.ModelModelAlias](Db()).
-		SetNotFound(xerror.NewError(int32(aiload.ErrCode_ModelAliasNotFound))).
-		SetDuplicatedKeyError(xerror.NewError(int32(aiload.ErrCode_ModelAliasDuplicateKey)))
-	UserAccess = db.NewModel[aiload.ModelUserAccess](Db()).
-		SetNotFound(xerror.NewError(int32(aiload.ErrCode_UserAccessNotFound))).
-		SetDuplicatedKeyError(xerror.NewError(int32(aiload.ErrCode_UserAccessDuplicateKey)))
 
 	log.Info("connect database successfully")
 

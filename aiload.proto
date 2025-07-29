@@ -103,6 +103,8 @@ service aiload {
 		};
 	};
 
+	// @gen: login
+	// @model: ModelUser
 	rpc Login (LoginReq) returns (LoginRsp) {
 		option (lazygophers.lrpc.core.http) = {
 			method: "POST",
