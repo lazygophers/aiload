@@ -5,6 +5,7 @@ import (
 	"github.com/lazygophers/aiload/internal/state"
 	"github.com/lazygophers/log"
 	"github.com/lazygophers/utils/app"
+	"github.com/lazygophers/utils/runtime"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -36,6 +37,8 @@ var rootCmd = &cobra.Command{
 			log.Errorf("err:%s", err)
 			return err
 		}
+
+		runtime.WaitExit()
 
 		return nil
 	},

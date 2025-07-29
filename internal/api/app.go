@@ -224,18 +224,6 @@ func Listen() error {
 		}
 	})
 
-	//app.Get("/ws", func(c *fiber.Ctx) error {
-	//	c.Locals("conn_id", c.Context().ConnID())
-	//	if websocket.IsWebSocketUpgrade(c) {
-	//		return c.Next()
-	//	}
-	//	return fiber.ErrUpgradeRequired
-	//},
-	//	websocket.New(impl.Websocket),
-	//)
-
-	//app.Get("/sub", cover.HandlerFiber)
-
 	app.Hooks().OnListen(func(info fiber.ListenData) error {
 		log.Infof("executor listen on :%s", info.Port)
 
