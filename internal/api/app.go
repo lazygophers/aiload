@@ -3,12 +3,18 @@ package api
 import (
 	"encoding/xml"
 	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/etag"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/lazygophers/aiload/internal/impl"
+
+	"net/netip"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/lazygophers/log"
 	"github.com/lazygophers/lrpc"
@@ -20,10 +26,6 @@ import (
 	"github.com/lazygophers/utils/runtime"
 	"github.com/metacubex/mihomo/ntp"
 	"github.com/valyala/fasthttp"
-	"net/netip"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var (
@@ -248,7 +250,7 @@ func Listen() error {
 	})
 
 	routine.Go(func() (err error) {
-		err = app.Listen(fmt.Sprintf(":%d", 14003))
+		err = app.Listen(fmt.Sprintf(":%d", 14002))
 		if err != nil {
 			log.Errorf("err:%v", err)
 			runtime.Exit()

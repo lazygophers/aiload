@@ -36,3 +36,4 @@ config.yaml
 data/
 !data/mysql/conf/my.cnf
 .memory
+assets/node_modules/
