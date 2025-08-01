@@ -1,0 +1,39 @@
+.ai-services-section {
+  padding: 6rem 0;
+  background-color: #0c111c;
+  color: white;
+}
+
+.scroller {
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow: hidden;
+  -webkit-mask: linear-gradient(90deg, transparent, white 20%, white 80%, transparent);
+  mask: linear-gradient(90deg, transparent, white 20%, white 80%, transparent);
+}
+
+.scroller-inner {
+  display: flex;
+  gap: 3rem;
+  width: max-content;
+  animation: scroll 30s linear infinite;
+}
+
+.logo-item {
+  height: 40px;
+  width: auto;
+  filter: grayscale(100%);
+  opacity: 0.6;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+a:hover .logo-item {
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
+@keyframes scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
