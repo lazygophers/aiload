@@ -31,13 +31,9 @@ const Footer: React.FC = () => {
   }));
 
   return (
-    <AntFooter style={{ textAlign: 'center' }}>
-      Copyright © 2025 Your Company Name. All Rights Reserved.
-      <br />
+    <AntFooter style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
       <Space>
-        <a href="#">关于我们</a>
-        <a href="#">联系方式</a>
-        <a href="#">隐私政策</a>
+        <span>Copyright © 2025 Your Company Name. All Rights Reserved.</span>
         <Dropdown menu={{ items: menuItems }}>
           <a onClick={(e) => e.preventDefault()}>
             <GlobalOutlined /> {languageMap[i18n.language] || '语言'}
