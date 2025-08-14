@@ -52,7 +52,7 @@ func (p *Gemini) GetModelList(req *GeminiGetModelListReq) (*GeminiGetModelListRs
 	if req.PageSize > 1000 {
 		pageSize = "1000"
 	}
-
+	
 	_, err := p.GetRequest().SetResult(&rsp).SetQueryParams(map[string]string{
 		"pageSize":  pageSize,
 		"pageToken": req.PageToken,
