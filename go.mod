@@ -5,6 +5,7 @@ go 1.24.5
 require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/emicklei/proto v1.14.2
+	github.com/go-resty/resty/v2 v2.16.5
 	github.com/gofiber/fiber/v2 v2.52.9
 	github.com/lazygophers/codegen v0.0.0-20250719035807-ba678532da1e
 	github.com/lazygophers/log v0.0.0-20250727103820-eba332871f04
