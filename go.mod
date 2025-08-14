@@ -7,6 +7,7 @@ require (
 	github.com/emicklei/proto v1.14.2
 	github.com/go-resty/resty/v2 v2.16.5
 	github.com/gofiber/fiber/v2 v2.52.9
+	github.com/jarcoal/httpmock v1.4.0
 	github.com/lazygophers/codegen v0.0.0-20250719035807-ba678532da1e
 	github.com/lazygophers/log v0.0.0-20250727103820-eba332871f04
 	github.com/lazygophers/lrpc v0.0.0-20250526011944-da7a4dbb858b
@@ -14,6 +15,7 @@ require (
 	github.com/metacubex/mihomo v1.19.12
 	github.com/pterm/pterm v0.12.81
 	github.com/spf13/cobra v1.9.1
+	github.com/stretchr/testify v1.10.0
 	github.com/valyala/fasthttp v1.62.0
 	google.golang.org/protobuf v1.36.6
 	gopkg.in/yaml.v3 v3.0.1
@@ -41,6 +43,7 @@ require (
 	github.com/cloudwego/base64x v0.1.5 // indirect
 	github.com/containerd/console v1.0.5 // indirect
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ebitengine/purego v0.8.3 // indirect
 	github.com/echovault/sugardb v0.17.0 // indirect
@@ -112,6 +115,7 @@ require (
 	github.com/petermattis/goid v0.0.0-20250508124226-395b08cebbdb // indirect
 	github.com/pjbgf/sha1cd v0.4.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
