@@ -2,6 +2,8 @@ package channel
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/lazygophers/aiload"
@@ -55,12 +57,20 @@ func (p *Gemini) GetModelList(ctx context.Context, req *GeminiGetModelListReq) (
 		pageSize = "1000"
 	}
 
-	_, err := p.GetRequest().SetResult(&rsp).SetQueryParams(map[string]string{
+	resp, err := p.GetRequest().SetQueryParams(map[string]string{
 		"pageSize":  pageSize,
 		"pageToken": req.PageToken,
 	}).Get("https://generativelanguage.googleapis.com/v1beta/models")
 	if err != nil {
 		log.Errorf("err:%s", err)
+		return nil, err
+	}
+
+	if resp.IsError() {
+		return nil, errors.New(resp.String())
+	}
+
+	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
 		return nil, err
 	}
 
