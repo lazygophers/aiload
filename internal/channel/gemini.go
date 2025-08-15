@@ -1,6 +1,8 @@
 package channel
 
 import (
+	"context"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/lazygophers/aiload"
 	"github.com/lazygophers/log"
@@ -43,7 +45,7 @@ type GeminiGetModelListRsp struct {
 	NextPageToken string        `json:"nextPageToken"`
 }
 
-func (p *Gemini) GetModelList(req *GeminiGetModelListReq) (*GeminiGetModelListRsp, error) {
+func (p *Gemini) GetModelList(ctx context.Context, req *GeminiGetModelListReq) (*GeminiGetModelListRsp, error) {
 	var rsp GeminiGetModelListRsp
 	pageSize := anyx.ToString(req.PageSize)
 	if req.PageSize == 0 {
@@ -52,7 +54,7 @@ func (p *Gemini) GetModelList(req *GeminiGetModelListReq) (*GeminiGetModelListRs
 	if req.PageSize > 1000 {
 		pageSize = "1000"
 	}
-	
+
 	_, err := p.GetRequest().SetResult(&rsp).SetQueryParams(map[string]string{
 		"pageSize":  pageSize,
 		"pageToken": req.PageToken,

@@ -2,17 +2,17 @@ package channel
 
 import (
 	"fmt"
+	"io"
+	"strings"
+	"time"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/lazygophers/log"
 	"github.com/lazygophers/lrpc"
-	"github.com/lazygophers/lrpc/middleware/xerror"
 	"github.com/lazygophers/utils/app"
 	"github.com/lazygophers/utils/json"
 	"github.com/lazygophers/utils/randx"
 	"github.com/lazygophers/utils/runtime"
-	"io"
-	"strings"
-	"time"
 )
 
 var client = resty.New().
@@ -37,13 +37,6 @@ var client = resty.New().
 		}
 
 		return nil
-	}).
-	OnAfterResponse(func(client *resty.Client, response *resty.Response) error {
-		if response.StatusCode() >= 200 && response.StatusCode() < 400 {
-			return nil
-		}
-
-		return xerror.NewErrorWithMsg(int32(response.StatusCode()), response.Status())
 	}).
 	SetLogger(log.Clone().SetOutput(io.Discard))
 
