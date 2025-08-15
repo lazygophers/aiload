@@ -111,6 +111,72 @@ service aiload {
 		};
 	};
 
+
+	// @gen: channel
+	// @model: ModelChannel
+	// @action: set
+	rpc SetChannelAdmin (SetChannelAdminReq) returns (SetChannelAdminRsp) {
+			option (lazygophers.lrpc.core.http) = {
+				method: "POST",
+				path: "SetChannelAdmin",
+			};
+		option (lazygophers.lrpc.core.lazygen) = {
+			role: "admin",
+		};
+	};
+
+	// @gen: channel
+	// @model: ModelChannel
+	// @action: del
+	rpc DelChannelAdmin (DelChannelAdminReq) returns (DelChannelAdminRsp) {
+			option (lazygophers.lrpc.core.http) = {
+				method: "POST",
+				path: "DelChannelAdmin",
+			};
+		option (lazygophers.lrpc.core.lazygen) = {
+			role: "admin",
+		};
+	};
+
+	// @gen: channel
+	// @model: ModelChannel
+	// @action: add
+	rpc AddChannelAdmin (AddChannelAdminReq) returns (AddChannelAdminRsp) {
+			option (lazygophers.lrpc.core.http) = {
+				method: "POST",
+				path: "AddChannelAdmin",
+			};
+		option (lazygophers.lrpc.core.lazygen) = {
+			role: "admin",
+		};
+	};
+
+	// @gen: channel
+	// @model: ModelChannel
+	// @action: get
+	rpc GetChannelAdmin (GetChannelAdminReq) returns (GetChannelAdminRsp) {
+			option (lazygophers.lrpc.core.http) = {
+				method: "POST",
+				path: "GetChannelAdmin",
+			};
+		option (lazygophers.lrpc.core.lazygen) = {
+			role: "admin",
+		};
+	};
+
+	// @gen: channel
+	// @model: ModelChannel
+	// @action: list
+	rpc ListChannelAdmin (ListChannelAdminReq) returns (ListChannelAdminRsp) {
+			option (lazygophers.lrpc.core.http) = {
+				method: "POST",
+				path: "ListChannelAdmin",
+			};
+		option (lazygophers.lrpc.core.lazygen) = {
+			role: "admin",
+		};
+	};
+
 }
 
 enum ErrCode {
@@ -158,6 +224,9 @@ message ModelChannel {
 	string token = 6;
 	// @gorm: index: idx_channel,unique
 	Platform platform = 7;
+
+	// @doc: base_url is the base url of the model channel.
+	string base_url = 8;
 }
 
 message ModelChannelAccess {
@@ -309,4 +378,61 @@ message LoginRsp {
 	ModelUser user = 1;
 	string token = 2;
 	int64 expires_at = 3;
+}
+
+message SetChannelAdminReq {
+	// @validate: required
+	ModelChannel channel = 1;
+}
+
+message SetChannelAdminRsp {
+	ModelChannel channel = 1;
+}
+
+message DelChannelAdminReq {
+	// @validate: required
+	uint64 id = 1;
+}
+
+message DelChannelAdminRsp {
+}
+
+message AddChannelAdminReq {
+	// @validate: required
+	ModelChannel channel = 1;
+}
+
+message AddChannelAdminRsp {
+	ModelChannel channel = 1;
+}
+
+message GetChannelAdminReq {
+	// @validate: required
+	uint64 id = 1;
+}
+
+message GetChannelAdminRsp {
+	ModelChannel channel = 1;
+}
+
+message ListChannelAdminReq {
+	enum ListOption {
+		ListOptionNil = 0;
+        // @type: uint32
+		ListOptionPlatform = 1;
+		// @type: like
+		ListOptionName = 2;
+		// @type: like
+		ListOptionToken = 3;
+		// @type: like
+		ListOptionBaseUrl = 4;
+	}
+
+	// @validate: required
+	lazygophers.lrpc.core.ListOption list_option = 1;
+}
+
+message ListChannelAdminRsp {
+	lazygophers.lrpc.core.Paginate paginate = 1;
+	repeated ModelChannel list = 2;
 }
