@@ -2,7 +2,7 @@
 //	versions:
 //		codegen	v0.0.0-SNAPSHOT-35b9c92
 //		go		go1.24.5
-//	update:	1753804280
+//	update:	1755221751
 //	source: aiload.proto
 
 package main
@@ -61,5 +61,35 @@ var Routes = []*api.Route{
 		Path:    aiload.RpcPathLogin,
 		Handler: impl.ToHandler(impl.Login, "public"),
 		Role:    "public",
+	},
+	{
+		Method:  "POST",
+		Path:    aiload.RpcPathSetChannelAdmin,
+		Handler: impl.ToHandler(impl.SetChannelAdmin, "admin"),
+		Role:    "admin",
+	},
+	{
+		Method:  "POST",
+		Path:    aiload.RpcPathDelChannelAdmin,
+		Handler: impl.ToHandler(impl.DelChannelAdmin, "admin"),
+		Role:    "admin",
+	},
+	{
+		Method:  "POST",
+		Path:    aiload.RpcPathAddChannelAdmin,
+		Handler: impl.ToHandler(impl.AddChannelAdmin, "admin"),
+		Role:    "admin",
+	},
+	{
+		Method:  "POST",
+		Path:    aiload.RpcPathGetChannelAdmin,
+		Handler: impl.ToHandler(impl.GetChannelAdmin, "admin"),
+		Role:    "admin",
+	},
+	{
+		Method:  "POST",
+		Path:    aiload.RpcPathListChannelAdmin,
+		Handler: impl.ToHandler(impl.ListChannelAdmin, "admin"),
+		Role:    "admin",
 	},
 }

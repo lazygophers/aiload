@@ -62,3 +62,43 @@ func Login(ctx *lrpc.Ctx, req *LoginReq) (*LoginRsp, error) {
 		ServicePath: RpcPathLogin,
 	}, req, &rsp)
 }
+
+func SetChannelAdmin(ctx *lrpc.Ctx, req *SetChannelAdminReq) (*SetChannelAdminRsp, error) {
+	var rsp SetChannelAdminRsp
+	return &rsp, lrpc.Call(ctx, &core.ServiceDiscoveryClient{
+		ServiceName: ServerName,
+		ServicePath: RpcPathSetChannelAdmin,
+	}, req, &rsp)
+}
+
+func DelChannelAdmin(ctx *lrpc.Ctx, req *DelChannelAdminReq) (*DelChannelAdminRsp, error) {
+	var rsp DelChannelAdminRsp
+	return &rsp, lrpc.Call(ctx, &core.ServiceDiscoveryClient{
+		ServiceName: ServerName,
+		ServicePath: RpcPathDelChannelAdmin,
+	}, req, &rsp)
+}
+
+func AddChannelAdmin(ctx *lrpc.Ctx, req *AddChannelAdminReq) (*AddChannelAdminRsp, error) {
+	var rsp AddChannelAdminRsp
+	return &rsp, lrpc.Call(ctx, &core.ServiceDiscoveryClient{
+		ServiceName: ServerName,
+		ServicePath: RpcPathAddChannelAdmin,
+	}, req, &rsp)
+}
+
+func GetChannelAdmin(ctx *lrpc.Ctx, req *GetChannelAdminReq) (*GetChannelAdminRsp, error) {
+	var rsp GetChannelAdminRsp
+	return &rsp, lrpc.Call(ctx, &core.ServiceDiscoveryClient{
+		ServiceName: ServerName,
+		ServicePath: RpcPathGetChannelAdmin,
+	}, req, &rsp)
+}
+
+func ListChannelAdmin(ctx *lrpc.Ctx, req *ListChannelAdminReq) (*ListChannelAdminRsp, error) {
+	var rsp ListChannelAdminRsp
+	return &rsp, lrpc.Call(ctx, &core.ServiceDiscoveryClient{
+		ServiceName: ServerName,
+		ServicePath: RpcPathListChannelAdmin,
+	}, req, &rsp)
+}
