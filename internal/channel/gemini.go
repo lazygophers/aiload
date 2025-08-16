@@ -156,7 +156,6 @@ func (p *Gemini) GetModel(ctx context.Context, req *GeminiGetModelReq) (*GeminiG
 	return &rsp, nil
 }
 
-
 // GeminiCommonPart represents a common part of a request or response.
 type GeminiCommonPart struct {
 	Text       string      `json:"text,omitempty"`
