@@ -16,6 +16,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// setupTest a helper function to setup tests
+func setupTest(t *testing.T) (*SiliconFlow, func()) {
+	t.Helper()
+
+	mockChannel := &aiload.ModelChannel{
+		Token: "test-token",
+	}
+	p := NewSiliconFlow(mockChannel)
+
+	httpmock.ActivateNonDefault(client.GetClient())
+
+	return p, func() {
+		httpmock.DeactivateAndReset()
+	}
+}
+
 func TestMain(m *testing.M) {
 	// 禁用测试期间的日志输出，保持测试结果的清洁
 	log.SetOutput(io.Discard)
@@ -27,20 +43,11 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-func TestSiliconFlow_CreateChatCompletion(t *testing.T) {
-	// Correctly initialize the provider using its constructor
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
+func TestSiliconFlowChat(t *testing.T) {
+	p, teardown := setupTest(t)
+	defer teardown()
 
-	// Since the code uses a global client, we must mock the global client.
-	// This is not ideal, but necessary to test the current implementation.
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	// Mock the API response
-	mockResponse := SiliconFlowCreateChatCompletionRsp{
+	mockSuccessResponse := SiliconFlowCreateChatCompletionRsp{
 		ID:      "chatcmpl-mock-id",
 		Object:  "chat.completion",
 		Created: 1677652288,
@@ -75,1592 +82,46 @@ func TestSiliconFlow_CreateChatCompletion(t *testing.T) {
 			TotalTokens:      21,
 		},
 	}
-	respBody, err := json.Marshal(mockResponse)
-	assert.NoError(t, err)
+	successRespBody, err := json.Marshal(mockSuccessResponse)
+	require.NoError(t, err)
 
-	httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/chat/completions",
-		func(req *http.Request) (*http.Response, error) {
-			// Check for the Authorization header
-			if req.Header.Get("Authorization") != "Bearer test-token" {
-				return httpmock.NewStringResponse(401, "Unauthorized"), nil
-			}
-			resp := httpmock.NewStringResponse(200, string(respBody))
-			resp.Header.Set("Content-Type", "application/json")
-			return resp, nil
-		},
-	)
-
-	// Create a request
-	req := &SiliconFlowCreateChatCompletionReq{
-		Model: "deepseek-coder",
-		Messages: []SiliconFlowCreateChatCompletionMessage{
-			{
-				Role:    "user",
-				Content: "Hello",
-			},
-		},
-	}
-
-	// Call the function
-	rsp, err := p.CreateChatCompletion(req)
-
-	// Assert the results
-	assert.NoError(t, err)
-	assert.NotNil(t, rsp)
-	assert.Equal(t, "chatcmpl-mock-id", rsp.ID)
-	assert.NotEmpty(t, rsp.Choices)
-	assert.Equal(t, "assistant", rsp.Choices[0].Message.Role)
-	assert.Equal(t, "\n\nHello there, how may I assist you today?", rsp.Choices[0].Message.Content)
-	assert.Equal(t, "stop", rsp.Choices[0].FinishReason)
-}
-
-func TestSiliconFlow_CreateChatCompletion_Error(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	// Mock the API error response
-	httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/chat/completions",
-		func(req *http.Request) (*http.Response, error) {
-			resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-			resp.Header.Set("Content-Type", "application/json")
-			return resp, nil
-		},
-	)
-
-	// Create a request
-	req := &SiliconFlowCreateChatCompletionReq{
-		Model: "deepseek-coder",
-		Messages: []SiliconFlowCreateChatCompletionMessage{
-			{
-				Role:    "user",
-				Content: "Hello",
-			},
-		},
-	}
-
-	// Call the function
-	rsp, err := p.CreateChatCompletion(req)
-
-	// Assert the results
-	assert.Error(t, err)
-	assert.Nil(t, rsp)
-	var siliconFlowError *SiliconFlowErrorRsp
-	require.ErrorAs(t, err, &siliconFlowError)
-	assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-}
-
-func TestSiliconFlow_CreateEmbedding(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	t.Run("success", func(t *testing.T) {
-		mockResponse := SiliconFlowCreateEmbeddingRsp{
-			Object: "list",
-			Data: []struct {
-				Object    string    `json:"object"`
-				Embedding []float64 `json:"embedding"`
-				Index     int       `json:"index"`
-			}{
-				{
-					Object:    "embedding",
-					Embedding: []float64{0.1, 0.2, 0.3},
-					Index:     0,
-				},
-			},
-			Model: "bge-large-zh-v1.5",
-			Usage: struct {
-				PromptTokens int `json:"prompt_tokens"`
-				TotalTokens  int `json:"total_tokens"`
-			}{
-				PromptTokens: 10,
-				TotalTokens:  10,
-			},
-		}
-		respBody, err := json.Marshal(mockResponse)
-		assert.NoError(t, err)
-
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/embeddings",
-			func(req *http.Request) (*http.Response, error) {
-				if req.Header.Get("Authorization") != "Bearer test-token" {
-					return httpmock.NewStringResponse(401, "Unauthorized"), nil
-				}
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowCreateEmbeddingReq{
-			Model: "bge-large-zh-v1.5",
-			Input: []string{"hello"},
-		}
-
-		rsp, err := p.CreateEmbedding(req)
-
-		assert.NoError(t, err)
-		assert.NotNil(t, rsp)
-		assert.Equal(t, "list", rsp.Object)
-		assert.Len(t, rsp.Data, 1)
-		assert.Equal(t, []float64{0.1, 0.2, 0.3}, rsp.Data[0].Embedding)
-	})
-
-	t.Run("error", func(t *testing.T) {
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/embeddings",
-			func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowCreateEmbeddingReq{
-			Model: "bge-large-zh-v1.5",
-			Input: []string{"hello"},
-		}
-
-		rsp, err := p.CreateEmbedding(req)
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		var siliconFlowError *SiliconFlowErrorRsp
-		require.ErrorAs(t, err, &siliconFlowError)
-		assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-	})
-}
-
-func TestSiliconFlow_CreateImageGenerations(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	t.Run("success", func(t *testing.T) {
-		mockResponse := SiliconFlowCreateImageGenerationsRsp{
-			Created: 1677652288,
-			Data: []struct {
-				URL     string `json:"url,omitempty"`
-				B64JSON string `json:"b64_json,omitempty"`
-			}{
-				{
-					URL: "https://example.com/image.png",
-				},
-			},
-		}
-		respBody, err := json.Marshal(mockResponse)
-		assert.NoError(t, err)
-
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/images/generations",
-			func(req *http.Request) (*http.Response, error) {
-				if req.Header.Get("Authorization") != "Bearer test-token" {
-					return httpmock.NewStringResponse(401, "Unauthorized"), nil
-				}
-				var reqBody SiliconFlowCreateImageGenerationsReq
-				err := json.NewDecoder(req.Body).Decode(&reqBody)
-				assert.NoError(t, err)
-				assert.Equal(t, "a cat", reqBody.Prompt)
-
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowCreateImageGenerationsReq{
-			Prompt: "a cat",
-		}
-
-		rsp, err := p.CreateImageGenerations(req)
-
-		assert.NoError(t, err)
-		assert.NotNil(t, rsp)
-		assert.Len(t, rsp.Data, 1)
-		assert.Equal(t, "https://example.com/image.png", rsp.Data[0].URL)
-	})
-
-	t.Run("error", func(t *testing.T) {
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/images/generations",
-			func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowCreateImageGenerationsReq{
-			Prompt: "a cat",
-		}
-
-		rsp, err := p.CreateImageGenerations(req)
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		var siliconFlowError *SiliconFlowErrorRsp
-		require.ErrorAs(t, err, &siliconFlowError)
-		assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-	})
-}
-
-func TestSiliconFlow_CreateImageEdits(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	t.Run("success", func(t *testing.T) {
-		mockResponse := SiliconFlowCreateImageEditsRsp{
-			Created: 1677652288,
-			Data: []struct {
-				URL     string `json:"url,omitempty"`
-				B64JSON string `json:"b64_json,omitempty"`
-			}{
-				{
-					URL: "https://example.com/edited-image.png",
-				},
-			},
-		}
-		respBody, err := json.Marshal(mockResponse)
-		require.NoError(t, err)
-
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/images/edits",
-			func(req *http.Request) (*http.Response, error) {
-				err := req.ParseMultipartForm(10 << 20) // 10 MB
-				require.NoError(t, err)
-
-				// Check form fields
-				assert.Equal(t, "a cute cat", req.FormValue("prompt"))
-				assert.Equal(t, "stable-diffusion-xl-1024-v1-0", req.FormValue("model"))
-				assert.Equal(t, "1", req.FormValue("n"))
-				assert.Equal(t, "1024x1024", req.FormValue("size"))
-				assert.Equal(t, "url", req.FormValue("response_format"))
-
-				// Check image file
-				file, header, err := req.FormFile("image")
-				require.NoError(t, err)
-				defer file.Close()
-				assert.Equal(t, "test-image.png", header.Filename)
-				imgData, err := io.ReadAll(file)
-				require.NoError(t, err)
-				assert.Equal(t, "fake-image-data", string(imgData))
-
-				// Check mask file
-				maskFile, maskHeader, err := req.FormFile("mask")
-				require.NoError(t, err)
-				defer maskFile.Close()
-				assert.Equal(t, "test-mask.png", maskHeader.Filename)
-				maskData, err := io.ReadAll(maskFile)
-				require.NoError(t, err)
-				assert.Equal(t, "fake-mask-data", string(maskData))
-
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowCreateImageEditsReq{
-			Prompt:         "a cute cat",
-			Image:          strings.NewReader("fake-image-data"),
-			ImageFileName:  "test-image.png",
-			Mask:           strings.NewReader("fake-mask-data"),
-			MaskFileName:   "test-mask.png",
-			Model:          "stable-diffusion-xl-1024-v1-0",
-			N:              1,
-			Size:           "1024x1024",
-			ResponseFormat: "url",
-		}
-
-		rsp, err := p.CreateImageEdits(req)
-
-		assert.NoError(t, err)
-		require.NotNil(t, rsp)
-		require.Len(t, rsp.Data, 1)
-		assert.Equal(t, "https://example.com/edited-image.png", rsp.Data[0].URL)
-	})
-
-	t.Run("api error", func(t *testing.T) {
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/images/edits",
-			func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowCreateImageEditsReq{
-			Prompt:        "a cute cat",
-			Image:         strings.NewReader("fake-image-data"),
-			ImageFileName: "test-image.png",
-			Model:         "stable-diffusion-xl-1024-v1-0",
-		}
-
-		rsp, err := p.CreateImageEdits(req)
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		var siliconFlowError *SiliconFlowErrorRsp
-		require.ErrorAs(t, err, &siliconFlowError)
-		assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-	})
-
-	t.Run("missing image", func(t *testing.T) {
-		req := &SiliconFlowCreateImageEditsReq{
-			Prompt: "a cute cat",
-			// Image is nil
-		}
-
-		rsp, err := p.CreateImageEdits(req)
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		assert.Contains(t, err.Error(), "image reader is required")
-	})
-}
-
-func TestSiliconFlow_CreateImageVariations(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	t.Run("success", func(t *testing.T) {
-		mockResponse := SiliconFlowCreateImageVariationsRsp{
-			Created: 1677652288,
-			Data: []struct {
-				URL     string `json:"url,omitempty"`
-				B64JSON string `json:"b64_json,omitempty"`
-			}{
-				{
-					URL: "https://example.com/variation-image.png",
-				},
-			},
-		}
-		respBody, err := json.Marshal(mockResponse)
-		require.NoError(t, err)
-
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/images/variations",
-			func(req *http.Request) (*http.Response, error) {
-				err := req.ParseMultipartForm(10 << 20) // 10 MB
-				require.NoError(t, err)
-
-				// Check form fields
-				assert.Equal(t, "stable-diffusion-xl-1024-v1-0", req.FormValue("model"))
-				assert.Equal(t, "1", req.FormValue("n"))
-				assert.Equal(t, "1024x1024", req.FormValue("size"))
-				assert.Equal(t, "url", req.FormValue("response_format"))
-
-				// Check image file
-				file, header, err := req.FormFile("image")
-				require.NoError(t, err)
-				defer file.Close()
-				assert.Equal(t, "test-variation-image.png", header.Filename)
-				imgData, err := io.ReadAll(file)
-				require.NoError(t, err)
-				assert.Equal(t, "fake-variation-image-data", string(imgData))
-
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowCreateImageVariationsReq{
-			Image:          strings.NewReader("fake-variation-image-data"),
-			ImageFileName:  "test-variation-image.png",
-			Model:          "stable-diffusion-xl-1024-v1-0",
-			N:              1,
-			Size:           "1024x1024",
-			ResponseFormat: "url",
-		}
-
-		rsp, err := p.CreateImageVariations(req)
-
-		assert.NoError(t, err)
-		require.NotNil(t, rsp)
-		require.Len(t, rsp.Data, 1)
-		assert.Equal(t, "https://example.com/variation-image.png", rsp.Data[0].URL)
-	})
-
-	t.Run("api error", func(t *testing.T) {
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/images/variations",
-			func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowCreateImageVariationsReq{
-			Image:         strings.NewReader("fake-image-data"),
-			ImageFileName: "test-image.png",
-			Model:         "stable-diffusion-xl-1024-v1-0",
-		}
-
-		rsp, err := p.CreateImageVariations(req)
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		var siliconFlowError *SiliconFlowErrorRsp
-		require.ErrorAs(t, err, &siliconFlowError)
-		assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-	})
-
-	t.Run("missing image", func(t *testing.T) {
-		req := &SiliconFlowCreateImageVariationsReq{
-			// Image is nil
-		}
-
-		rsp, err := p.CreateImageVariations(req)
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		assert.Equal(t, "image reader is required", err.Error())
-	})
-}
-
-func TestSiliconFlow_CreateAudioTranslation(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	t.Run("success", func(t *testing.T) {
-		mockResponse := SiliconFlowCreateAudioTranslationRsp{
-			Text: "Hello, this is a test.",
-		}
-		respBody, err := json.Marshal(mockResponse)
-		require.NoError(t, err)
-
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/audio/translations",
-			func(req *http.Request) (*http.Response, error) {
-				err := req.ParseMultipartForm(10 << 20) // 10 MB
-				require.NoError(t, err)
-
-				// Check form fields
-				assert.Equal(t, "whisper-large-v3", req.FormValue("model"))
-				assert.Equal(t, "Translate to English", req.FormValue("prompt"))
-				assert.Equal(t, "json", req.FormValue("response_format"))
-				assert.Equal(t, "0.7", req.FormValue("temperature"))
-
-				// Check file
-				file, header, err := req.FormFile("file")
-				require.NoError(t, err)
-				defer file.Close()
-				assert.Equal(t, "test-audio.mp3", header.Filename)
-				audioData, err := io.ReadAll(file)
-				require.NoError(t, err)
-				assert.Equal(t, "fake-audio-data", string(audioData))
-
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowCreateAudioTranslationReq{
-			File:           strings.NewReader("fake-audio-data"),
-			FileName:       "test-audio.mp3",
-			Model:          "whisper-large-v3",
-			Prompt:         "Translate to English",
-			ResponseFormat: "json",
-			Temperature:    0.7,
-		}
-
-		rsp, err := p.CreateAudioTranslation(req)
-
-		assert.NoError(t, err)
-		require.NotNil(t, rsp)
-		assert.Equal(t, "Hello, this is a test.", rsp.Text)
-	})
-
-	t.Run("api error", func(t *testing.T) {
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/audio/translations",
-			func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowCreateAudioTranslationReq{
-			File:     strings.NewReader("fake-audio-data"),
-			FileName: "test-audio.mp3",
-			Model:    "whisper-large-v3",
-		}
-
-		rsp, err := p.CreateAudioTranslation(req)
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		var siliconFlowError *SiliconFlowErrorRsp
-		require.ErrorAs(t, err, &siliconFlowError)
-		assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-	})
-
-	t.Run("missing file", func(t *testing.T) {
-		req := &SiliconFlowCreateAudioTranslationReq{
-			Model: "whisper-large-v3",
-			// File is nil
-		}
-
-		rsp, err := p.CreateAudioTranslation(req)
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		assert.Equal(t, "file reader is required", err.Error())
-	})
-}
-
-func TestSiliconFlow_CreateAudioTranscription(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	t.Run("success", func(t *testing.T) {
-		mockResponse := SiliconFlowCreateAudioTranscriptionResp{
-			Text: "This is a test transcription.",
-		}
-		respBody, err := json.Marshal(mockResponse)
-		require.NoError(t, err)
-
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/audio/transcriptions",
-			func(req *http.Request) (*http.Response, error) {
-				err := req.ParseMultipartForm(10 << 20) // 10 MB
-				require.NoError(t, err)
-
-				// Check form fields
-				assert.Equal(t, "whisper-large-v3", req.FormValue("model"))
-				assert.Equal(t, "Transcribe this audio", req.FormValue("prompt"))
-				assert.Equal(t, "json", req.FormValue("response_format"))
-				assert.Equal(t, "0.8", req.FormValue("temperature"))
-
-				// Check file
-				file, header, err := req.FormFile("file")
-				require.NoError(t, err)
-				defer file.Close()
-				assert.Equal(t, "test-audio.mp3", header.Filename)
-				audioData, err := io.ReadAll(file)
-				require.NoError(t, err)
-				assert.Equal(t, "fake-audio-data-for-transcription", string(audioData))
-
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowCreateAudioTranscriptionReq{
-			File:           strings.NewReader("fake-audio-data-for-transcription"),
-			FileName:       "test-audio.mp3",
-			Model:          "whisper-large-v3",
-			Prompt:         "Transcribe this audio",
-			ResponseFormat: "json",
-			Temperature:    0.8,
-		}
-
-		rsp, err := p.CreateAudioTranscription(req)
-
-		assert.NoError(t, err)
-		require.NotNil(t, rsp)
-		assert.Equal(t, "This is a test transcription.", rsp.Text)
-	})
-
-	t.Run("api error", func(t *testing.T) {
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/audio/transcriptions",
-			func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowCreateAudioTranscriptionReq{
-			File:     strings.NewReader("fake-audio-data-for-transcription"),
-			FileName: "test-audio.mp3",
-			Model:    "whisper-large-v3",
-		}
-
-		rsp, err := p.CreateAudioTranscription(req)
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		var siliconFlowError *SiliconFlowErrorRsp
-		require.ErrorAs(t, err, &siliconFlowError)
-		assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-	})
-
-	t.Run("missing file", func(t *testing.T) {
-		req := &SiliconFlowCreateAudioTranscriptionReq{
-			Model: "whisper-large-v3",
-			// File is nil
-		}
-
-		rsp, err := p.CreateAudioTranscription(req)
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		assert.Equal(t, "file reader is required", err.Error())
-	})
-}
-
-func TestSiliconFlow_UploadFile(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	t.Run("success", func(t *testing.T) {
-		mockResponse := SiliconFlowFileObj{
-			ID:        "file-mock-id",
-			Bytes:     140,
-			CreatedAt: 1677652288,
-			Filename:  "test-file.jsonl",
-			Object:    "file",
-			Purpose:   "fine-tune",
-			Status:    "processed",
-		}
-		respBody, err := json.Marshal(mockResponse)
-		require.NoError(t, err)
-
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/files",
-			func(req *http.Request) (*http.Response, error) {
-				err := req.ParseMultipartForm(10 << 20) // 10 MB
-				require.NoError(t, err)
-
-				// Check form fields
-				assert.Equal(t, "fine-tune", req.FormValue("purpose"))
-
-				// Check file
-				file, header, err := req.FormFile("file")
-				require.NoError(t, err)
-				defer file.Close()
-				assert.Equal(t, "test-file.jsonl", header.Filename)
-				fileData, err := io.ReadAll(file)
-				require.NoError(t, err)
-				assert.Equal(t, "fake-file-data", string(fileData))
-
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowUploadFileReq{
-			File:     strings.NewReader("fake-file-data"),
-			FileName: "test-file.jsonl",
-			Purpose:  "fine-tune",
-		}
-
-		rsp, err := p.UploadFile(req)
-
-		assert.NoError(t, err)
-		require.NotNil(t, rsp)
-		assert.Equal(t, "file-mock-id", rsp.ID)
-		assert.Equal(t, "fine-tune", rsp.Purpose)
-		assert.Equal(t, "test-file.jsonl", rsp.Filename)
-	})
-
-	t.Run("api error", func(t *testing.T) {
-		httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/files",
-			func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		req := &SiliconFlowUploadFileReq{
-			File:     strings.NewReader("fake-file-data"),
-			FileName: "test-file.jsonl",
-			Purpose:  "fine-tune",
-		}
-
-		rsp, err := p.UploadFile(req)
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		var siliconFlowError *SiliconFlowErrorRsp
-		require.ErrorAs(t, err, &siliconFlowError)
-		assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-	})
-
-	t.Run("missing file", func(t *testing.T) {
-		req := &SiliconFlowUploadFileReq{
-			Purpose: "fine-tune",
-			// File is nil
-		}
-
-		rsp, err := p.UploadFile(req)
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		assert.Equal(t, "file reader is required", err.Error())
-	})
-}
-func TestSiliconFlow_ListFiles(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	t.Run("success", func(t *testing.T) {
-		mockResponse := &SiliconFlowListFilesRsp{
-			Object: "list",
-			Data: []SiliconFlowFileObj{
-				{
-					ID:        "file-mock-id-1",
-					Bytes:     140,
-					CreatedAt: 1677652288,
-					Filename:  "test-file-1.jsonl",
-					Object:    "file",
-					Purpose:   "fine-tune",
-					Status:    "processed",
-				},
-				{
-					ID:        "file-mock-id-2",
-					Bytes:     256,
-					CreatedAt: 1677652289,
-					Filename:  "test-file-2.jsonl",
-					Object:    "file",
-					Purpose:   "fine-tune",
-					Status:    "processed",
-				},
-			},
-		}
-		respBody, err := json.Marshal(mockResponse)
-		require.NoError(t, err)
-
-		httpmock.RegisterResponder("GET", "https://api.siliconflow.cn/v1/files",
-			func(req *http.Request) (*http.Response, error) {
-				if req.Header.Get("Authorization") != "Bearer test-token" {
-					return httpmock.NewStringResponse(401, "Unauthorized"), nil
-				}
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		rsp, err := p.ListFiles()
-
-		assert.NoError(t, err)
-		require.NotNil(t, rsp)
-		assert.Equal(t, "list", rsp.Object)
-		require.Len(t, rsp.Data, 2)
-		assert.Equal(t, "file-mock-id-1", rsp.Data[0].ID)
-		assert.Equal(t, "test-file-2.jsonl", rsp.Data[1].Filename)
-	})
-
-	t.Run("api error", func(t *testing.T) {
-		httpmock.RegisterResponder("GET", "https://api.siliconflow.cn/v1/files",
-			func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		rsp, err := p.ListFiles()
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		var siliconFlowError *SiliconFlowErrorRsp
-		require.ErrorAs(t, err, &siliconFlowError)
-		assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-	})
-}
-
-func TestSiliconFlow_DeleteFile(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	t.Run("success", func(t *testing.T) {
-		mockResponse := &SiliconFlowDeleteFileRsp{
-			ID:      "file-mock-id-to-delete",
-			Object:  "file",
-			Deleted: true,
-		}
-		respBody, err := json.Marshal(mockResponse)
-		require.NoError(t, err)
-
-		httpmock.RegisterResponder("DELETE", "https://api.siliconflow.cn/v1/files/file-mock-id-to-delete",
-			func(req *http.Request) (*http.Response, error) {
-				if req.Header.Get("Authorization") != "Bearer test-token" {
-					return httpmock.NewStringResponse(401, "Unauthorized"), nil
-				}
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		rsp, err := p.DeleteFile("file-mock-id-to-delete")
-
-		assert.NoError(t, err)
-		require.NotNil(t, rsp)
-		assert.Equal(t, "file-mock-id-to-delete", rsp.ID)
-		assert.True(t, rsp.Deleted)
-		assert.Equal(t, "file", rsp.Object)
-	})
-
-	t.Run("api error", func(t *testing.T) {
-		httpmock.RegisterResponder("DELETE", "https://api.siliconflow.cn/v1/files/file-mock-id-for-error",
-			func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		rsp, err := p.DeleteFile("file-mock-id-for-error")
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		var siliconFlowError *SiliconFlowErrorRsp
-		require.ErrorAs(t, err, &siliconFlowError)
-		assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-	})
-}
-func TestSiliconflow_RetrieveFile(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	t.Run("success", func(t *testing.T) {
-		mockResponse := &SiliconFlowFileObj{
-			ID:        "file-mock-id-1",
-			Bytes:     140,
-			CreatedAt: 1677652288,
-			Filename:  "test-file-1.jsonl",
-			Object:    "file",
-			Purpose:   "fine-tune",
-			Status:    "processed",
-		}
-		respBody, err := json.Marshal(mockResponse)
-		require.NoError(t, err)
-
-		httpmock.RegisterResponder("GET", "https://api.siliconflow.cn/v1/files/file-mock-id-1",
-			func(req *http.Request) (*http.Response, error) {
-				if req.Header.Get("Authorization") != "Bearer test-token" {
-					return httpmock.NewStringResponse(401, "Unauthorized"), nil
-				}
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		rsp, err := p.RetrieveFile("file-mock-id-1")
-
-		assert.NoError(t, err)
-		require.NotNil(t, rsp)
-		assert.Equal(t, "file-mock-id-1", rsp.ID)
-		assert.Equal(t, "test-file-1.jsonl", rsp.Filename)
-	})
-
-	t.Run("api error", func(t *testing.T) {
-		httpmock.RegisterResponder("GET", "https://api.siliconflow.cn/v1/files/file-mock-id-for-error",
-			func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-		)
-
-		rsp, err := p.RetrieveFile("file-mock-id-for-error")
-
-		assert.Error(t, err)
-		assert.Nil(t, rsp)
-		var siliconFlowError *SiliconFlowErrorRsp
-		require.ErrorAs(t, err, &siliconFlowError)
-		assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-	})
-}
-
-func TestSiliconFlow_CreateFineTuningJob(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	// 定义测试用例
 	tests := []struct {
 		name          string
-		giveRequest   *SiliconFlowFineTuningJobRequest
+		giveRequest   *SiliconFlowCreateChatCompletionReq
 		mockResponder httpmock.Responder
-		wantErr       bool
-		wantErrAs     interface{}
-		checkResponse func(t *testing.T, rsp *SiliconFlowFineTuningJob, err error)
+		checkResponse func(t *testing.T, rsp *SiliconFlowCreateChatCompletionRsp, err error)
 	}{
 		{
 			name: "success",
-			giveRequest: &SiliconFlowFineTuningJobRequest{
-				TrainingFile: "file-train-mock-id",
-				Model:        "gpt-3.5-turbo",
+			giveRequest: &SiliconFlowCreateChatCompletionReq{
+				Model: "deepseek-coder",
+				Messages: []SiliconFlowCreateChatCompletionMessage{
+					{Role: "user", Content: "Hello"},
+				},
 			},
-			mockResponder: func(req *http.Request) (*http.Response, error) {
-				mockResponse := SiliconFlowFineTuningJob{
-					ID:             "ft-job-mock-id",
-					Object:         "fine_tuning.job",
-					Model:          "gpt-3.5-turbo",
-					CreatedAt:      1677652288,
-					Status:         "succeeded",
-					FineTunedModel: "ft:gpt-3.5-turbo:my-org:custom-model-name:1",
-					TrainingFile:   "file-train-mock-id",
-				}
-				respBody, err := json.Marshal(mockResponse)
-				require.NoError(t, err)
-
-				if req.Header.Get("Authorization") != "Bearer test-token" {
-					return httpmock.NewStringResponse(401, "Unauthorized"), nil
-				}
-
-				var reqBody SiliconFlowFineTuningJobRequest
-				err = json.NewDecoder(req.Body).Decode(&reqBody)
-				require.NoError(t, err)
-				assert.Equal(t, "file-train-mock-id", reqBody.TrainingFile)
-				assert.Equal(t, "gpt-3.5-turbo", reqBody.Model)
-
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-			wantErr: false,
-			checkResponse: func(t *testing.T, rsp *SiliconFlowFineTuningJob, err error) {
+			mockResponder: newMockResponder(http.StatusOK, string(successRespBody)),
+			checkResponse: func(t *testing.T, rsp *SiliconFlowCreateChatCompletionRsp, err error) {
 				assert.NoError(t, err)
 				require.NotNil(t, rsp)
-				assert.Equal(t, "ft-job-mock-id", rsp.ID)
-				assert.Equal(t, "succeeded", rsp.Status)
-				assert.Equal(t, "ft:gpt-3.5-turbo:my-org:custom-model-name:1", rsp.FineTunedModel)
+				assert.Equal(t, "chatcmpl-mock-id", rsp.ID)
+				require.NotEmpty(t, rsp.Choices)
+				assert.Equal(t, "assistant", rsp.Choices[0].Message.Role)
+				assert.Equal(t, "\n\nHello there, how may I assist you today?", rsp.Choices[0].Message.Content)
 			},
 		},
 		{
 			name: "api error",
-			giveRequest: &SiliconFlowFineTuningJobRequest{
-				TrainingFile: "file-train-mock-id",
-				Model:        "gpt-3.5-turbo",
+			giveRequest: &SiliconFlowCreateChatCompletionReq{
+				Model: "deepseek-coder",
+				Messages: []SiliconFlowCreateChatCompletionMessage{
+					{Role: "user", Content: "Hello"},
+				},
 			},
-			mockResponder: func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-			wantErr:   true,
-			wantErrAs: &SiliconFlowErrorRsp{},
-			checkResponse: func(t *testing.T, rsp *SiliconFlowFineTuningJob, err error) {
+			mockResponder: newMockResponder(http.StatusInternalServerError, `{"error":{"message":"Internal server error"}}`),
+			checkResponse: func(t *testing.T, rsp *SiliconFlowCreateChatCompletionRsp, err error) {
 				assert.Error(t, err)
 				assert.Nil(t, rsp)
-				var siliconFlowError *SiliconFlowErrorRsp
-				require.ErrorAs(t, err, &siliconFlowError)
-				assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-			},
-		},
-		{
-			name: "network error",
-			giveRequest: &SiliconFlowFineTuningJobRequest{
-				TrainingFile: "file-train-mock-id",
-				Model:        "gpt-3.5-turbo",
-			},
-			mockResponder: httpmock.NewErrorResponder(errors.New("network connection error")),
-			wantErr:       true,
-			checkResponse: func(t *testing.T, rsp *SiliconFlowFineTuningJob, err error) {
-				assert.Error(t, err)
-				assert.Nil(t, rsp)
-				assert.Contains(t, err.Error(), "network connection error")
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			httpmock.Reset() // 每个子测试前重置 mock
-			httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/fine_tuning/jobs", tt.mockResponder)
-
-			rsp, err := p.CreateFineTuningJob(tt.giveRequest)
-
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-
-			if tt.checkResponse != nil {
-				tt.checkResponse(t, rsp, err)
-			}
-		})
-	}
-}
-func TestSiliconFlow_ListFineTuningJobs(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	// 定义测试用例
-	tests := []struct {
-		name          string
-		giveLimit     int
-		giveAfter     string
-		mockResponder httpmock.Responder
-		wantErr       bool
-		wantErrAs     interface{}
-		checkResponse func(t *testing.T, rsp *SiliconFlowFineTuningJobList, err error)
-	}{
-		{
-			name:      "success",
-			giveLimit: 10,
-			giveAfter: "job-id-123",
-			mockResponder: func(req *http.Request) (*http.Response, error) {
-				// 验证查询参数
-				assert.Equal(t, "10", req.URL.Query().Get("limit"))
-				assert.Equal(t, "job-id-123", req.URL.Query().Get("after"))
-
-				mockResponse := SiliconFlowFineTuningJobList{
-					Object: "list",
-					Data: []SiliconFlowFineTuningJob{
-						{
-							ID:             "ft-job-mock-id-1",
-							Object:         "fine_tuning.job",
-							Model:          "gpt-3.5-turbo",
-							CreatedAt:      1677652288,
-							Status:         "succeeded",
-							FineTunedModel: "ft:gpt-3.5-turbo:my-org:custom-model-name:1",
-							TrainingFile:   "file-train-mock-id-1",
-						},
-					},
-					HasMore: false,
-				}
-				respBody, err := json.Marshal(mockResponse)
-				require.NoError(t, err)
-
-				if req.Header.Get("Authorization") != "Bearer test-token" {
-					return httpmock.NewStringResponse(401, "Unauthorized"), nil
-				}
-
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-			wantErr: false,
-			checkResponse: func(t *testing.T, rsp *SiliconFlowFineTuningJobList, err error) {
-				assert.NoError(t, err)
-				require.NotNil(t, rsp)
-				assert.Equal(t, "list", rsp.Object)
-				require.Len(t, rsp.Data, 1)
-				assert.Equal(t, "ft-job-mock-id-1", rsp.Data[0].ID)
-				assert.False(t, rsp.HasMore)
-			},
-		},
-		{
-			name:      "api error",
-			giveLimit: 5,
-			mockResponder: func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-			wantErr:   true,
-			wantErrAs: &SiliconFlowErrorRsp{},
-			checkResponse: func(t *testing.T, rsp *SiliconFlowFineTuningJobList, err error) {
-				assert.Error(t, err)
-				assert.Nil(t, rsp)
-				var siliconFlowError *SiliconFlowErrorRsp
-				require.ErrorAs(t, err, &siliconFlowError)
-				assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-			},
-		},
-		{
-			name:          "network error",
-			mockResponder: httpmock.NewErrorResponder(errors.New("network connection error")),
-			wantErr:       true,
-			checkResponse: func(t *testing.T, rsp *SiliconFlowFineTuningJobList, err error) {
-				assert.Error(t, err)
-				assert.Nil(t, rsp)
-				assert.Contains(t, err.Error(), "network connection error")
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			httpmock.Reset() // 每个子测试前重置 mock
-			httpmock.RegisterResponder("GET", "https://api.siliconflow.cn/v1/fine_tuning/jobs", tt.mockResponder)
-
-			rsp, err := p.ListFineTuningJobs(tt.giveLimit, tt.giveAfter)
-
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-
-			if tt.checkResponse != nil {
-				tt.checkResponse(t, rsp, err)
-			}
-		})
-	}
-}
-
-func TestSiliconFlow_RetrieveFineTuningJob(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	// 定义测试用例
-	tests := []struct {
-		name          string
-		giveJobID     string
-		mockResponder httpmock.Responder
-		wantErr       bool
-		checkResponse func(t *testing.T, rsp *SiliconFlowFineTuningJob, err error)
-	}{
-		{
-			name:      "success",
-			giveJobID: "ft-job-mock-id-success",
-			mockResponder: func(req *http.Request) (*http.Response, error) {
-				mockResponse := SiliconFlowFineTuningJob{
-					ID:             "ft-job-mock-id-success",
-					Object:         "fine_tuning.job",
-					Model:          "gpt-3.5-turbo",
-					CreatedAt:      1677652288,
-					Status:         "succeeded",
-					FineTunedModel: "ft:gpt-3.5-turbo:my-org:custom-model-name:1",
-					TrainingFile:   "file-train-mock-id-1",
-				}
-				respBody, err := json.Marshal(mockResponse)
-				require.NoError(t, err)
-
-				if req.Header.Get("Authorization") != "Bearer test-token" {
-					return httpmock.NewStringResponse(401, "Unauthorized"), nil
-				}
-
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-			wantErr: false,
-			checkResponse: func(t *testing.T, rsp *SiliconFlowFineTuningJob, err error) {
-				assert.NoError(t, err)
-				require.NotNil(t, rsp)
-				assert.Equal(t, "ft-job-mock-id-success", rsp.ID)
-				assert.Equal(t, "succeeded", rsp.Status)
-				assert.Equal(t, "ft:gpt-3.5-turbo:my-org:custom-model-name:1", rsp.FineTunedModel)
-			},
-		},
-		{
-			name:      "not found error",
-			giveJobID: "ft-job-mock-id-not-found",
-			mockResponder: func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(404, `{"error":{"message":"Job not found"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-			wantErr: true,
-			checkResponse: func(t *testing.T, rsp *SiliconFlowFineTuningJob, err error) {
-				assert.Error(t, err)
-				assert.Nil(t, rsp)
-				var siliconFlowError *SiliconFlowErrorRsp
-				require.ErrorAs(t, err, &siliconFlowError)
-				assert.Equal(t, "Job not found", siliconFlowError.Err.Message)
-			},
-		},
-		{
-			name:      "internal server error",
-			giveJobID: "ft-job-mock-id-server-error",
-			mockResponder: func(req *http.Request) (*http.Response, error) {
-				resp := httpmock.NewStringResponse(500, `{"error":{"message":"Internal server error"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-			wantErr: true,
-			checkResponse: func(t *testing.T, rsp *SiliconFlowFineTuningJob, err error) {
-				assert.Error(t, err)
-				assert.Nil(t, rsp)
-				var siliconFlowError *SiliconFlowErrorRsp
-				require.ErrorAs(t, err, &siliconFlowError)
-				assert.Equal(t, "Internal server error", siliconFlowError.Err.Message)
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			httpmock.Reset() // 每个子测试前重置 mock
-			url := "https://api.siliconflow.cn/v1/fine_tuning/jobs/" + tt.giveJobID
-			httpmock.RegisterResponder("GET", url, tt.mockResponder)
-
-			rsp, err := p.RetrieveFineTuningJob(tt.giveJobID)
-
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-
-			if tt.checkResponse != nil {
-				tt.checkResponse(t, rsp, err)
-			}
-		})
-	}
-}
-
-func TestSiliconFlow_CancelFineTuningJob(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	// 定义测试用例
-	tests := []struct {
-		name          string
-		giveJobID     string
-		mockResponder httpmock.Responder
-		wantErr       bool
-		checkResponse func(t *testing.T, rsp *SiliconFlowFineTuningJob, err error)
-	}{
-		{
-			name:      "success",
-			giveJobID: "ft-job-mock-id-success",
-			mockResponder: func(req *http.Request) (*http.Response, error) {
-				// 模拟一个成功取消的响应
-				mockResponse := SiliconFlowFineTuningJob{
-					ID:             "ft-job-mock-id-success",
-					Object:         "fine_tuning.job",
-					Model:          "gpt-3.5-turbo",
-					CreatedAt:      1677652288,
-					Status:         "cancelled", // 关键状态：已取消
-					FineTunedModel: "",
-					TrainingFile:   "file-train-mock-id-1",
-				}
-				respBody, err := json.Marshal(mockResponse)
-				require.NoError(t, err)
-
-				if req.Header.Get("Authorization") != "Bearer test-token" {
-					return httpmock.NewStringResponse(401, "Unauthorized"), nil
-				}
-
-				resp := httpmock.NewStringResponse(200, string(respBody))
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-			wantErr: false,
-			checkResponse: func(t *testing.T, rsp *SiliconFlowFineTuningJob, err error) {
-				assert.NoError(t, err)
-				require.NotNil(t, rsp)
-				assert.Equal(t, "ft-job-mock-id-success", rsp.ID)
-				assert.Equal(t, "cancelled", rsp.Status)
-			},
-		},
-		{
-			name:      "not found error",
-			giveJobID: "ft-job-mock-id-not-found",
-			mockResponder: func(req *http.Request) (*http.Response, error) {
-				// 模拟任务不存在的 404 错误
-				resp := httpmock.NewStringResponse(404, `{"error":{"message":"Job not found"}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-			wantErr: true,
-			checkResponse: func(t *testing.T, rsp *SiliconFlowFineTuningJob, err error) {
-				assert.Error(t, err)
-				assert.Nil(t, rsp)
-				var siliconFlowError *SiliconFlowErrorRsp
-				require.ErrorAs(t, err, &siliconFlowError)
-				assert.Equal(t, "Job not found", siliconFlowError.Err.Message)
-			},
-		},
-		{
-			name:      "cannot cancel error due to status",
-			giveJobID: "ft-job-mock-id-already-completed",
-			mockResponder: func(req *http.Request) (*http.Response, error) {
-				// 模拟任务因已完成而无法取消的错误
-				resp := httpmock.NewStringResponse(400, `{"error":{"message":"Job has already completed, cannot cancel."}}`)
-				resp.Header.Set("Content-Type", "application/json")
-				return resp, nil
-			},
-			wantErr: true,
-			checkResponse: func(t *testing.T, rsp *SiliconFlowFineTuningJob, err error) {
-				assert.Error(t, err)
-				assert.Nil(t, rsp)
-				var siliconFlowError *SiliconFlowErrorRsp
-				require.ErrorAs(t, err, &siliconFlowError)
-				assert.Equal(t, "Job has already completed, cannot cancel.", siliconFlowError.Err.Message)
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			httpmock.Reset() // 每个子测试前重置 mock
-			url := "https://api.siliconflow.cn/v1/fine_tuning/jobs/" + tt.giveJobID + "/cancel"
-			httpmock.RegisterResponder("POST", url, tt.mockResponder)
-
-			rsp, err := p.CancelFineTuningJob(tt.giveJobID)
-
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-
-			if tt.checkResponse != nil {
-				tt.checkResponse(t, rsp, err)
-			}
-		})
-	}
-}
-
-func TestGetModelSuccess(t *testing.T) {
-	// Initialize the provider
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	// Activate the HTTP mock
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	// Define the model ID and the mock response
-	modelID := "deepseek-coder"
-	mockResponse := Model{
-		Id:      modelID,
-		Object:  "model",
-		Created: 1696931010,
-		OwnedBy: "deepseek",
-	}
-
-	// Create a JSON responder
-	responder, err := httpmock.NewJsonResponder(200, mockResponse)
-	require.NoError(t, err)
-
-	// Register the responder for the specific URL
-	url := "https://api.siliconflow.cn/v1/models/" + modelID
-	httpmock.RegisterResponder("GET", url, responder)
-
-	// Call the method under test
-	model, err := p.GetModel(modelID)
-
-	// Assert the results
-	assert.NoError(t, err)
-	require.NotNil(t, model)
-	assert.Equal(t, mockResponse.Id, model.Id)
-	assert.Equal(t, mockResponse.Object, model.Object)
-	assert.Equal(t, mockResponse.Created, model.Created)
-	assert.Equal(t, mockResponse.OwnedBy, model.OwnedBy)
-}
-func TestGetModelFailure(t *testing.T) {
-	// Initialize the provider
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
-
-	// Activate the HTTP mock
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	// Define the model ID that does not exist
-	modelID := "non-existent-model"
-	errorMessage := "model not found"
-
-	// Mock the API error response
-	mockErrorResponse := SiliconFlowErrorRsp{
-		Err: struct {
-			Message string `json:"message"`
-			Type    string `json:"type"`
-			Param   string `json:"param"`
-			Code    string `json:"code"`
-		}{
-			Message: errorMessage,
-			Type:    "invalid_request_error",
-		},
-	}
-
-	// Create a JSON responder for the error
-	responder, err := httpmock.NewJsonResponder(http.StatusNotFound, mockErrorResponse)
-	require.NoError(t, err)
-
-	// Register the responder for the specific URL
-	url := "https://api.siliconflow.cn/v1/models/" + modelID
-	httpmock.RegisterResponder("GET", url, responder)
-
-	// Call the method under test
-	model, err := p.GetModel(modelID)
-
-	// Assert the results
-	assert.Error(t, err)
-	assert.Nil(t, model)
-
-	// Check if the error is of the expected type
-	var siliconFlowError *SiliconFlowErrorRsp
-	require.ErrorAs(t, err, &siliconFlowError)
-	assert.Equal(t, errorMessage, siliconFlowError.Err.Message)
-}
-func TestSiliconFlow_GetInfoList(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
-
-	tests := []struct {
-		name          string
-		setupMock     func()
-		giveChannel   *aiload.ModelChannel
-		checkResponse func(t *testing.T, rsp *SiliconFlowGetInfoListRsp, err error)
-	}{
-		{
-			name: "success",
-			setupMock: func() {
-				mockResponse := SiliconFlowGetInfoListRsp{
-					Code:    200,
-					Message: "Success",
-					Status:  true,
-					Data: struct {
-						Id            string `json:"id"`
-						Name          string `json:"name"`
-						Image         string `json:"image"`
-						Email         string `json:"email"`
-						IsAdmin       bool   `json:"isAdmin"`
-						Balance       string `json:"balance"`
-						Status        string `json:"status"`
-						Introduction  string `json:"introduction"`
-						Role          string `json:"role"`
-						ChargeBalance string `json:"chargeBalance"`
-						TotalBalance  string `json:"totalBalance"`
-					}{
-						Id:      "user-123",
-						Name:    "Test User",
-						Email:   "test@example.com",
-						Balance: "100.00",
-					},
-				}
-				respBody, err := json.Marshal(mockResponse)
-				require.NoError(t, err)
-
-				httpmock.RegisterResponder("GET", "https://api.siliconflow.cn/v1/user/info",
-					func(req *http.Request) (*http.Response, error) {
-						if req.Header.Get("Authorization") != "Bearer test-token" {
-							return httpmock.NewStringResponse(401, "Unauthorized"), nil
-						}
-						resp := httpmock.NewStringResponse(200, string(respBody))
-						resp.Header.Set("Content-Type", "application/json")
-						return resp, nil
-					},
-				)
-			},
-			giveChannel: mockChannel,
-			checkResponse: func(t *testing.T, rsp *SiliconFlowGetInfoListRsp, err error) {
-				assert.NoError(t, err)
-				require.NotNil(t, rsp)
-				assert.True(t, rsp.Status)
-				assert.Equal(t, "user-123", rsp.Data.Id)
-				assert.Equal(t, "Test User", rsp.Data.Name)
-			},
-		},
-		{
-			name: "api error",
-			setupMock: func() {
-				httpmock.RegisterResponder("GET", "https://api.siliconflow.cn/v1/user/info",
-					func(req *http.Request) (*http.Response, error) {
-						resp := httpmock.NewStringResponse(400, `{"error":{"message":"Bad request"}}`)
-						resp.Header.Set("Content-Type", "application/json")
-						return resp, nil
-					},
-				)
-			},
-			giveChannel: mockChannel,
-			checkResponse: func(t *testing.T, rsp *SiliconFlowGetInfoListRsp, err error) {
-				assert.Error(t, err)
-				assert.Nil(t, rsp)
-				var siliconFlowError *SiliconFlowErrorRsp
-				require.ErrorAs(t, err, &siliconFlowError)
-				assert.Equal(t, "Bad request", siliconFlowError.Err.Message)
-			},
-		},
-		{
-			name: "no token",
-			setupMock: func() {
-				// No mock needed as it should fail before the request
-			},
-			giveChannel: &aiload.ModelChannel{Token: ""}, // No token
-			checkResponse: func(t *testing.T, rsp *SiliconFlowGetInfoListRsp, err error) {
-				assert.Error(t, err)
-				assert.Nil(t, rsp)
-				assert.True(t, errors.Is(err, ErrAuthTokenNil))
-			},
-		},
-		{
-			name: "http error",
-			setupMock: func() {
-				httpmock.RegisterResponder("GET", "https://api.siliconflow.cn/v1/user/info",
-					func(req *http.Request) (*http.Response, error) {
-						return httpmock.NewStringResponse(500, "Internal Server Error"), nil
-					},
-				)
-			},
-			giveChannel: mockChannel,
-			checkResponse: func(t *testing.T, rsp *SiliconFlowGetInfoListRsp, err error) {
-				assert.Error(t, err)
-				assert.Nil(t, rsp)
-				_, isSiliconFlowError := err.(*SiliconFlowErrorRsp)
-				assert.False(t, isSiliconFlowError, "error should not be a SiliconFlowErrorRsp")
-				assert.Contains(t, err.Error(), "Internal Server Error")
+				checkAPIError(t, err, "Internal server error")
 			},
 		},
 	}
@@ -1668,100 +129,76 @@ func TestSiliconFlow_GetInfoList(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			httpmock.Reset()
-			tt.setupMock()
+			httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/chat/completions", tt.mockResponder)
 
-			// Use the channel provided by the test case
-			provider := NewSiliconFlow(tt.giveChannel)
-			rsp, err := provider.GetInfoList()
+			rsp, err := p.CreateChatCompletion(tt.giveRequest)
 
 			tt.checkResponse(t, rsp, err)
 		})
 	}
 }
-func TestSiliconFlow_RetrieveFileContent(t *testing.T) {
-	mockChannel := &aiload.ModelChannel{
-		Token: "test-token",
-	}
-	p := NewSiliconFlow(mockChannel)
 
-	httpmock.ActivateNonDefault(client.GetClient())
-	defer httpmock.DeactivateAndReset()
+func TestSiliconFlowEmbedding(t *testing.T) {
+	p, teardown := setupTest(t)
+	defer teardown()
+
+	mockSuccessResponse := SiliconFlowCreateEmbeddingRsp{
+		Object: "list",
+		Data: []struct {
+			Object    string    `json:"object"`
+			Embedding []float64 `json:"embedding"`
+			Index     int       `json:"index"`
+		}{
+			{
+				Object:    "embedding",
+				Embedding: []float64{0.1, 0.2, 0.3},
+				Index:     0,
+			},
+		},
+		Model: "bge-large-zh-v1.5",
+		Usage: struct {
+			PromptTokens int `json:"prompt_tokens"`
+			TotalTokens  int `json:"total_tokens"`
+		}{
+			PromptTokens: 10,
+			TotalTokens:  10,
+		},
+	}
+	successRespBody, err := json.Marshal(mockSuccessResponse)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name          string
-		giveFileID    string
+		giveRequest   *SiliconFlowCreateEmbeddingReq
 		mockResponder httpmock.Responder
-		checkResponse func(t *testing.T, body io.ReadCloser, err error)
+		checkResponse func(t *testing.T, rsp *SiliconFlowCreateEmbeddingRsp, err error)
 	}{
 		{
-			name:       "success",
-			giveFileID: "file-id-success",
-			mockResponder: func(req *http.Request) (*http.Response, error) {
-				// 验证请求头
-				assert.Equal(t, "Bearer test-token", req.Header.Get("Authorization"))
-				// 返回成功的响应
-				return httpmock.NewStringResponse(200, "file content"), nil
+			name: "success",
+			giveRequest: &SiliconFlowCreateEmbeddingReq{
+				Model: "bge-large-zh-v1.5",
+				Input: []string{"hello"},
 			},
-			checkResponse: func(t *testing.T, body io.ReadCloser, err error) {
+			mockResponder: newMockResponder(http.StatusOK, string(successRespBody)),
+			checkResponse: func(t *testing.T, rsp *SiliconFlowCreateEmbeddingRsp, err error) {
 				assert.NoError(t, err)
-				require.NotNil(t, body)
-				defer body.Close()
-				content, readErr := io.ReadAll(body)
-				assert.NoError(t, readErr)
-				assert.Equal(t, "file content", string(content))
+				require.NotNil(t, rsp)
+				assert.Equal(t, "list", rsp.Object)
+				require.Len(t, rsp.Data, 1)
+				assert.Equal(t, []float64{0.1, 0.2, 0.3}, rsp.Data[0].Embedding)
 			},
 		},
 		{
-			name:       "api error - structured",
-			giveFileID: "file-id-api-error",
-			mockResponder: func(req *http.Request) (*http.Response, error) {
-				// 模拟一个结构化的错误响应
-				errRsp := SiliconFlowErrorRsp{
-					Err: struct {
-						Message string `json:"message"`
-						Type    string `json:"type"`
-						Param   string `json:"param"`
-						Code    string `json:"code"`
-					}{
-						Message: "File not found",
-						Type:    "invalid_request_error",
-						Code:    "not_found",
-					},
-				}
-				return httpmock.NewJsonResponse(404, errRsp)
+			name: "api error",
+			giveRequest: &SiliconFlowCreateEmbeddingReq{
+				Model: "bge-large-zh-v1.5",
+				Input: []string{"hello"},
 			},
-			checkResponse: func(t *testing.T, body io.ReadCloser, err error) {
-				assert.Nil(t, body)
-				require.Error(t, err)
-				var siliconFlowError *SiliconFlowErrorRsp
-				require.ErrorAs(t, err, &siliconFlowError)
-				assert.Equal(t, "File not found", siliconFlowError.Error())
-			},
-		},
-		{
-			name:       "api error - unstructured",
-			giveFileID: "file-id-unstructured-error",
-			mockResponder: func(req *http.Request) (*http.Response, error) {
-				// 模拟一个非 JSON 格式的错误响应
-				return httpmock.NewStringResponse(500, "Internal Server Error"), nil
-			},
-			checkResponse: func(t *testing.T, body io.ReadCloser, err error) {
-				assert.Nil(t, body)
-				require.Error(t, err)
-				// 错误不应是 SiliconFlowErrorRsp 类型
-				_, isSiliconFlowError := err.(*SiliconFlowErrorRsp)
-				assert.False(t, isSiliconFlowError)
-				assert.Equal(t, "Internal Server Error", err.Error())
-			},
-		},
-		{
-			name:          "network error",
-			giveFileID:    "file-id-network-error",
-			mockResponder: httpmock.NewErrorResponder(errors.New("connection refused")),
-			checkResponse: func(t *testing.T, body io.ReadCloser, err error) {
-				assert.Nil(t, body)
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), "connection refused")
+			mockResponder: newMockResponder(http.StatusInternalServerError, `{"error":{"message":"Internal server error"}}`),
+			checkResponse: func(t *testing.T, rsp *SiliconFlowCreateEmbeddingRsp, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				checkAPIError(t, err, "Internal server error")
 			},
 		},
 	}
@@ -1769,13 +206,1148 @@ func TestSiliconFlow_RetrieveFileContent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			httpmock.Reset()
-			url := "https://api.siliconflow.cn/v1/files/" + tt.giveFileID + "/content"
-			httpmock.RegisterResponder("GET", url, tt.mockResponder)
+			httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/embeddings", tt.mockResponder)
 
-			body, err := p.RetrieveFileContent(tt.giveFileID)
+			rsp, err := p.CreateEmbedding(tt.giveRequest)
 
-			tt.checkResponse(t, body, err)
+			tt.checkResponse(t, rsp, err)
 		})
 	}
 }
 
+func TestSiliconFlow_Image(t *testing.T) {
+	p, teardown := setupTest(t)
+	defer teardown()
+
+	// Mocks for successful responses
+	mockGenerationsSuccessResponse := SiliconFlowCreateImageGenerationsRsp{
+		Created: 1677652288,
+		Data: []struct {
+			URL     string `json:"url,omitempty"`
+			B64JSON string `json:"b64_json,omitempty"`
+		}{{URL: "https://example.com/image.png"}},
+	}
+	generationsSuccessBody, err := json.Marshal(mockGenerationsSuccessResponse)
+	require.NoError(t, err)
+
+	mockEditsSuccessResponse := SiliconFlowCreateImageEditsRsp{
+		Created: 1677652288,
+		Data: []struct {
+			URL     string `json:"url,omitempty"`
+			B64JSON string `json:"b64_json,omitempty"`
+		}{{URL: "https://example.com/edited-image.png"}},
+	}
+	editsSuccessBody, err := json.Marshal(mockEditsSuccessResponse)
+	require.NoError(t, err)
+
+	mockVariationsSuccessResponse := SiliconFlowCreateImageVariationsRsp{
+		Created: 1677652288,
+		Data: []struct {
+			URL     string `json:"url,omitempty"`
+			B64JSON string `json:"b64_json,omitempty"`
+		}{{URL: "https://example.com/variation-image.png"}},
+	}
+	variationsSuccessBody, err := json.Marshal(mockVariationsSuccessResponse)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name          string
+		endpoint      string
+		giveRequest   any
+		mockResponder httpmock.Responder
+		apiCall       func(p *SiliconFlow, req any) (any, error)
+		checkResponse func(t *testing.T, rsp any, err error)
+	}{
+		// Generations
+		{
+			name:          "generations/success",
+			endpoint:      "https://api.siliconflow.cn/v1/images/generations",
+			giveRequest:   &SiliconFlowCreateImageGenerationsReq{Prompt: "a cat"},
+			mockResponder: newMockResponder(http.StatusOK, string(generationsSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateImageGenerations(req.(*SiliconFlowCreateImageGenerationsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowCreateImageGenerationsRsp)
+				require.True(t, ok)
+				require.NotNil(t, r)
+				require.Len(t, r.Data, 1)
+				assert.Equal(t, "https://example.com/image.png", r.Data[0].URL)
+			},
+		},
+		{
+			name:          "generations/api_error",
+			endpoint:      "https://api.siliconflow.cn/v1/images/generations",
+			giveRequest:   &SiliconFlowCreateImageGenerationsReq{Prompt: "a cat"},
+			mockResponder: newMockResponder(http.StatusInternalServerError, `{"error":{"message":"Internal server error"}}`),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateImageGenerations(req.(*SiliconFlowCreateImageGenerationsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				checkAPIError(t, err, "Internal server error")
+			},
+		},
+		{
+			name:          "generations/network_error",
+			endpoint:      "https://api.siliconflow.cn/v1/images/generations",
+			giveRequest:   &SiliconFlowCreateImageGenerationsReq{Prompt: "a cat"},
+			mockResponder: httpmock.NewErrorResponder(errors.New("network error")),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateImageGenerations(req.(*SiliconFlowCreateImageGenerationsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				assert.Contains(t, err.Error(), "network error")
+			},
+		},
+		// Edits
+		{
+			name:     "edits/success",
+			endpoint: "https://api.siliconflow.cn/v1/images/edits",
+			giveRequest: &SiliconFlowCreateImageEditsReq{
+				Prompt:        "a cute cat",
+				Image:         strings.NewReader("fake-image-data"),
+				ImageFileName: "test-image.png",
+				Model:         "stable-diffusion-xl-1024-v1-0",
+			},
+			mockResponder: newMockResponder(http.StatusOK, string(editsSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateImageEdits(req.(*SiliconFlowCreateImageEditsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowCreateImageEditsRsp)
+				require.True(t, ok)
+				require.NotNil(t, r)
+				require.Len(t, r.Data, 1)
+				assert.Equal(t, "https://example.com/edited-image.png", r.Data[0].URL)
+			},
+		},
+		{
+			name:     "edits/missing_image",
+			endpoint: "https://api.siliconflow.cn/v1/images/edits",
+			giveRequest: &SiliconFlowCreateImageEditsReq{
+				Prompt: "a cute cat",
+			},
+			mockResponder: newMockResponder(http.StatusBadRequest, ""), // Not called
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateImageEdits(req.(*SiliconFlowCreateImageEditsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				assert.Contains(t, err.Error(), "image reader is required")
+			},
+		},
+		{
+			name:     "edits/api_error",
+			endpoint: "https://api.siliconflow.cn/v1/images/edits",
+			giveRequest: &SiliconFlowCreateImageEditsReq{
+				Prompt:        "a cute cat",
+				Image:         strings.NewReader("fake-image-data"),
+				ImageFileName: "test-image.png",
+			},
+			mockResponder: newMockResponder(http.StatusInternalServerError, `{"error":{"message":"Internal server error"}}`),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateImageEdits(req.(*SiliconFlowCreateImageEditsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				checkAPIError(t, err, "Internal server error")
+			},
+		},
+		{
+			name:     "edits/network_error",
+			endpoint: "https://api.siliconflow.cn/v1/images/edits",
+			giveRequest: &SiliconFlowCreateImageEditsReq{
+				Prompt:        "a cute cat",
+				Image:         strings.NewReader("fake-image-data"),
+				ImageFileName: "test-image.png",
+			},
+			mockResponder: httpmock.NewErrorResponder(errors.New("network error")),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateImageEdits(req.(*SiliconFlowCreateImageEditsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				assert.Contains(t, err.Error(), "network error")
+			},
+		},
+		{
+			name:     "edits/success_with_all_fields",
+			endpoint: "https://api.siliconflow.cn/v1/images/edits",
+			giveRequest: &SiliconFlowCreateImageEditsReq{
+				Prompt:         "a cute cat with a hat",
+				Image:          strings.NewReader("fake-image-data-full"),
+				ImageFileName:  "test-image-full.png",
+				Mask:           strings.NewReader("fake-mask-data"),
+				MaskFileName:   "mask.png",
+				Model:          "stable-diffusion-xl-1024-v1-0",
+				N:              2,
+				Size:           "1024x1024",
+				ResponseFormat: "b64_json",
+				User:           "test-user",
+			},
+			mockResponder: newMockResponder(http.StatusOK, string(editsSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateImageEdits(req.(*SiliconFlowCreateImageEditsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowCreateImageEditsRsp)
+				require.True(t, ok)
+				require.NotNil(t, r)
+				require.Len(t, r.Data, 1)
+				assert.Equal(t, "https://example.com/edited-image.png", r.Data[0].URL)
+			},
+		},
+		// Variations
+		{
+			name:     "variations/success",
+			endpoint: "https://api.siliconflow.cn/v1/images/variations",
+			giveRequest: &SiliconFlowCreateImageVariationsReq{
+				Image:         strings.NewReader("fake-variation-image-data"),
+				ImageFileName: "test-variation-image.png",
+				Model:         "stable-diffusion-xl-1024-v1-0",
+			},
+			mockResponder: newMockResponder(http.StatusOK, string(variationsSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateImageVariations(req.(*SiliconFlowCreateImageVariationsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowCreateImageVariationsRsp)
+				require.True(t, ok)
+				require.NotNil(t, r)
+				require.Len(t, r.Data, 1)
+				assert.Equal(t, "https://example.com/variation-image.png", r.Data[0].URL)
+			},
+		},
+		{
+			name:          "variations/missing_image",
+			endpoint:      "https://api.siliconflow.cn/v1/images/variations",
+			giveRequest:   &SiliconFlowCreateImageVariationsReq{},
+			mockResponder: newMockResponder(http.StatusBadRequest, ""), // Not called
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateImageVariations(req.(*SiliconFlowCreateImageVariationsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				assert.Equal(t, "image reader is required", err.Error())
+			},
+		},
+		{
+			name:     "variations/network_error",
+			endpoint: "https://api.siliconflow.cn/v1/images/variations",
+			giveRequest: &SiliconFlowCreateImageVariationsReq{
+				Image:         strings.NewReader("fake-variation-image-data"),
+				ImageFileName: "test-variation-image.png",
+			},
+			mockResponder: httpmock.NewErrorResponder(errors.New("network error")),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateImageVariations(req.(*SiliconFlowCreateImageVariationsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				assert.Contains(t, err.Error(), "network error")
+			},
+		},
+		{
+			name:     "variations/success_with_all_fields",
+			endpoint: "https://api.siliconflow.cn/v1/images/variations",
+			giveRequest: &SiliconFlowCreateImageVariationsReq{
+				Image:          strings.NewReader("fake-variation-image-data-full"),
+				ImageFileName:  "test-variation-image-full.png",
+				Model:          "stable-diffusion-xl-1024-v1-0",
+				N:              2,
+				Size:           "1024x1024",
+				ResponseFormat: "url",
+				User:           "test-user-variations",
+			},
+			mockResponder: newMockResponder(http.StatusOK, string(variationsSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateImageVariations(req.(*SiliconFlowCreateImageVariationsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowCreateImageVariationsRsp)
+				require.True(t, ok)
+				require.NotNil(t, r)
+				require.Len(t, r.Data, 1)
+				assert.Equal(t, "https://example.com/variation-image.png", r.Data[0].URL)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			httpmock.Reset()
+			httpmock.RegisterResponder("POST", tt.endpoint, tt.mockResponder)
+
+			rsp, err := tt.apiCall(p, tt.giveRequest)
+
+			tt.checkResponse(t, rsp, err)
+		})
+	}
+}
+
+func TestSiliconFlow_Audio(t *testing.T) {
+	p, teardown := setupTest(t)
+	defer teardown()
+
+	// Mocks for successful responses
+	mockTranslationSuccessResponse := SiliconFlowCreateAudioTranslationRsp{
+		Text: "Hello, this is a test.",
+	}
+	translationSuccessBody, err := json.Marshal(mockTranslationSuccessResponse)
+	require.NoError(t, err)
+
+	mockTranscriptionSuccessResponse := SiliconFlowCreateAudioTranscriptionResp{
+		Text: "This is a test transcription.",
+	}
+	transcriptionSuccessBody, err := json.Marshal(mockTranscriptionSuccessResponse)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name          string
+		endpoint      string
+		giveRequest   any
+		mockResponder httpmock.Responder
+		apiCall       func(p *SiliconFlow, req any) (any, error)
+		checkResponse func(t *testing.T, rsp any, err error)
+	}{
+		// Translations
+		{
+			name:     "translations/success",
+			endpoint: "https://api.siliconflow.cn/v1/audio/translations",
+			giveRequest: &SiliconFlowCreateAudioTranslationReq{
+				File:     strings.NewReader("fake-audio-data"),
+				FileName: "test-audio.mp3",
+				Model:    "whisper-large-v3",
+			},
+			mockResponder: newMockResponder(http.StatusOK, string(translationSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateAudioTranslation(req.(*SiliconFlowCreateAudioTranslationReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowCreateAudioTranslationRsp)
+				require.True(t, ok)
+				require.NotNil(t, r)
+				assert.Equal(t, "Hello, this is a test.", r.Text)
+			},
+		},
+		{
+			name:     "translations/api_error",
+			endpoint: "https://api.siliconflow.cn/v1/audio/translations",
+			giveRequest: &SiliconFlowCreateAudioTranslationReq{
+				File:     strings.NewReader("fake-audio-data"),
+				FileName: "test-audio.mp3",
+				Model:    "whisper-large-v3",
+			},
+			mockResponder: newMockResponder(http.StatusInternalServerError, `{"error":{"message":"Internal server error"}}`),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateAudioTranslation(req.(*SiliconFlowCreateAudioTranslationReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				checkAPIError(t, err, "Internal server error")
+			},
+		},
+		{
+			name:          "translations/missing_file",
+			endpoint:      "https://api.siliconflow.cn/v1/audio/translations",
+			giveRequest:   &SiliconFlowCreateAudioTranslationReq{Model: "whisper-large-v3"},
+			mockResponder: newMockResponder(http.StatusBadRequest, ""), // Not called
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateAudioTranslation(req.(*SiliconFlowCreateAudioTranslationReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				assert.Equal(t, "file reader is required", err.Error())
+			},
+		},
+		{
+			name:     "translations/network_error",
+			endpoint: "https://api.siliconflow.cn/v1/audio/translations",
+			giveRequest: &SiliconFlowCreateAudioTranslationReq{
+				File:     strings.NewReader("fake-audio-data"),
+				FileName: "test-audio.mp3",
+				Model:    "whisper-large-v3",
+			},
+			mockResponder: httpmock.NewErrorResponder(errors.New("network error")),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateAudioTranslation(req.(*SiliconFlowCreateAudioTranslationReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				assert.Contains(t, err.Error(), "network error")
+			},
+		},
+		// Transcriptions
+		{
+			name:     "transcriptions/success",
+			endpoint: "https://api.siliconflow.cn/v1/audio/transcriptions",
+			giveRequest: &SiliconFlowCreateAudioTranscriptionReq{
+				File:     strings.NewReader("fake-audio-data-for-transcription"),
+				FileName: "test-audio.mp3",
+				Model:    "whisper-large-v3",
+			},
+			mockResponder: newMockResponder(http.StatusOK, string(transcriptionSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateAudioTranscription(req.(*SiliconFlowCreateAudioTranscriptionReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowCreateAudioTranscriptionResp)
+				require.True(t, ok)
+				require.NotNil(t, r)
+				assert.Equal(t, "This is a test transcription.", r.Text)
+			},
+		},
+		{
+			name:     "transcriptions/api_error",
+			endpoint: "https://api.siliconflow.cn/v1/audio/transcriptions",
+			giveRequest: &SiliconFlowCreateAudioTranscriptionReq{
+				File:     strings.NewReader("fake-audio-data-for-transcription"),
+				FileName: "test-audio.mp3",
+				Model:    "whisper-large-v3",
+			},
+			mockResponder: newMockResponder(http.StatusInternalServerError, `{"error":{"message":"Internal server error"}}`),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateAudioTranscription(req.(*SiliconFlowCreateAudioTranscriptionReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				checkAPIError(t, err, "Internal server error")
+			},
+		},
+		{
+			name:          "transcriptions/missing_file",
+			endpoint:      "https://api.siliconflow.cn/v1/audio/transcriptions",
+			giveRequest:   &SiliconFlowCreateAudioTranscriptionReq{Model: "whisper-large-v3"},
+			mockResponder: newMockResponder(http.StatusBadRequest, ""), // Not called
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateAudioTranscription(req.(*SiliconFlowCreateAudioTranscriptionReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				assert.Equal(t, "file reader is required", err.Error())
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			httpmock.Reset()
+			httpmock.RegisterResponder("POST", tt.endpoint, tt.mockResponder)
+
+			rsp, err := tt.apiCall(p, tt.giveRequest)
+
+			tt.checkResponse(t, rsp, err)
+		})
+	}
+}
+
+func TestSiliconflowFile(t *testing.T) {
+	p, teardown := setupTest(t)
+	defer teardown()
+
+	// Mocks for successful responses
+	mockUploadFileSuccessResponse := SiliconFlowFileObj{
+		ID: "file-mock-id", Bytes: 140, CreatedAt: 1677652288, Filename: "test-file.jsonl", Object: "file", Purpose: "fine-tune", Status: "processed",
+	}
+	uploadFileSuccessBody, err := json.Marshal(mockUploadFileSuccessResponse)
+	require.NoError(t, err)
+
+	mockListFilesSuccessResponse := SiliconFlowListFilesRsp{
+		Object: "list",
+		Data: []SiliconFlowFileObj{
+			{ID: "file-mock-id-1", Filename: "test-file-1.jsonl"},
+			{ID: "file-mock-id-2", Filename: "test-file-2.jsonl"},
+		},
+	}
+	listFilesSuccessBody, err := json.Marshal(mockListFilesSuccessResponse)
+	require.NoError(t, err)
+
+	mockDeleteFileSuccessResponse := SiliconFlowDeleteFileRsp{
+		ID: "file-mock-id-to-delete", Object: "file", Deleted: true,
+	}
+	deleteFileSuccessBody, err := json.Marshal(mockDeleteFileSuccessResponse)
+	require.NoError(t, err)
+
+	mockRetrieveFileSuccessResponse := SiliconFlowFileObj{
+		ID: "file-mock-id-1", Filename: "test-file-1.jsonl",
+	}
+	retrieveFileSuccessBody, err := json.Marshal(mockRetrieveFileSuccessResponse)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name          string
+		method        string
+		endpoint      string
+		giveRequest   any
+		mockResponder httpmock.Responder
+		apiCall       func(p *SiliconFlow, req any) (any, error)
+		checkResponse func(t *testing.T, rsp any, err error)
+	}{
+		// UploadFile
+		{
+			name:     "upload/success",
+			method:   "POST",
+			endpoint: "https://api.siliconflow.cn/v1/files",
+			giveRequest: &SiliconFlowUploadFileReq{
+				File: strings.NewReader("fake-file-data"), FileName: "test-file.jsonl", Purpose: "fine-tune",
+			},
+			mockResponder: newMockResponder(http.StatusOK, string(uploadFileSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.UploadFile(req.(*SiliconFlowUploadFileReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowFileObj)
+				require.True(t, ok)
+				assert.Equal(t, "file-mock-id", r.ID)
+			},
+		},
+		{
+			name:     "upload/missing_file",
+			method:   "POST",
+			endpoint: "https://api.siliconflow.cn/v1/files",
+			giveRequest: &SiliconFlowUploadFileReq{
+				Purpose: "fine-tune",
+			},
+			mockResponder: newMockResponder(http.StatusBadRequest, ""), // Not called
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.UploadFile(req.(*SiliconFlowUploadFileReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				assert.Equal(t, "file reader is required", err.Error())
+			},
+		},
+		{
+			name:          "upload/network_error",
+			method:        "POST",
+			endpoint:      "https://api.siliconflow.cn/v1/files",
+			giveRequest:   &SiliconFlowUploadFileReq{File: strings.NewReader("d"), FileName: "d", Purpose: "fine-tune"},
+			mockResponder: httpmock.NewErrorResponder(errors.New("network error")),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.UploadFile(req.(*SiliconFlowUploadFileReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				assert.Contains(t, err.Error(), "network error")
+			},
+		},
+		// ListFiles
+		{
+			name:          "list/success",
+			method:        "GET",
+			endpoint:      "https://api.siliconflow.cn/v1/files",
+			giveRequest:   nil,
+			mockResponder: newMockResponder(http.StatusOK, string(listFilesSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.ListFiles()
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowListFilesRsp)
+				require.True(t, ok)
+				require.Len(t, r.Data, 2)
+				assert.Equal(t, "file-mock-id-1", r.Data[0].ID)
+			},
+		},
+		// DeleteFile
+		{
+			name:          "delete/success",
+			method:        "DELETE",
+			endpoint:      "https://api.siliconflow.cn/v1/files/file-mock-id-to-delete",
+			giveRequest:   "file-mock-id-to-delete",
+			mockResponder: newMockResponder(http.StatusOK, string(deleteFileSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.DeleteFile(req.(string))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowDeleteFileRsp)
+				require.True(t, ok)
+				assert.True(t, r.Deleted)
+			},
+		},
+		// RetrieveFile
+		{
+			name:          "retrieve/success",
+			method:        "GET",
+			endpoint:      "https://api.siliconflow.cn/v1/files/file-mock-id-1",
+			giveRequest:   "file-mock-id-1",
+			mockResponder: newMockResponder(http.StatusOK, string(retrieveFileSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.RetrieveFile(req.(string))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowFileObj)
+				require.True(t, ok)
+				assert.Equal(t, "file-mock-id-1", r.ID)
+			},
+		},
+		// RetrieveFileContent
+		{
+			name:          "retrieve_content/success",
+			method:        "GET",
+			endpoint:      "https://api.siliconflow.cn/v1/files/file-id-success/content",
+			giveRequest:   "file-id-success",
+			mockResponder: newMockResponder(http.StatusOK, "file content"),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.RetrieveFileContent(req.(string))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				body, ok := rsp.(io.ReadCloser)
+				require.True(t, ok)
+				defer body.Close()
+				content, _ := io.ReadAll(body)
+				assert.Equal(t, "file content", string(content))
+			},
+		},
+		{
+			name:          "retrieve_content/api_error",
+			method:        "GET",
+			endpoint:      "https://api.siliconflow.cn/v1/files/file-id-api-error/content",
+			giveRequest:   "file-id-api-error",
+			mockResponder: newMockResponder(http.StatusNotFound, `{"error":{"message":"File not found"}}`),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.RetrieveFileContent(req.(string))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Nil(t, rsp)
+				checkAPIError(t, err, "File not found")
+			},
+		},
+		{
+			name:          "retrieve_content/unstructured_error",
+			method:        "GET",
+			endpoint:      "https://api.siliconflow.cn/v1/files/file-id-unstructured-error/content",
+			giveRequest:   "file-id-unstructured-error",
+			mockResponder: newMockResponder(http.StatusInternalServerError, "internal server error"),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.RetrieveFileContent(req.(string))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				assert.Contains(t, err.Error(), "internal server error")
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			httpmock.Reset()
+			httpmock.RegisterResponder(tt.method, tt.endpoint, tt.mockResponder)
+			rsp, err := tt.apiCall(p, tt.giveRequest)
+			tt.checkResponse(t, rsp, err)
+		})
+	}
+}
+func TestSiliconflowFineTuning(t *testing.T) {
+	p, teardown := setupTest(t)
+	defer teardown()
+
+	// Mocks for successful responses
+	mockCreateJobSuccessResponse := SiliconFlowFineTuningJob{
+		ID: "ft-job-mock-id", Status: "succeeded", FineTunedModel: "ft:gpt-3.5-turbo:my-org:custom-model-name:1",
+	}
+	createJobSuccessBody, err := json.Marshal(mockCreateJobSuccessResponse)
+	require.NoError(t, err)
+
+	mockListJobsSuccessResponse := SiliconFlowFineTuningJobList{
+		Object: "list", Data: []SiliconFlowFineTuningJob{{ID: "ft-job-mock-id-1"}}, HasMore: false,
+	}
+	listJobsSuccessBody, err := json.Marshal(mockListJobsSuccessResponse)
+	require.NoError(t, err)
+
+	mockRetrieveJobSuccessResponse := SiliconFlowFineTuningJob{
+		ID: "ft-job-mock-id-success", Status: "succeeded", FineTunedModel: "ft:gpt-3.5-turbo:my-org:custom-model-name:1",
+	}
+	retrieveJobSuccessBody, err := json.Marshal(mockRetrieveJobSuccessResponse)
+	require.NoError(t, err)
+
+	mockCancelJobSuccessResponse := SiliconFlowFineTuningJob{
+		ID: "ft-job-mock-id-success", Status: "cancelled",
+	}
+	cancelJobSuccessBody, err := json.Marshal(mockCancelJobSuccessResponse)
+	require.NoError(t, err)
+
+	mockListEventsSuccessResponse := SiliconFlowFineTuningJobEventList{
+		Object: "list", Data: []SiliconFlowFineTuningJobEvent{{Object: "fine_tuning.job.event", Message: "Job started"}},
+	}
+	listEventsSuccessBody, err := json.Marshal(mockListEventsSuccessResponse)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name          string
+		method        string
+		endpoint      string
+		giveRequest   any
+		mockResponder httpmock.Responder
+		apiCall       func(p *SiliconFlow, req any) (any, error)
+		checkResponse func(t *testing.T, rsp any, err error)
+	}{
+		// CreateFineTuningJob
+		{
+			name:     "create_job/success",
+			method:   "POST",
+			endpoint: "https://api.siliconflow.cn/v1/fine_tuning/jobs",
+			giveRequest: &SiliconFlowFineTuningJobRequest{
+				TrainingFile: "file-train-mock-id", Model: "gpt-3.5-turbo",
+			},
+			mockResponder: newMockResponder(http.StatusOK, string(createJobSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CreateFineTuningJob(req.(*SiliconFlowFineTuningJobRequest))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowFineTuningJob)
+				require.True(t, ok)
+				assert.Equal(t, "ft-job-mock-id", r.ID)
+			},
+		},
+		// ListFineTuningJobs
+		{
+			name:     "list_jobs/success",
+			method:   "GET",
+			endpoint: "https://api.siliconflow.cn/v1/fine_tuning/jobs",
+			giveRequest: struct {
+				limit int
+				after string
+			}{limit: 10, after: "job-id-123"},
+			mockResponder: func(req *http.Request) (*http.Response, error) {
+				assert.Equal(t, "10", req.URL.Query().Get("limit"))
+				assert.Equal(t, "job-id-123", req.URL.Query().Get("after"))
+				return newMockResponder(http.StatusOK, string(listJobsSuccessBody))(req)
+			},
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				r := req.(struct {
+					limit int
+					after string
+				})
+				return p.ListFineTuningJobs(r.limit, r.after)
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowFineTuningJobList)
+				require.True(t, ok)
+				require.Len(t, r.Data, 1)
+				assert.Equal(t, "ft-job-mock-id-1", r.Data[0].ID)
+			},
+		},
+		{
+			name:     "list_jobs/success_no_params",
+			method:   "GET",
+			endpoint: "https://api.siliconflow.cn/v1/fine_tuning/jobs",
+			giveRequest: struct {
+				limit int
+				after string
+			}{limit: 0, after: ""},
+			mockResponder: func(req *http.Request) (*http.Response, error) {
+				assert.Equal(t, "", req.URL.Query().Get("limit"))
+				assert.Equal(t, "", req.URL.Query().Get("after"))
+				return newMockResponder(http.StatusOK, string(listJobsSuccessBody))(req)
+			},
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				r := req.(struct {
+					limit int
+					after string
+				})
+				return p.ListFineTuningJobs(r.limit, r.after)
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowFineTuningJobList)
+				require.True(t, ok)
+				require.Len(t, r.Data, 1)
+				assert.Equal(t, "ft-job-mock-id-1", r.Data[0].ID)
+			},
+		},
+		// RetrieveFineTuningJob
+		{
+			name:          "retrieve_job/success",
+			method:        "GET",
+			endpoint:      "https://api.siliconflow.cn/v1/fine_tuning/jobs/ft-job-mock-id-success",
+			giveRequest:   "ft-job-mock-id-success",
+			mockResponder: newMockResponder(http.StatusOK, string(retrieveJobSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.RetrieveFineTuningJob(req.(string))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowFineTuningJob)
+				require.True(t, ok)
+				assert.Equal(t, "ft-job-mock-id-success", r.ID)
+			},
+		},
+		// CancelFineTuningJob
+		{
+			name:          "cancel_job/success",
+			method:        "POST",
+			endpoint:      "https://api.siliconflow.cn/v1/fine_tuning/jobs/ft-job-mock-id-success/cancel",
+			giveRequest:   "ft-job-mock-id-success",
+			mockResponder: newMockResponder(http.StatusOK, string(cancelJobSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.CancelFineTuningJob(req.(string))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowFineTuningJob)
+				require.True(t, ok)
+				assert.Equal(t, "cancelled", r.Status)
+			},
+		},
+		// ListFineTuningJobEvents
+		{
+			name:     "list_events/success",
+			method:   "GET",
+			endpoint: "https://api.siliconflow.cn/v1/fine_tuning/jobs/ft-job-123/events",
+			giveRequest: &SiliconFlowListFineTuningJobEventsReq{
+				FineTuningJobID: "ft-job-123", Limit: 5, After: "event-id-0",
+			},
+			mockResponder: func(req *http.Request) (*http.Response, error) {
+				assert.Equal(t, "5", req.URL.Query().Get("limit"))
+				assert.Equal(t, "event-id-0", req.URL.Query().Get("after"))
+				return newMockResponder(http.StatusOK, string(listEventsSuccessBody))(req)
+			},
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.ListFineTuningJobEvents(req.(*SiliconFlowListFineTuningJobEventsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowFineTuningJobEventList)
+				require.True(t, ok)
+				require.Len(t, r.Data, 1)
+				assert.Equal(t, "Job started", r.Data[0].Message)
+			},
+		},
+		{
+			name:     "list_events/success_no_params",
+			method:   "GET",
+			endpoint: "https://api.siliconflow.cn/v1/fine_tuning/jobs/ft-job-123/events",
+			giveRequest: &SiliconFlowListFineTuningJobEventsReq{
+				FineTuningJobID: "ft-job-123",
+			},
+			mockResponder: func(req *http.Request) (*http.Response, error) {
+				assert.Equal(t, "", req.URL.Query().Get("limit"))
+				assert.Equal(t, "", req.URL.Query().Get("after"))
+				return newMockResponder(http.StatusOK, string(listEventsSuccessBody))(req)
+			},
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.ListFineTuningJobEvents(req.(*SiliconFlowListFineTuningJobEventsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowFineTuningJobEventList)
+				require.True(t, ok)
+				require.Len(t, r.Data, 1)
+				assert.Equal(t, "Job started", r.Data[0].Message)
+			},
+		},
+		{
+			name:     "list_events/api_error",
+			method:   "GET",
+			endpoint: "https://api.siliconflow.cn/v1/fine_tuning/jobs/ft-job-456/events",
+			giveRequest: &SiliconFlowListFineTuningJobEventsReq{
+				FineTuningJobID: "ft-job-456",
+			},
+			mockResponder: newMockResponder(http.StatusNotFound, `{"error":{"message":"Job not found"}}`),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.ListFineTuningJobEvents(req.(*SiliconFlowListFineTuningJobEventsReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Nil(t, rsp)
+				checkAPIError(t, err, "Job not found")
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			httpmock.Reset()
+			httpmock.RegisterResponder(tt.method, tt.endpoint, tt.mockResponder)
+			rsp, err := tt.apiCall(p, tt.giveRequest)
+			tt.checkResponse(t, rsp, err)
+		})
+	}
+}
+
+func TestSiliconflowMetadataAPI(t *testing.T) {
+	p, teardown := setupTest(t)
+	defer teardown()
+
+	// Mocks for GetModel
+	mockGetModelSuccessResponse := Model{
+		Id: "deepseek-coder", Object: "model", Created: 1696931010, OwnedBy: "deepseek",
+	}
+	getModelSuccessBody, err := json.Marshal(mockGetModelSuccessResponse)
+	require.NoError(t, err)
+
+	// Mocks for GetModelList
+	mockGetModelListFilteredResponse := SiliconFlowGetModelListRsp{
+		Object: "list",
+		Data:   []Model{{Id: "deepseek-coder", Object: "model", Created: 1696931010, OwnedBy: "deepseek"}},
+	}
+	getModelListFilteredBody, err := json.Marshal(mockGetModelListFilteredResponse)
+	require.NoError(t, err)
+
+	mockGetModelListUnfilteredResponse := SiliconFlowGetModelListRsp{
+		Object: "list",
+		Data:   []Model{{Id: "model-1"}, {Id: "model-2"}},
+	}
+	getModelListUnfilteredBody, err := json.Marshal(mockGetModelListUnfilteredResponse)
+	require.NoError(t, err)
+
+	// Mocks for GetInfoList
+	mockGetInfoListSuccessResponse := SiliconFlowGetInfoListRsp{
+		Code: 200, Message: "Success", Status: true,
+		Data: struct {
+			Id            string `json:"id"`
+			Name          string `json:"name"`
+			Image         string `json:"image"`
+			Email         string `json:"email"`
+			IsAdmin       bool   `json:"isAdmin"`
+			Balance       string `json:"balance"`
+			Status        string `json:"status"`
+			Introduction  string `json:"introduction"`
+			Role          string `json:"role"`
+			ChargeBalance string `json:"chargeBalance"`
+			TotalBalance  string `json:"totalBalance"`
+		}{Id: "user-123", Name: "Test User", Email: "test@example.com", Balance: "100.00"},
+	}
+	getInfoListSuccessBody, err := json.Marshal(mockGetInfoListSuccessResponse)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name          string
+		method        string
+		endpoint      string
+		giveRequest   any
+		mockResponder httpmock.Responder
+		apiCall       func(p *SiliconFlow, req any) (any, error)
+		checkResponse func(t *testing.T, rsp any, err error)
+	}{
+		// GetModel tests
+		{
+			name:          "get_model/success",
+			method:        "GET",
+			endpoint:      "https://api.siliconflow.cn/v1/models/deepseek-coder",
+			giveRequest:   "deepseek-coder",
+			mockResponder: newMockResponder(http.StatusOK, string(getModelSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.GetModel(req.(string))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*Model)
+				require.True(t, ok)
+				assert.Equal(t, "deepseek-coder", r.Id)
+			},
+		},
+		{
+			name:          "get_model/not_found",
+			method:        "GET",
+			endpoint:      "https://api.siliconflow.cn/v1/models/non-existent-model",
+			giveRequest:   "non-existent-model",
+			mockResponder: newMockResponder(http.StatusNotFound, `{"error":{"message":"model not found"}}`),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.GetModel(req.(string))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Nil(t, rsp)
+				checkAPIError(t, err, "model not found")
+			},
+		},
+		// GetModelList tests
+		{
+			name:     "get_model_list/with_filter",
+			method:   "GET",
+			endpoint: "https://api.siliconflow.cn/v1/models",
+			giveRequest: &SiliconFlowGetModelListReq{
+				Type: "chat", SubType: "open-source",
+			},
+			mockResponder: func(req *http.Request) (*http.Response, error) {
+				assert.Equal(t, "chat", req.URL.Query().Get("type"))
+				assert.Equal(t, "open-source", req.URL.Query().Get("sub_type"))
+				return newMockResponder(http.StatusOK, string(getModelListFilteredBody))(req)
+			},
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.GetModelList(req.(*SiliconFlowGetModelListReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowGetModelListRsp)
+				require.True(t, ok)
+				require.Len(t, r.Data, 1)
+				assert.Equal(t, "deepseek-coder", r.Data[0].Id)
+			},
+		},
+		{
+			name:          "get_model_list/no_filter",
+			method:        "GET",
+			endpoint:      "https://api.siliconflow.cn/v1/models",
+			giveRequest:   &SiliconFlowGetModelListReq{},
+			mockResponder: newMockResponder(http.StatusOK, string(getModelListUnfilteredBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.GetModelList(req.(*SiliconFlowGetModelListReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowGetModelListRsp)
+				require.True(t, ok)
+				assert.Len(t, r.Data, 2)
+			},
+		},
+		// GetInfoList tests
+		{
+			name:          "get_info_list/success",
+			method:        "GET",
+			endpoint:      "https://api.siliconflow.cn/v1/user/info",
+			giveRequest:   &aiload.ModelChannel{Token: "test-token"},
+			mockResponder: newMockResponder(http.StatusOK, string(getInfoListSuccessBody)),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				p.channel = req.(*aiload.ModelChannel)
+				return p.GetInfoList()
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.NoError(t, err)
+				r, ok := rsp.(*SiliconFlowGetInfoListRsp)
+				require.True(t, ok)
+				assert.True(t, r.Status)
+				assert.Equal(t, "user-123", r.Data.Id)
+			},
+		},
+		{
+			name:          "get_info_list/no_token",
+			method:        "GET",
+			endpoint:      "https://api.siliconflow.cn/v1/user/info",
+			giveRequest:   &aiload.ModelChannel{Token: ""},
+			mockResponder: newMockResponder(http.StatusOK, ""), // Not called
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				p.channel = req.(*aiload.ModelChannel)
+				return p.GetInfoList()
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Nil(t, rsp)
+				assert.True(t, errors.Is(err, ErrAuthTokenNil))
+			},
+		},
+		{
+			name:          "get_info_list/api_unstructured_error",
+			method:        "GET",
+			endpoint:      "https://api.siliconflow.cn/v1/user/info",
+			giveRequest:   &aiload.ModelChannel{Token: "test-token"},
+			mockResponder: newMockResponder(http.StatusInternalServerError, "internal server error"),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				p.channel = req.(*aiload.ModelChannel)
+				return p.GetInfoList()
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				assert.Contains(t, err.Error(), "internal server error")
+			},
+		},
+		{
+			name:          "get_model_list/api_error",
+			method:        "GET",
+			endpoint:      "https://api.siliconflow.cn/v1/models",
+			giveRequest:   &SiliconFlowGetModelListReq{},
+			mockResponder: newMockResponder(http.StatusInternalServerError, `{"error":{"message":"Internal server error"}}`),
+			apiCall: func(p *SiliconFlow, req any) (any, error) {
+				return p.GetModelList(req.(*SiliconFlowGetModelListReq))
+			},
+			checkResponse: func(t *testing.T, rsp any, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, rsp)
+				checkAPIError(t, err, "Internal server error")
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			httpmock.Reset()
+			httpmock.RegisterResponder(tt.method, tt.endpoint, tt.mockResponder)
+			rsp, err := tt.apiCall(p, tt.giveRequest)
+			tt.checkResponse(t, rsp, err)
+		})
+	}
+}
+
+func TestSiliconFlow_RequestHandling(t *testing.T) {
+	tests := []struct {
+		name        string
+		giveChannel *aiload.ModelChannel
+		checkFunc   func(t *testing.T, p *SiliconFlow)
+	}{
+		{
+			name:        "GetRequestRequired returns true when token is present",
+			giveChannel: &aiload.ModelChannel{Token: "some-token"},
+			checkFunc: func(t *testing.T, p *SiliconFlow) {
+				assert.True(t, p.GetRequestRequired())
+			},
+		},
+		{
+			name:        "GetRequestRequired returns false when token is absent",
+			giveChannel: &aiload.ModelChannel{Token: ""},
+			checkFunc: func(t *testing.T, p *SiliconFlow) {
+				assert.False(t, p.GetRequestRequired())
+			},
+		},
+		{
+			name:        "GetRequest sets auth token correctly",
+			giveChannel: &aiload.ModelChannel{Token: "my-secret-token"},
+			checkFunc: func(t *testing.T, p *SiliconFlow) {
+				req := p.GetRequest()
+				assert.Equal(t, "my-secret-token", req.Token)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := NewSiliconFlow(tt.giveChannel)
+			tt.checkFunc(t, p)
+		})
+	}
+}
+
+// newMockResponder creates a new httpmock.Responder with a given status code and body.
+// It automatically sets the Content-Type header to application/json.
+func newMockResponder(statusCode int, body string) httpmock.Responder {
+	resp := httpmock.NewStringResponse(statusCode, body)
+	resp.Header.Set("Content-Type", "application/json")
+	return httpmock.ResponderFromResponse(resp)
+}
+
+// checkAPIError checks if the given error is a *SiliconFlowErrorRsp and if its message matches the expected one.
+func checkAPIError(t *testing.T, err error, expectedMessage string) {
+	t.Helper()
+	var siliconFlowError *SiliconFlowErrorRsp
+	require.ErrorAs(t, err, &siliconFlowError, "error should be of type SiliconFlowErrorRsp")
+	assert.Equal(t, expectedMessage, siliconFlowError.Err.Message, "error message should match")
+}

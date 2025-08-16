@@ -1,12 +1,12 @@
-# 📖 API 文档 (aiload.proto)
+# API 规范
 
-本文档根据 `aiload.proto` 文件自动生成，详细描述了其中定义的所有服务接口、数据模型和枚举类型。
+本文档详细定义了 `aiload` 服务的 API 接口、数据模型和枚举类型，所有接口均基于 Protobuf 生成。
 
 ---
 
-## 🔮 接口 (RPC) 文档
+## 服务接口 (RPC)
 
-本部分详细说明了 `aiload` 服务提供的所有 RPC 方法。
+本部分详细说明了 `aiload` 服务提供的所有 RPC 方法及其使用方式。
 
 ### `POST /AddUserAdmin`
 
@@ -64,55 +64,77 @@
 -   **请求参数**: [`LoginReq`](#LoginReq)
 -   **响应参数**: [`LoginRsp`](#LoginRsp)
 
+-   **请求示例**:
+    ```json
+    {
+      "username": "admin",
+      "password": "your_password"
+    }
+    ```
+
+-   **响应示例**:
+    ```json
+    {
+      "user": {
+        "id": "1",
+        "username": "admin",
+        "name": "Administrator",
+        "role": "Admin"
+      },
+      "token": "ey...",
+      "expires_at": "1678886400"
+    }
+    ```
+
 ---
 
-## 🧱 数据模型 (Message) 文档
+## 数据模型 (Message)
 
-本部分清晰地展示了每个 `message` 的数据结构。
+本部分详细定义了 API 通信中使用的数据结构。
 
 ### `ModelChannel`
 
 | 字段         | 类型                    | 描述                                           |
 | :----------- | :---------------------- | :--------------------------------------------- |
-| `id`         | `uint64`                | 唯一标识符                                     |
-| `created_at` | `int64`                 | 创建时间                                       |
-| `updated_at` | `int64`                 | 更新时间                                       |
-| `deleted_at` | `int64`                 | 删除时间，`@gorm: index: idx_channel,unique`   |
+| `id`         | `uint64`                | 唯一标识符 (ID)                                |
+| `created_at` | `int64`                 | 创建时间戳                                     |
+| `updated_at` | `int64`                 | 更新时间戳                                     |
+| `deleted_at` | `int64`                 | 删除时间戳                                     |
 | `name`       | `string`                | 渠道名称                                       |
-| `token`      | `string`                | 渠道 Token, `@gorm: index: idx_channel,unique` |
+| `token`      | `string`                | 渠道令牌 (Token)                               |
 | `platform`   | [`Platform`](#Platform) | 平台类型, `@gorm: index: idx_channel,unique`   |
 
 ### `ModelChannelAccess`
 
 | 字段         | 类型     | 描述                                                |
 | :----------- | :------- | :-------------------------------------------------- |
-| `id`         | `uint64` | 唯一标识符                                          |
-| `created_at` | `int64`  | 创建时间                                            |
-| `updated_at` | `int64`  | 更新时间                                            |
-| `deleted_at` | `int64`  | 删除时间, `@gorm: index: idx_channel_access,unique` |
-| `channel_id` | `uint64` | 渠道 ID, `@gorm: index: idx_channel_access,unique`  |
+| `id`         | `uint64` | 唯一标识符 (ID)                                     |
+| `created_at` | `int64`  | 创建时间戳                                          |
+| `updated_at` | `int64`  | 更新时间戳                                          |
+| `deleted_at` | `int64`  | 删除时间戳                                          |
+| `channelID`  | `uint64` | 渠道 ID                                             |
 | `model`      | `string` | 模型名称, `@gorm: index: idx_channel_access,unique` |
 
 ### `ModelModelAlias`
 
 | 字段          | 类型     | 描述                                      |
 | :------------ | :------- | :---------------------------------------- |
-| `id`          | `uint64` | 唯一标识符                                |
-| `created_at`  | `int64`  | 创建时间                                  |
-| `updated_at`  | `int64`  | 更新时间                                  |
-| `deleted_at`  | `int64`  | 删除时间, `@gorm: index:idx_alias,unique` |
-| `model`       | `string` | 模型名称, `@gorm: index:idx_alias,unique` |
+| `id`          | `uint64` | 唯一标识符 (ID)                           |
+| `created_at`  | `int64`  | 创建时间戳                                |
+| `updated_at`  | `int64`  | 更新时间戳                                |
+| `deleted_at`  | `int64`  | 删除时间戳                                |
+| `model`       | `string` | 模型名称                                  |
 | `model_alias` | `string` | 模型别名, `@gorm: index:idx_alias,unique` |
 
 ### `ModelUser`
 
 | 字段         | 类型                    | 描述                                     |
 | :----------- | :---------------------- | :--------------------------------------- |
-| `id`         | `uint64`                | 唯一标识符                               |
-| `created_at` | `int64`                 | 创建时间                                 |
-| `updated_at` | `int64`                 | 更新时间                                 |
-| `deleted_at` | `int64`                 | 删除时间, `@gorm: index:idx_user,unique` |
-| `username`   | `string`                | 用户名, `@gorm: index:idx_user,unique`   |
+| `id`         | `uint64`                | 唯一标识符 (ID)                          |
+| `created_at` | `int64`                 | 创建时间戳                               |
+| `updated_at` | `int64`                 | 更新时间戳                               |
+| `deleted_at` | `int64`                 | 删除时间戳                               |
+| `username`   | `string`                | 用户名                                   |
 | `password`   | `string`                | 密码                                     |
 | `name`       | `string`                | 用户昵称                                 |
 | `role`       | [`UserRole`](#UserRole) | 用户角色                                 |
@@ -121,30 +143,30 @@
 
 | 字段         | 类型     | 描述                                        |
 | :----------- | :------- | :------------------------------------------ |
-| `id`         | `uint64` | 唯一标识符                                  |
-| `created_at` | `int64`  | 创建时间                                    |
-| `updated_at` | `int64`  | 更新时间                                    |
-| `deleted_at` | `int64`  | 删除时间, `@gorm: index:idx_token,unique`   |
-| `user_id`    | `uint64` | 用户 ID, `@gorm: index:idx_token,unique`    |
-| `token`      | `string` | 用户 Token, `@gorm: index:idx_token,unique` |
+| `id`         | `uint64` | 唯一标识符 (ID)                             |
+| `created_at` | `int64`  | 创建时间戳                                  |
+| `updated_at` | `int64`  | 更新时间戳                                  |
+| `deleted_at` | `int64`  | 删除时间戳                                  |
+| `userID`     | `uint64` | 用户 ID                                     |
+| `token`      | `string` | 用户访问令牌 (Token)                        |
 | `limit`      | `int64`  | 限制                                        |
 
 ### `ModelUserAccess`
 
 | 字段         | 类型     | 描述                                            |
 | :----------- | :------- | :---------------------------------------------- |
-| `id`         | `uint64` | 唯一标识符                                      |
-| `created_at` | `int64`  | 创建时间                                        |
-| `updated_at` | `int64`  | 更新时间                                        |
-| `deleted_at` | `int64`  | 删除时间, `@gorm: index:idx_user_access,unique` |
-| `token`      | `uint64` | Token ID, `@gorm: index:idx_user_access,unique` |
-| `model`      | `string` | 模型名称, `@gorm: index:idx_user_access,unique` |
+| `id`         | `uint64` | 唯一标识符 (ID)                                 |
+| `created_at` | `int64`  | 创建时间戳                                      |
+| `updated_at` | `int64`  | 更新时间戳                                      |
+| `deleted_at` | `int64`  | 删除时间戳                                      |
+| `tokenID`    | `uint64` | 令牌 ID (Token ID)                              |
+| `model`      | `string` | 模型名称                                        |
 
 ### `AddUserAdminReq`
 
 | 字段   | 类型                      | 描述                            |
 | :----- | :------------------------ | :------------------------------ |
-| `user` | [`ModelUser`](#ModelUser) | 用户信息, `@validate: required` |
+| `user` | [`ModelUser`](#ModelUser) | 用户信息 (必填) |
 
 ### `AddUserAdminRsp`
 
@@ -162,11 +184,23 @@
 | :----- | :------------------------ | :----------- |
 | `user` | [`ModelUser`](#ModelUser) | 当前用户信息 |
 
+-   **响应示例**:
+    ```json
+    {
+      "user": {
+        "id": "101",
+        "username": "testuser",
+        "name": "Test User",
+        "role": "User"
+      }
+    }
+    ```
+
 ### `GetUserAdminReq`
 
 | 字段 | 类型     | 描述                           |
 | :--- | :------- | :----------------------------- |
-| `id` | `uint64` | 用户 ID, `@validate: required` |
+| `id` | `uint64` | 用户 ID (必填) |
 
 ### `GetUserAdminRsp`
 
@@ -178,7 +212,7 @@
 
 | 字段          | 类型                               | 描述                            |
 | :------------ | :--------------------------------- | :------------------------------ |
-| `list_option` | `lazygophers.lrpc.core.ListOption` | 列表选项, `@validate: required` |
+| `list_option` | `lazygophers.lrpc.core.ListOption` | 列表选项 (必填) |
 
 `ListUserAdminReq.ListOption` 枚举:
 | 名称 | 值 | 描述 |
@@ -194,11 +228,36 @@
 | `paginate` | `lazygophers.lrpc.core.Paginate` | 分页信息 |
 | `list`     | `repeated ModelUser`             | 用户列表 |
 
+-   **响应示例**:
+    ```json
+    {
+      "paginate": {
+        "page": 1,
+        "per_page": 10,
+        "total": 100
+      },
+      "list": [
+        {
+          "id": "1",
+          "username": "admin",
+          "name": "Administrator",
+          "role": "Admin"
+        },
+        {
+          "id": "101",
+          "username": "testuser",
+          "name": "Test User",
+          "role": "User"
+        }
+      ]
+    }
+    ```
+
 ### `SetUserReq`
 
 | 字段   | 类型                      | 描述                                      |
 | :----- | :------------------------ | :---------------------------------------- |
-| `user` | [`ModelUser`](#ModelUser) | 需要更新的用户信息, `@validate: required` |
+| `user` | [`ModelUser`](#ModelUser) | 需要更新的用户信息 (必填) |
 
 ### `SetUserRsp`
 
@@ -210,7 +269,7 @@
 
 | 字段   | 类型                      | 描述                                      |
 | :----- | :------------------------ | :---------------------------------------- |
-| `user` | [`ModelUser`](#ModelUser) | 需要更新的用户信息, `@validate: required` |
+| `user` | [`ModelUser`](#ModelUser) | 需要更新的用户信息 (必填) |
 
 ### `SetUserAdminRsp`
 
@@ -222,7 +281,7 @@
 
 | 字段 | 类型     | 描述                                   |
 | :--- | :------- | :------------------------------------- |
-| `id` | `uint64` | 要删除的用户 ID, `@validate: required` |
+| `id` | `uint64` | 要删除的用户 ID (必填) |
 
 ### `DelUserAdminRsp`
 
@@ -232,8 +291,8 @@
 
 | 字段       | 类型     | 描述                          |
 | :--------- | :------- | :---------------------------- |
-| `username` | `string` | 用户名, `@validate: required` |
-| `password` | `string` | 密码, `@validate: required`   |
+| `username` | `string` | 用户名 (必填) |
+| `password` | `string` | 密码 (必填)   |
 
 ### `LoginRsp`
 

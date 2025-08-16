@@ -721,21 +721,28 @@ func (p *SiliconFlow) CancelFineTuningJob(jobID string) (*SiliconFlowFineTuningJ
 	return &rsp, nil
 }
 
+// SiliconFlowListFineTuningJobEventsReq defines the request for listing fine-tuning job events.
+type SiliconFlowListFineTuningJobEventsReq struct {
+	FineTuningJobID string
+	Limit           int
+	After           string
+}
+
 // ListFineTuningJobEvents 获取微调任务的事件列表。
-func (p *SiliconFlow) ListFineTuningJobEvents(jobID string, limit int, after string) (*SiliconFlowFineTuningJobEventList, error) {
+func (p *SiliconFlow) ListFineTuningJobEvents(req *SiliconFlowListFineTuningJobEventsReq) (*SiliconFlowFineTuningJobEventList, error) {
 	var rsp SiliconFlowFineTuningJobEventList
-	req := p.GetRequest().
+	request := p.GetRequest().
 		SetResult(&rsp).
-		SetPathParam("job_id", jobID)
+		SetPathParam("job_id", req.FineTuningJobID)
 
-	if limit > 0 {
-		req.SetQueryParam("limit", strconv.Itoa(limit))
+	if req.Limit > 0 {
+		request.SetQueryParam("limit", strconv.Itoa(req.Limit))
 	}
-	if after != "" {
-		req.SetQueryParam("after", after)
+	if req.After != "" {
+		request.SetQueryParam("after", req.After)
 	}
 
-	resp, err := req.Get("https://api.siliconflow.cn/v1/fine_tuning/jobs/{job_id}/events")
+	resp, err := request.Get("https://api.siliconflow.cn/v1/fine_tuning/jobs/{job_id}/events")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		return nil, err

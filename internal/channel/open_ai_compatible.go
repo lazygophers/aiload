@@ -37,5 +37,5 @@ func (p *OpenAICompatible) GetModelList() (*OpenAICompatibleGetModelListRsp, err
 
 func (p *OpenAICompatible) GetRequest() *resty.Request {
 	return client.R().
-		SetAuthToken(p.channel.Token)
+		SetHeader("Authorization", "Bearer "+p.channel.Token)
 }
