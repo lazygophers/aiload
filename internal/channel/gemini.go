@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"fmt"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/lazygophers/aiload"
 	"github.com/lazygophers/log"
@@ -109,12 +110,17 @@ func (p *Gemini) GetModelList(ctx context.Context, req *GeminiGetModelListReq) (
 
 	if resp.IsError() {
 		if geminiErr, ok := resp.Error().(*GeminiError); ok && geminiErr.Error.Message != "" {
-			return nil, fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			err := fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			log.Errorf("err:%s", err)
+			return nil, err
 		}
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -144,12 +150,17 @@ func (p *Gemini) GetModel(ctx context.Context, req *GeminiGetModelReq) (*GeminiG
 
 	if resp.IsError() {
 		if geminiErr, ok := resp.Error().(*GeminiError); ok && geminiErr.Error.Message != "" {
-			return nil, fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			err := fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			log.Errorf("err:%s", err)
+			return nil, err
 		}
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -306,7 +317,9 @@ func (p *Gemini) CountTokens(ctx context.Context, req *GeminiCountTokensReq) (*G
 	var rsp GeminiCountTokensRsp
 
 	if req.Model == "" {
-		return nil, errors.New("model name cannot be empty")
+		err := errors.New("model name cannot be empty")
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	resp, err := p.client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + req.Model + ":countTokens")
@@ -317,12 +330,17 @@ func (p *Gemini) CountTokens(ctx context.Context, req *GeminiCountTokensReq) (*G
 
 	if resp.IsError() {
 		if geminiErr, ok := resp.Error().(*GeminiError); ok && geminiErr.Error.Message != "" {
-			return nil, fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			err := fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			log.Errorf("err:%s", err)
+			return nil, err
 		}
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -341,12 +359,17 @@ func (p *Gemini) EmbedContent(ctx context.Context, req *GeminiEmbedContentReq) (
 
 	if resp.IsError() {
 		if geminiErr, ok := resp.Error().(*GeminiError); ok && geminiErr.Error.Message != "" {
-			return nil, fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			err := fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			log.Errorf("err:%s", err)
+			return nil, err
 		}
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -358,13 +381,17 @@ func (p *Gemini) BatchEmbedContents(ctx context.Context, req *GeminiBatchEmbedCo
 	var rsp GeminiBatchEmbedContentsRsp
 
 	if len(req.Requests) == 0 {
-		return nil, errors.New("requests cannot be empty")
+		err := errors.New("requests cannot be empty")
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	// 从第一个请求中获取模型名称，因为批量请求通常针对同一个模型
 	model := req.Requests[0].Model
 	if model == "" {
-		return nil, errors.New("model name cannot be empty in the first request")
+		err := errors.New("model name cannot be empty in the first request")
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	resp, err := p.client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + model + ":batchEmbedContents")
@@ -375,12 +402,17 @@ func (p *Gemini) BatchEmbedContents(ctx context.Context, req *GeminiBatchEmbedCo
 
 	if resp.IsError() {
 		if geminiErr, ok := resp.Error().(*GeminiError); ok && geminiErr.Error.Message != "" {
-			return nil, fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			err := fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			log.Errorf("err:%s", err)
+			return nil, err
 		}
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -392,7 +424,9 @@ func (p *Gemini) GenerateContent(ctx context.Context, model string, req *GeminiG
 	var rsp GeminiGenerateContentRsp
 
 	if model == "" {
-		return nil, errors.New("model name cannot be empty")
+		err := errors.New("model name cannot be empty")
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	resp, err := p.client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + model + ":generateContent")
@@ -403,12 +437,17 @@ func (p *Gemini) GenerateContent(ctx context.Context, model string, req *GeminiG
 
 	if resp.IsError() {
 		if geminiErr, ok := resp.Error().(*GeminiError); ok && geminiErr.Error.Message != "" {
-			return nil, fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			err := fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			log.Errorf("err:%s", err)
+			return nil, err
 		}
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -418,7 +457,9 @@ func (p *Gemini) GenerateContent(ctx context.Context, model string, req *GeminiG
 // StreamGenerateContent generates content from a prompt in a streaming fashion.
 func (p *Gemini) StreamGenerateContent(ctx context.Context, model string, req *GeminiGenerateContentReq) (<-chan *GeminiGenerateContentRsp, error) {
 	if model == "" {
-		return nil, errors.New("model name cannot be empty")
+		err := errors.New("model name cannot be empty")
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	// 创建一个通道用于流式返回响应

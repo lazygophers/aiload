@@ -54,6 +54,7 @@ func (p *SiliconFlow) GetRequest() *resty.Request {
 // handleSiliconFlowError checks for an API error from SiliconFlow and returns a structured error if possible.
 func handleSiliconFlowError(resp *resty.Response, err error) error {
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return err
 	}
 	if !resp.IsError() {
@@ -61,9 +62,13 @@ func handleSiliconFlowError(resp *resty.Response, err error) error {
 	}
 	var errRsp SiliconFlowErrorRsp
 	if e := json.Unmarshal(resp.Body(), &errRsp); e == nil && errRsp.Err.Message != "" {
-		return &errRsp
+		err := &errRsp
+		log.Errorf("err:%s", err)
+		return err
 	}
-	return errors.New(resp.String())
+	err = errors.New(resp.String())
+	log.Errorf("err:%s", err)
+	return err
 }
 
 // post is a helper function to make a POST request with a JSON body.
@@ -98,7 +103,9 @@ type SiliconFlowGetInfoListRsp struct {
 // GetInfoList gets the user info.
 func (p *SiliconFlow) GetInfoList() (*SiliconFlowGetInfoListRsp, error) {
 	if !p.GetRequestRequired() {
-		return nil, ErrAuthTokenNil
+		err := ErrAuthTokenNil
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	var rsp SiliconFlowGetInfoListRsp
 	resp, err := p.GetRequest().SetResult(&rsp).Get("https://api.siliconflow.cn/v1/user/info")
@@ -143,6 +150,7 @@ func (p *SiliconFlow) GetModelList(req *SiliconFlowGetModelListReq) (*SiliconFlo
 	}
 	return &rsp, nil
 }
+
 // GetModel retrieves a model instance.
 func (p *SiliconFlow) GetModel(modelId string) (*Model, error) {
 	var rsp Model
@@ -216,7 +224,9 @@ type SiliconFlowCreateAudioTranslationRsp struct {
 // CreateAudioTranslation 创建音频翻译。
 func (p *SiliconFlow) CreateAudioTranslation(req *SiliconFlowCreateAudioTranslationReq) (*SiliconFlowCreateAudioTranslationRsp, error) {
 	if req.File == nil {
-		return nil, errors.New("file reader is required")
+		err := errors.New("file reader is required")
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	var rsp SiliconFlowCreateAudioTranslationRsp
@@ -242,6 +252,7 @@ func (p *SiliconFlow) CreateAudioTranslation(req *SiliconFlowCreateAudioTranslat
 		Post("https://api.siliconflow.cn/v1/audio/translations")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -266,7 +277,9 @@ type SiliconFlowCreateAudioTranscriptionResp struct {
 // CreateAudioTranscription 创建音频转录。
 func (p *SiliconFlow) CreateAudioTranscription(req *SiliconFlowCreateAudioTranscriptionReq) (*SiliconFlowCreateAudioTranscriptionResp, error) {
 	if req.File == nil {
-		return nil, errors.New("file reader is required")
+		err := errors.New("file reader is required")
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	var rsp SiliconFlowCreateAudioTranscriptionResp
@@ -292,6 +305,7 @@ func (p *SiliconFlow) CreateAudioTranscription(req *SiliconFlowCreateAudioTransc
 		Post("https://api.siliconflow.cn/v1/audio/transcriptions")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -303,6 +317,7 @@ func (p *SiliconFlow) CreateChatCompletion(req *SiliconFlowCreateChatCompletionR
 	var rsp SiliconFlowCreateChatCompletionRsp
 	err := p.post("https://api.siliconflow.cn/v1/chat/completions", req, &rsp)
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -334,6 +349,7 @@ func (p *SiliconFlow) CreateEmbedding(req *SiliconFlowCreateEmbeddingReq) (*Sili
 	var rsp SiliconFlowCreateEmbeddingRsp
 	err := p.post("https://api.siliconflow.cn/v1/embeddings", req, &rsp)
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -363,6 +379,7 @@ func (p *SiliconFlow) CreateImageGenerations(req *SiliconFlowCreateImageGenerati
 	var rsp SiliconFlowCreateImageGenerationsRsp
 	err := p.post("https://api.siliconflow.cn/v1/images/generations", req, &rsp)
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -388,7 +405,9 @@ type SiliconFlowCreateImageEditsRsp = SiliconFlowCreateImageGenerationsRsp
 // CreateImageEdits creates image edits.
 func (p *SiliconFlow) CreateImageEdits(req *SiliconFlowCreateImageEditsReq) (*SiliconFlowCreateImageEditsRsp, error) {
 	if req.Image == nil {
-		return nil, errors.New("image reader is required")
+		err := errors.New("image reader is required")
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	var rsp SiliconFlowCreateImageEditsRsp
@@ -423,6 +442,7 @@ func (p *SiliconFlow) CreateImageEdits(req *SiliconFlowCreateImageEditsReq) (*Si
 		Post("https://api.siliconflow.cn/v1/images/edits")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -486,6 +506,7 @@ func (p *SiliconFlow) DeleteFile(fileID string) (*SiliconFlowDeleteFileRsp, erro
 		Delete("https://api.siliconflow.cn/v1/files/{file_id}")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -494,7 +515,9 @@ func (p *SiliconFlow) DeleteFile(fileID string) (*SiliconFlowDeleteFileRsp, erro
 // UploadFile uploads a file.
 func (p *SiliconFlow) UploadFile(req *SiliconFlowUploadFileReq) (*SiliconFlowFileObj, error) {
 	if req.File == nil {
-		return nil, errors.New("file reader is required")
+		err := errors.New("file reader is required")
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	var rsp SiliconFlowFileObj
@@ -511,6 +534,7 @@ func (p *SiliconFlow) UploadFile(req *SiliconFlowUploadFileReq) (*SiliconFlowFil
 		Post("https://api.siliconflow.cn/v1/files")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -525,6 +549,7 @@ func (p *SiliconFlow) ListFiles() (*SiliconFlowListFilesRsp, error) {
 		Get("https://api.siliconflow.cn/v1/files")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -539,6 +564,7 @@ func (p *SiliconFlow) RetrieveFile(fileID string) (*SiliconFlowFileObj, error) {
 		Get("https://api.siliconflow.cn/v1/files/{file_id}")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -552,6 +578,7 @@ func (p *SiliconFlow) RetrieveFileContent(fileID string) (io.ReadCloser, error) 
 		Get("https://api.siliconflow.cn/v1/files/{file_id}/content")
 
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -560,14 +587,19 @@ func (p *SiliconFlow) RetrieveFileContent(fileID string) (io.ReadCloser, error) 
 		defer resp.RawBody().Close() // Ensure body is closed on error path
 		body, readErr := io.ReadAll(resp.RawBody())
 		if readErr != nil {
+			log.Errorf("err:%s", readErr)
 			return nil, readErr // Error reading the error body
 		}
 
 		var errRsp SiliconFlowErrorRsp
 		if e := json.Unmarshal(body, &errRsp); e == nil && errRsp.Err.Message != "" {
-			return nil, &errRsp
+			err := &errRsp
+			log.Errorf("err:%s", err)
+			return nil, err
 		}
-		return nil, errors.New(string(body))
+		err := errors.New(string(body))
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	return resp.RawBody(), nil
@@ -576,7 +608,9 @@ func (p *SiliconFlow) RetrieveFileContent(fileID string) (io.ReadCloser, error) 
 // CreateImageVariations creates variations of an image.
 func (p *SiliconFlow) CreateImageVariations(req *SiliconFlowCreateImageVariationsReq) (*SiliconFlowCreateImageVariationsRsp, error) {
 	if req.Image == nil {
-		return nil, errors.New("image reader is required")
+		err := errors.New("image reader is required")
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 
 	var rsp SiliconFlowCreateImageVariationsRsp
@@ -606,6 +640,7 @@ func (p *SiliconFlow) CreateImageVariations(req *SiliconFlowCreateImageVariation
 		Post("https://api.siliconflow.cn/v1/images/variations")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -668,6 +703,7 @@ func (p *SiliconFlow) CreateFineTuningJob(req *SiliconFlowFineTuningJobRequest) 
 	var rsp SiliconFlowFineTuningJob
 	err := p.post("https://api.siliconflow.cn/v1/fine_tuning/jobs", req, &rsp)
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -688,6 +724,7 @@ func (p *SiliconFlow) ListFineTuningJobs(limit int, after string) (*SiliconFlowF
 	resp, err := req.Get("https://api.siliconflow.cn/v1/fine_tuning/jobs")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -702,6 +739,7 @@ func (p *SiliconFlow) RetrieveFineTuningJob(jobID string) (*SiliconFlowFineTunin
 		Get("https://api.siliconflow.cn/v1/fine_tuning/jobs/{job_id}")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -716,6 +754,7 @@ func (p *SiliconFlow) CancelFineTuningJob(jobID string) (*SiliconFlowFineTuningJ
 		Post("https://api.siliconflow.cn/v1/fine_tuning/jobs/{job_id}/cancel")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -745,6 +784,7 @@ func (p *SiliconFlow) ListFineTuningJobEvents(req *SiliconFlowListFineTuningJobE
 	resp, err := request.Get("https://api.siliconflow.cn/v1/fine_tuning/jobs/{job_id}/events")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil

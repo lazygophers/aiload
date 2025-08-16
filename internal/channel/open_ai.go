@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/lazygophers/aiload"
+	"github.com/lazygophers/log"
 )
 
 type OpenAI struct {
@@ -42,12 +43,16 @@ func (o *OpenAI) GetModelList() (*ModelListResponse, error) {
 	var rsp ModelListResponse
 	resp, err := o.GetRequest().Get(o.baseURL + "/v1/models")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, parseError(resp)
+		err := parseError(resp)
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -106,12 +111,16 @@ func (o *OpenAI) CreateChatCompletion(req *ChatCompletionRequest) (*ChatCompleti
 		SetBody(req).
 		Post(o.baseURL + "/v1/chat/completions")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, parseError(resp)
+		err := parseError(resp)
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -143,12 +152,16 @@ func (o *OpenAI) CreateEmbedding(req *EmbeddingRequest) (*EmbeddingResponse, err
 		SetBody(req).
 		Post(o.baseURL + "/v1/embeddings")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, parseError(resp)
+		err := parseError(resp)
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -182,12 +195,16 @@ func (o *OpenAI) CreateImage(req *ImageGenerationRequest) (*ImageGenerationRespo
 		SetBody(req).
 		Post(o.baseURL + "/v1/images/generations")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, parseError(resp)
+		err := parseError(resp)
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -209,7 +226,9 @@ type AudioTranscriptionResponse struct {
 
 func (o *OpenAI) CreateAudioTranscription(req *AudioTranscriptionRequest) (*AudioTranscriptionResponse, error) {
 	if req.File == nil {
-		return nil, errors.New("file reader is nil")
+		err := errors.New("file reader is nil")
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	var rsp AudioTranscriptionResponse
 
@@ -231,12 +250,16 @@ func (o *OpenAI) CreateAudioTranscription(req *AudioTranscriptionRequest) (*Audi
 		SetFormData(formData).
 		Post(o.baseURL + "/v1/audio/transcriptions")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, parseError(resp)
+		err := parseError(resp)
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -261,7 +284,11 @@ func parseError(resp *resty.Response) error {
 	var errRsp ErrorResponse
 	if err := json.Unmarshal(resp.Body(), &errRsp); err == nil {
 		errRsp.Error.StatusCode = resp.StatusCode()
-		return &errRsp.Error
+		err := &errRsp.Error
+		log.Errorf("err:%s", err)
+		return err
 	}
-	return errors.New(resp.String())
+	err := errors.New(resp.String())
+	log.Errorf("err:%s", err)
+	return err
 }

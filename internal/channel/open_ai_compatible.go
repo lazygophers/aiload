@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/lazygophers/aiload"
+	"github.com/lazygophers/log"
 )
 
 type OpenAICompatible struct {
@@ -39,12 +40,16 @@ func (p *OpenAICompatible) GetModelList() (*OpenAICompatibleGetModelListRsp, err
 	var rsp OpenAICompatibleGetModelListRsp
 	resp, err := p.GetRequest().Get(p.baseURL + "/v1/models")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -67,10 +72,13 @@ func (p *OpenAICompatible) CreateSpeech(req *OpenAICompatibleCreateSpeechReq) (*
 		Post(p.baseURL + "/v1/audio/speech")
 
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	return resp, nil
 }
@@ -94,12 +102,16 @@ func (p *OpenAICompatible) CreateTranscription(file, model, language, prompt, re
 
 	resp, err := req.Post(p.baseURL + "/v1/audio/transcriptions")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -123,12 +135,16 @@ func (p *OpenAICompatible) CreateTranslation(file, model, prompt, responseFormat
 
 	resp, err := req.Post(p.baseURL + "/v1/audio/translations")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -187,12 +203,16 @@ func (p *OpenAICompatible) CreateChatCompletion(req *OpenAICompatibleCreateChatC
 		Post(p.baseURL + "/v1/chat/completions")
 
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -246,12 +266,16 @@ func (p *OpenAICompatible) CreateCompletion(req *OpenAICompatibleCreateCompletio
 		Post(p.baseURL + "/v1/completions")
 
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -285,12 +309,16 @@ func (p *OpenAICompatible) CreateEmbedding(req *OpenAICompatibleCreateEmbeddingR
 		Post(p.baseURL + "/v1/embeddings")
 
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -337,12 +365,16 @@ func (p *OpenAICompatible) CreateFineTuningJob(req *OpenAICompatibleCreateFineTu
 		Post(p.baseURL + "/v1/fine_tuning/jobs")
 
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -376,12 +408,16 @@ func (p *OpenAICompatible) ListFineTuningJobs(after string, limit int) (*OpenAIC
 	resp, err := req.Get(p.baseURL + "/v1/fine_tuning/jobs")
 
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -393,12 +429,16 @@ func (p *OpenAICompatible) RetrieveFineTuningJob(jobId string) (*OpenAICompatibl
 		Get(p.baseURL + fmt.Sprintf("/v1/fine_tuning/jobs/%s", jobId))
 
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -410,12 +450,16 @@ func (p *OpenAICompatible) CancelFineTuningJob(jobId string) (*OpenAICompatibleF
 		Post(p.baseURL + fmt.Sprintf("/v1/fine_tuning/jobs/%s/cancel", jobId))
 
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -439,12 +483,16 @@ func (p *OpenAICompatible) ListFineTuningEvents(jobId, after string, limit int) 
 	resp, err := req.Get(p.baseURL + fmt.Sprintf("/v1/fine_tuning/jobs/%s/events", jobId))
 
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -478,12 +526,16 @@ func (p *OpenAICompatible) CreateImage(req *OpenAICompatibleCreateImageReq) (*Op
 		Post(p.baseURL + "/v1/images/generations")
 
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -506,12 +558,16 @@ func (p *OpenAICompatible) CreateImageEdit(image, mask, prompt, n, size, respons
 
 	resp, err := req.Post(p.baseURL + "/v1/images/edits")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -530,12 +586,16 @@ func (p *OpenAICompatible) CreateImageVariation(image, n, size, responseFormat, 
 
 	resp, err := req.Post(p.baseURL + "/v1/images/variations")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -554,12 +614,16 @@ func (p *OpenAICompatible) RetrieveModel(modelId string) (*OpenAICompatibleModel
 	var rsp OpenAICompatibleModel
 	resp, err := p.GetRequest().Get(p.baseURL + fmt.Sprintf("/v1/models/%s", modelId))
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -575,12 +639,16 @@ func (p *OpenAICompatible) DeleteModel(modelId string) (*OpenAICompatibleDeleteM
 	var rsp OpenAICompatibleDeleteModelRsp
 	resp, err := p.GetRequest().Delete(p.baseURL + fmt.Sprintf("/v1/models/%s", modelId))
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -610,12 +678,16 @@ func (p *OpenAICompatible) ListFiles(purpose string) (*OpenAICompatibleListFiles
 	}
 	resp, err := req.Get(p.baseURL + "/v1/files")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -630,12 +702,16 @@ func (p *OpenAICompatible) UploadFile(file, purpose string) (*OpenAICompatibleFi
 		}).
 		Post(p.baseURL + "/v1/files")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -651,12 +727,16 @@ func (p *OpenAICompatible) DeleteFile(fileId string) (*OpenAICompatibleDeleteFil
 	var rsp OpenAICompatibleDeleteFileRsp
 	resp, err := p.GetRequest().Delete(p.baseURL + fmt.Sprintf("/v1/files/%s", fileId))
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -666,12 +746,16 @@ func (p *OpenAICompatible) RetrieveFile(fileId string) (*OpenAICompatibleFile, e
 	var rsp OpenAICompatibleFile
 	resp, err := p.GetRequest().Get(p.baseURL + fmt.Sprintf("/v1/files/%s", fileId))
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -680,10 +764,13 @@ func (p *OpenAICompatible) RetrieveFile(fileId string) (*OpenAICompatibleFile, e
 func (p *OpenAICompatible) RetrieveFileContent(fileId string) (string, error) {
 	resp, err := p.GetRequest().Get(p.baseURL + fmt.Sprintf("/v1/files/%s/content", fileId))
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return "", err
 	}
 	if resp.IsError() {
-		return "", errors.New(resp.String())
+		err := errors.New(resp.String())
+		log.Errorf("err:%s", err)
+		return "", err
 	}
 	return resp.String(), nil
 }

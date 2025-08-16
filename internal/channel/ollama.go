@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"time"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/lazygophers/aiload"
-	"time"
+	"github.com/lazygophers/log"
 )
 
 type Ollama struct {
@@ -36,12 +38,16 @@ func (p *Ollama) GetLocalModelList() (*OllamaGetLocalModelListRsp, error) {
 	var rsp OllamaGetLocalModelListRsp
 	resp, err := p.GetRequest().Get("http://localhost:11434/api/tags")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf("api error: %s", resp.String())
+		err := fmt.Errorf("api error: %s", resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -216,12 +222,16 @@ func (p *Ollama) GenerateCompletion(req *OllamaGenerateReq) (*OllamaGenerateRsp,
 	var rsp OllamaGenerateRsp
 	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/generate")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf("api error: %s", resp.String())
+		err := fmt.Errorf("api error: %s", resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -232,12 +242,16 @@ func (p *Ollama) CreateChatCompletion(req *OllamaChatReq) (*OllamaChatRsp, error
 	var rsp OllamaChatRsp
 	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/chat")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf("api error: %s", resp.String())
+		err := fmt.Errorf("api error: %s", resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -248,12 +262,16 @@ func (p *Ollama) CreateModel(req *OllamaCreateModelReq) (*OllamaCreateModelRsp, 
 	var rsp OllamaCreateModelRsp
 	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/create")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf("api error: %s", resp.String())
+		err := fmt.Errorf("api error: %s", resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -264,12 +282,16 @@ func (p *Ollama) ShowModelInfo(req *OllamaShowModelReq) (*OllamaShowModelRsp, er
 	var rsp OllamaShowModelRsp
 	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/show")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf("api error: %s", resp.String())
+		err := fmt.Errorf("api error: %s", resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -279,10 +301,13 @@ func (p *Ollama) ShowModelInfo(req *OllamaShowModelReq) (*OllamaShowModelRsp, er
 func (p *Ollama) CopyModel(req *OllamaCopyModelReq) error {
 	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/copy")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return err
 	}
 	if resp.IsError() {
-		return fmt.Errorf("api error: %s", resp.String())
+		err := fmt.Errorf("api error: %s", resp.String())
+		log.Errorf("err:%s", err)
+		return err
 	}
 	return nil
 }
@@ -291,10 +316,13 @@ func (p *Ollama) CopyModel(req *OllamaCopyModelReq) error {
 func (p *Ollama) DeleteModel(req *OllamaDeleteModelReq) error {
 	resp, err := p.GetRequest().SetBody(req).Delete("http://localhost:11434/api/delete")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return err
 	}
 	if resp.IsError() {
-		return fmt.Errorf("api error: %s", resp.String())
+		err := fmt.Errorf("api error: %s", resp.String())
+		log.Errorf("err:%s", err)
+		return err
 	}
 	return nil
 }
@@ -304,12 +332,16 @@ func (p *Ollama) PullModel(req *OllamaPullModelReq) (*OllamaPullModelRsp, error)
 	var rsp OllamaPullModelRsp
 	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/pull")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf("api error: %s", resp.String())
+		err := fmt.Errorf("api error: %s", resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -320,12 +352,16 @@ func (p *Ollama) PushModel(req *OllamaPushModelReq) (*OllamaPushModelRsp, error)
 	var rsp OllamaPushModelRsp
 	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/push")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf("api error: %s", resp.String())
+		err := fmt.Errorf("api error: %s", resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -336,12 +372,16 @@ func (p *Ollama) GenerateEmbeddings(req *OllamaEmbeddingsReq) (*OllamaEmbeddings
 	var rsp OllamaEmbeddingsRsp
 	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/embeddings")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf("api error: %s", resp.String())
+		err := fmt.Errorf("api error: %s", resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -352,12 +392,16 @@ func (p *Ollama) ListRunningModels() (*OllamaGetRunningModelListRsp, error) {
 	var rsp OllamaGetRunningModelListRsp
 	resp, err := p.GetRequest().Get("http://localhost:11434/api/ps")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf("api error: %s", resp.String())
+		err := fmt.Errorf("api error: %s", resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -368,12 +412,16 @@ func (p *Ollama) GetVersion() (*OllamaVersionRsp, error) {
 	var rsp OllamaVersionRsp
 	resp, err := p.GetRequest().Get("http://localhost:11434/api/version")
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf("api error: %s", resp.String())
+		err := fmt.Errorf("api error: %s", resp.String())
+		log.Errorf("err:%s", err)
+		return nil, err
 	}
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -383,13 +431,16 @@ func (p *Ollama) GetVersion() (*OllamaVersionRsp, error) {
 func (p *Ollama) CheckBlobExists(digest string) (bool, error) {
 	resp, err := p.GetRequest().Head("http://localhost:11434/api/blobs/" + digest)
 	if err != nil {
+		log.Errorf("err:%s", err)
 		return false, err
 	}
 	if resp.IsError() {
 		if resp.StatusCode() == 404 {
 			return false, nil
 		}
-		return false, fmt.Errorf("api error: %s", resp.String())
+		err := fmt.Errorf("api error: %s", resp.String())
+		log.Errorf("err:%s", err)
+		return false, err
 	}
 	return resp.StatusCode() == 200, nil
 }
