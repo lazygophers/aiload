@@ -27,7 +27,6 @@ type GeminiError struct {
 // Gemini a channel for gemini models
 type Gemini struct {
 	channel *aiload.ModelChannel
-	client  *resty.Client
 }
 
 // NewGemini creates a new gemini channel
@@ -38,7 +37,6 @@ func NewGemini(channel *aiload.ModelChannel) *Gemini {
 
 	return &Gemini{
 		channel: channel,
-		client:  client,
 	}
 }
 
@@ -99,7 +97,7 @@ func (p *Gemini) GetModelList(ctx context.Context, req *GeminiGetModelListReq) (
 		pageSize = "1000"
 	}
 
-	resp, err := p.client.R().SetQueryParams(map[string]string{
+	resp, err := client.R().SetQueryParams(map[string]string{
 		"pageSize":  pageSize,
 		"pageToken": req.PageToken,
 	}).Get(p.channel.BaseUrl + "/v1beta/models")
@@ -142,7 +140,7 @@ type GeminiGetModelRsp struct {
 func (p *Gemini) GetModel(ctx context.Context, req *GeminiGetModelReq) (*GeminiGetModelRsp, error) {
 	var rsp GeminiGetModelRsp
 
-	resp, err := p.client.R().Get(p.channel.BaseUrl + "/v1/models/" + req.Model)
+	resp, err := client.R().Get(p.channel.BaseUrl + "/v1/models/" + req.Model)
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -322,7 +320,7 @@ func (p *Gemini) CountTokens(ctx context.Context, req *GeminiCountTokensReq) (*G
 		return nil, err
 	}
 
-	resp, err := p.client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + req.Model + ":countTokens")
+	resp, err := client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + req.Model + ":countTokens")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -351,7 +349,7 @@ func (p *Gemini) CountTokens(ctx context.Context, req *GeminiCountTokensReq) (*G
 func (p *Gemini) EmbedContent(ctx context.Context, req *GeminiEmbedContentReq) (*GeminiEmbedContentRsp, error) {
 	var rsp GeminiEmbedContentRsp
 
-	resp, err := p.client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + req.Model + ":embedContent")
+	resp, err := client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + req.Model + ":embedContent")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -394,7 +392,7 @@ func (p *Gemini) BatchEmbedContents(ctx context.Context, req *GeminiBatchEmbedCo
 		return nil, err
 	}
 
-	resp, err := p.client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + model + ":batchEmbedContents")
+	resp, err := client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + model + ":batchEmbedContents")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -429,7 +427,7 @@ func (p *Gemini) GenerateContent(ctx context.Context, model string, req *GeminiG
 		return nil, err
 	}
 
-	resp, err := p.client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + model + ":generateContent")
+	resp, err := client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + model + ":generateContent")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -470,7 +468,7 @@ func (p *Gemini) StreamGenerateContent(ctx context.Context, model string, req *G
 		defer close(ch) // 确保在函数退出时关闭通道
 
 		// 设置请求，但不执行
-		request := p.client.R().SetBody(req)
+		request := client.R().SetBody(req)
 		request.SetDoNotParseResponse(true) // 必须设置，以便我们可以手动处理响应流
 
 		// 执行请求
