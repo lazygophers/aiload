@@ -12,17 +12,14 @@ import (
 
 type OpenAICompatible struct {
 	channel *aiload.ModelChannel
-	baseURL string
 }
 
 func NewOpenAICompatible(channel *aiload.ModelChannel) *OpenAICompatible {
-	baseURL := "https://api.OpenAICompatible.com"
-	if channel.BaseUrl != "" {
-		baseURL = channel.BaseUrl
+	if channel.BaseUrl == "" {
+		channel.BaseUrl = "https://api.OpenAICompatible.com"
 	}
 	return &OpenAICompatible{
 		channel: channel,
-		baseURL: baseURL,
 	}
 }
 
@@ -38,7 +35,7 @@ type OpenAICompatibleGetModelListRsp struct {
 
 func (p *OpenAICompatible) GetModelList() (*OpenAICompatibleGetModelListRsp, error) {
 	var rsp OpenAICompatibleGetModelListRsp
-	resp, err := p.GetRequest().Get(p.baseURL + "/v1/models")
+	resp, err := p.GetRequest().Get(p.channel.BaseUrl + "/v1/models")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -69,7 +66,7 @@ type OpenAICompatibleCreateSpeechReq struct {
 func (p *OpenAICompatible) CreateSpeech(req *OpenAICompatibleCreateSpeechReq) (*resty.Response, error) {
 	resp, err := p.GetRequest().
 		SetBody(req).
-		Post(p.baseURL + "/v1/audio/speech")
+		Post(p.channel.BaseUrl + "/v1/audio/speech")
 
 	if err != nil {
 		log.Errorf("err:%s", err)
@@ -100,7 +97,7 @@ func (p *OpenAICompatible) CreateTranscription(file, model, language, prompt, re
 			"temperature":     fmt.Sprintf("%f", temperature),
 		})
 
-	resp, err := req.Post(p.baseURL + "/v1/audio/transcriptions")
+	resp, err := req.Post(p.channel.BaseUrl + "/v1/audio/transcriptions")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -133,7 +130,7 @@ func (p *OpenAICompatible) CreateTranslation(file, model, prompt, responseFormat
 			"temperature":     fmt.Sprintf("%f", temperature),
 		})
 
-	resp, err := req.Post(p.baseURL + "/v1/audio/translations")
+	resp, err := req.Post(p.channel.BaseUrl + "/v1/audio/translations")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -200,7 +197,7 @@ func (p *OpenAICompatible) CreateChatCompletion(req *OpenAICompatibleCreateChatC
 	var rsp OpenAICompatibleCreateChatCompletionRsp
 	resp, err := p.GetRequest().
 		SetBody(req).
-		Post(p.baseURL + "/v1/chat/completions")
+		Post(p.channel.BaseUrl + "/v1/chat/completions")
 
 	if err != nil {
 		log.Errorf("err:%s", err)
@@ -263,7 +260,7 @@ func (p *OpenAICompatible) CreateCompletion(req *OpenAICompatibleCreateCompletio
 	var rsp OpenAICompatibleCreateCompletionRsp
 	resp, err := p.GetRequest().
 		SetBody(req).
-		Post(p.baseURL + "/v1/completions")
+		Post(p.channel.BaseUrl + "/v1/completions")
 
 	if err != nil {
 		log.Errorf("err:%s", err)
@@ -306,7 +303,7 @@ func (p *OpenAICompatible) CreateEmbedding(req *OpenAICompatibleCreateEmbeddingR
 	var rsp OpenAICompatibleCreateEmbeddingRsp
 	resp, err := p.GetRequest().
 		SetBody(req).
-		Post(p.baseURL + "/v1/embeddings")
+		Post(p.channel.BaseUrl + "/v1/embeddings")
 
 	if err != nil {
 		log.Errorf("err:%s", err)
@@ -362,7 +359,7 @@ func (p *OpenAICompatible) CreateFineTuningJob(req *OpenAICompatibleCreateFineTu
 	var rsp OpenAICompatibleFineTuningJob
 	resp, err := p.GetRequest().
 		SetBody(req).
-		Post(p.baseURL + "/v1/fine_tuning/jobs")
+		Post(p.channel.BaseUrl + "/v1/fine_tuning/jobs")
 
 	if err != nil {
 		log.Errorf("err:%s", err)
@@ -405,7 +402,7 @@ func (p *OpenAICompatible) ListFineTuningJobs(after string, limit int) (*OpenAIC
 	if limit > 0 {
 		req.SetQueryParam("limit", fmt.Sprintf("%d", limit))
 	}
-	resp, err := req.Get(p.baseURL + "/v1/fine_tuning/jobs")
+	resp, err := req.Get(p.channel.BaseUrl + "/v1/fine_tuning/jobs")
 
 	if err != nil {
 		log.Errorf("err:%s", err)
@@ -426,7 +423,7 @@ func (p *OpenAICompatible) ListFineTuningJobs(after string, limit int) (*OpenAIC
 func (p *OpenAICompatible) RetrieveFineTuningJob(jobId string) (*OpenAICompatibleFineTuningJob, error) {
 	var rsp OpenAICompatibleFineTuningJob
 	resp, err := p.GetRequest().
-		Get(p.baseURL + fmt.Sprintf("/v1/fine_tuning/jobs/%s", jobId))
+		Get(p.channel.BaseUrl + fmt.Sprintf("/v1/fine_tuning/jobs/%s", jobId))
 
 	if err != nil {
 		log.Errorf("err:%s", err)
@@ -447,7 +444,7 @@ func (p *OpenAICompatible) RetrieveFineTuningJob(jobId string) (*OpenAICompatibl
 func (p *OpenAICompatible) CancelFineTuningJob(jobId string) (*OpenAICompatibleFineTuningJob, error) {
 	var rsp OpenAICompatibleFineTuningJob
 	resp, err := p.GetRequest().
-		Post(p.baseURL + fmt.Sprintf("/v1/fine_tuning/jobs/%s/cancel", jobId))
+		Post(p.channel.BaseUrl + fmt.Sprintf("/v1/fine_tuning/jobs/%s/cancel", jobId))
 
 	if err != nil {
 		log.Errorf("err:%s", err)
@@ -480,7 +477,7 @@ func (p *OpenAICompatible) ListFineTuningEvents(jobId, after string, limit int) 
 	if limit > 0 {
 		req.SetQueryParam("limit", fmt.Sprintf("%d", limit))
 	}
-	resp, err := req.Get(p.baseURL + fmt.Sprintf("/v1/fine_tuning/jobs/%s/events", jobId))
+	resp, err := req.Get(p.channel.BaseUrl + fmt.Sprintf("/v1/fine_tuning/jobs/%s/events", jobId))
 
 	if err != nil {
 		log.Errorf("err:%s", err)
@@ -523,7 +520,7 @@ func (p *OpenAICompatible) CreateImage(req *OpenAICompatibleCreateImageReq) (*Op
 	var rsp OpenAICompatibleImageRsp
 	resp, err := p.GetRequest().
 		SetBody(req).
-		Post(p.baseURL + "/v1/images/generations")
+		Post(p.channel.BaseUrl + "/v1/images/generations")
 
 	if err != nil {
 		log.Errorf("err:%s", err)
@@ -556,7 +553,7 @@ func (p *OpenAICompatible) CreateImageEdit(image, mask, prompt, n, size, respons
 		req.SetFile("mask", mask)
 	}
 
-	resp, err := req.Post(p.baseURL + "/v1/images/edits")
+	resp, err := req.Post(p.channel.BaseUrl + "/v1/images/edits")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -584,7 +581,7 @@ func (p *OpenAICompatible) CreateImageVariation(image, n, size, responseFormat, 
 			"user":            user,
 		})
 
-	resp, err := req.Post(p.baseURL + "/v1/images/variations")
+	resp, err := req.Post(p.channel.BaseUrl + "/v1/images/variations")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -612,7 +609,7 @@ type OpenAICompatibleModel struct {
 
 func (p *OpenAICompatible) RetrieveModel(modelId string) (*OpenAICompatibleModel, error) {
 	var rsp OpenAICompatibleModel
-	resp, err := p.GetRequest().Get(p.baseURL + fmt.Sprintf("/v1/models/%s", modelId))
+	resp, err := p.GetRequest().Get(p.channel.BaseUrl + fmt.Sprintf("/v1/models/%s", modelId))
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -637,7 +634,7 @@ type OpenAICompatibleDeleteModelRsp struct {
 
 func (p *OpenAICompatible) DeleteModel(modelId string) (*OpenAICompatibleDeleteModelRsp, error) {
 	var rsp OpenAICompatibleDeleteModelRsp
-	resp, err := p.GetRequest().Delete(p.baseURL + fmt.Sprintf("/v1/models/%s", modelId))
+	resp, err := p.GetRequest().Delete(p.channel.BaseUrl + fmt.Sprintf("/v1/models/%s", modelId))
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -676,7 +673,7 @@ func (p *OpenAICompatible) ListFiles(purpose string) (*OpenAICompatibleListFiles
 	if purpose != "" {
 		req.SetQueryParam("purpose", purpose)
 	}
-	resp, err := req.Get(p.baseURL + "/v1/files")
+	resp, err := req.Get(p.channel.BaseUrl + "/v1/files")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -700,7 +697,7 @@ func (p *OpenAICompatible) UploadFile(file, purpose string) (*OpenAICompatibleFi
 		SetFormData(map[string]string{
 			"purpose": purpose,
 		}).
-		Post(p.baseURL + "/v1/files")
+		Post(p.channel.BaseUrl + "/v1/files")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -725,7 +722,7 @@ type OpenAICompatibleDeleteFileRsp struct {
 
 func (p *OpenAICompatible) DeleteFile(fileId string) (*OpenAICompatibleDeleteFileRsp, error) {
 	var rsp OpenAICompatibleDeleteFileRsp
-	resp, err := p.GetRequest().Delete(p.baseURL + fmt.Sprintf("/v1/files/%s", fileId))
+	resp, err := p.GetRequest().Delete(p.channel.BaseUrl + fmt.Sprintf("/v1/files/%s", fileId))
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -744,7 +741,7 @@ func (p *OpenAICompatible) DeleteFile(fileId string) (*OpenAICompatibleDeleteFil
 
 func (p *OpenAICompatible) RetrieveFile(fileId string) (*OpenAICompatibleFile, error) {
 	var rsp OpenAICompatibleFile
-	resp, err := p.GetRequest().Get(p.baseURL + fmt.Sprintf("/v1/files/%s", fileId))
+	resp, err := p.GetRequest().Get(p.channel.BaseUrl + fmt.Sprintf("/v1/files/%s", fileId))
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -762,7 +759,7 @@ func (p *OpenAICompatible) RetrieveFile(fileId string) (*OpenAICompatibleFile, e
 }
 
 func (p *OpenAICompatible) RetrieveFileContent(fileId string) (string, error) {
-	resp, err := p.GetRequest().Get(p.baseURL + fmt.Sprintf("/v1/files/%s/content", fileId))
+	resp, err := p.GetRequest().Get(p.channel.BaseUrl + fmt.Sprintf("/v1/files/%s/content", fileId))
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return "", err

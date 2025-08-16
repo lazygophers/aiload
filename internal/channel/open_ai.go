@@ -13,17 +13,14 @@ import (
 
 type OpenAI struct {
 	channel *aiload.ModelChannel
-	baseURL string
 }
 
 func NewOpenAI(channel *aiload.ModelChannel) *OpenAI {
-	baseURL := "https://api.openai.com"
-	if channel.BaseUrl != "" {
-		baseURL = channel.BaseUrl
+	if channel.BaseUrl == "" {
+		channel.BaseUrl = "https://api.openai.com"
 	}
 	return &OpenAI{
 		channel: channel,
-		baseURL: baseURL,
 	}
 }
 
@@ -41,7 +38,7 @@ type ModelData struct {
 
 func (o *OpenAI) GetModelList() (*ModelListResponse, error) {
 	var rsp ModelListResponse
-	resp, err := o.GetRequest().Get(o.baseURL + "/v1/models")
+	resp, err := o.GetRequest().Get(o.channel.BaseUrl + "/v1/models")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -109,7 +106,7 @@ func (o *OpenAI) CreateChatCompletion(req *ChatCompletionRequest) (*ChatCompleti
 	var rsp ChatCompletionResponse
 	resp, err := o.GetRequest().
 		SetBody(req).
-		Post(o.baseURL + "/v1/chat/completions")
+		Post(o.channel.BaseUrl + "/v1/chat/completions")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -150,7 +147,7 @@ func (o *OpenAI) CreateEmbedding(req *EmbeddingRequest) (*EmbeddingResponse, err
 	var rsp EmbeddingResponse
 	resp, err := o.GetRequest().
 		SetBody(req).
-		Post(o.baseURL + "/v1/embeddings")
+		Post(o.channel.BaseUrl + "/v1/embeddings")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -193,7 +190,7 @@ func (o *OpenAI) CreateImage(req *ImageGenerationRequest) (*ImageGenerationRespo
 	var rsp ImageGenerationResponse
 	resp, err := o.GetRequest().
 		SetBody(req).
-		Post(o.baseURL + "/v1/images/generations")
+		Post(o.channel.BaseUrl + "/v1/images/generations")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -248,7 +245,7 @@ func (o *OpenAI) CreateAudioTranscription(req *AudioTranscriptionRequest) (*Audi
 	resp, err := o.GetRequest().
 		SetFileReader("file", req.FileName, req.File).
 		SetFormData(formData).
-		Post(o.baseURL + "/v1/audio/transcriptions")
+		Post(o.channel.BaseUrl + "/v1/audio/transcriptions")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
