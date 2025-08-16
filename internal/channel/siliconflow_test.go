@@ -16,8 +16,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// setupTest a helper function to setup tests
-func setupTest(t *testing.T) (*SiliconFlow, func()) {
+// setupSiliconFlowTest a helper function to setup tests
+func setupSiliconFlowTest(t *testing.T) *SiliconFlow {
 	t.Helper()
 
 	mockChannel := &aiload.ModelChannel{
@@ -26,10 +26,9 @@ func setupTest(t *testing.T) (*SiliconFlow, func()) {
 	p := NewSiliconFlow(mockChannel)
 
 	httpmock.ActivateNonDefault(client.GetClient())
+	t.Cleanup(httpmock.DeactivateAndReset)
 
-	return p, func() {
-		httpmock.DeactivateAndReset()
-	}
+	return p
 }
 
 func TestMain(m *testing.M) {
@@ -44,8 +43,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestSiliconFlowChat(t *testing.T) {
-	p, teardown := setupTest(t)
-	defer teardown()
+	p := setupSiliconFlowTest(t)
 
 	mockSuccessResponse := SiliconFlowCreateChatCompletionRsp{
 		ID:      "chatcmpl-mock-id",
@@ -128,7 +126,6 @@ func TestSiliconFlowChat(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			httpmock.Reset()
 			httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/chat/completions", tt.mockResponder)
 
 			rsp, err := p.CreateChatCompletion(tt.giveRequest)
@@ -139,8 +136,7 @@ func TestSiliconFlowChat(t *testing.T) {
 }
 
 func TestSiliconFlowEmbedding(t *testing.T) {
-	p, teardown := setupTest(t)
-	defer teardown()
+	p := setupSiliconFlowTest(t)
 
 	mockSuccessResponse := SiliconFlowCreateEmbeddingRsp{
 		Object: "list",
@@ -205,7 +201,6 @@ func TestSiliconFlowEmbedding(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			httpmock.Reset()
 			httpmock.RegisterResponder("POST", "https://api.siliconflow.cn/v1/embeddings", tt.mockResponder)
 
 			rsp, err := p.CreateEmbedding(tt.giveRequest)
@@ -216,8 +211,7 @@ func TestSiliconFlowEmbedding(t *testing.T) {
 }
 
 func TestSiliconFlow_Image(t *testing.T) {
-	p, teardown := setupTest(t)
-	defer teardown()
+	p := setupSiliconFlowTest(t)
 
 	// Mocks for successful responses
 	mockGenerationsSuccessResponse := SiliconFlowCreateImageGenerationsRsp{
@@ -489,7 +483,6 @@ func TestSiliconFlow_Image(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			httpmock.Reset()
 			httpmock.RegisterResponder("POST", tt.endpoint, tt.mockResponder)
 
 			rsp, err := tt.apiCall(p, tt.giveRequest)
@@ -500,8 +493,7 @@ func TestSiliconFlow_Image(t *testing.T) {
 }
 
 func TestSiliconFlow_Audio(t *testing.T) {
-	p, teardown := setupTest(t)
-	defer teardown()
+	p := setupSiliconFlowTest(t)
 
 	// Mocks for successful responses
 	mockTranslationSuccessResponse := SiliconFlowCreateAudioTranslationRsp{
@@ -652,7 +644,6 @@ func TestSiliconFlow_Audio(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			httpmock.Reset()
 			httpmock.RegisterResponder("POST", tt.endpoint, tt.mockResponder)
 
 			rsp, err := tt.apiCall(p, tt.giveRequest)
@@ -663,8 +654,7 @@ func TestSiliconFlow_Audio(t *testing.T) {
 }
 
 func TestSiliconflowFile(t *testing.T) {
-	p, teardown := setupTest(t)
-	defer teardown()
+	p := setupSiliconFlowTest(t)
 
 	// Mocks for successful responses
 	mockUploadFileSuccessResponse := SiliconFlowFileObj{
@@ -859,7 +849,6 @@ func TestSiliconflowFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			httpmock.Reset()
 			httpmock.RegisterResponder(tt.method, tt.endpoint, tt.mockResponder)
 			rsp, err := tt.apiCall(p, tt.giveRequest)
 			tt.checkResponse(t, rsp, err)
@@ -867,8 +856,7 @@ func TestSiliconflowFile(t *testing.T) {
 	}
 }
 func TestSiliconflowFineTuning(t *testing.T) {
-	p, teardown := setupTest(t)
-	defer teardown()
+	p := setupSiliconFlowTest(t)
 
 	// Mocks for successful responses
 	mockCreateJobSuccessResponse := SiliconFlowFineTuningJob{
@@ -1087,7 +1075,6 @@ func TestSiliconflowFineTuning(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			httpmock.Reset()
 			httpmock.RegisterResponder(tt.method, tt.endpoint, tt.mockResponder)
 			rsp, err := tt.apiCall(p, tt.giveRequest)
 			tt.checkResponse(t, rsp, err)
@@ -1096,8 +1083,7 @@ func TestSiliconflowFineTuning(t *testing.T) {
 }
 
 func TestSiliconflowMetadataAPI(t *testing.T) {
-	p, teardown := setupTest(t)
-	defer teardown()
+	p := setupSiliconFlowTest(t)
 
 	// Mocks for GetModel
 	mockGetModelSuccessResponse := Model{
@@ -1290,7 +1276,6 @@ func TestSiliconflowMetadataAPI(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			httpmock.Reset()
 			httpmock.RegisterResponder(tt.method, tt.endpoint, tt.mockResponder)
 			rsp, err := tt.apiCall(p, tt.giveRequest)
 			tt.checkResponse(t, rsp, err)
