@@ -36,6 +36,9 @@ type SiliconFlow struct {
 
 // NewSiliconFlow creates a new SiliconFlow client.
 func NewSiliconFlow(channel *aiload.ModelChannel) *SiliconFlow {
+	if channel.BaseUrl == "" {
+		channel.BaseUrl = "https://api.siliconflow.cn"
+	}
 	return &SiliconFlow{
 		channel: channel,
 	}
@@ -108,7 +111,7 @@ func (p *SiliconFlow) GetInfoList() (*SiliconFlowGetInfoListRsp, error) {
 		return nil, err
 	}
 	var rsp SiliconFlowGetInfoListRsp
-	resp, err := p.GetRequest().SetResult(&rsp).Get("https://api.siliconflow.cn/v1/user/info")
+	resp, err := p.GetRequest().SetResult(&rsp).Get(p.channel.BaseUrl + "/v1/user/info")
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -142,7 +145,7 @@ func (p *SiliconFlow) GetModelList(req *SiliconFlowGetModelListReq) (*SiliconFlo
 	resp, err := p.GetRequest().SetResult(&rsp).SetQueryParams(map[string]string{
 		"type":     req.Type,
 		"sub_type": req.SubType,
-	}).Get("https://api.siliconflow.cn/v1/models")
+	}).Get(p.channel.BaseUrl + "/v1/models")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
@@ -157,7 +160,7 @@ func (p *SiliconFlow) GetModel(modelId string) (*Model, error) {
 	resp, err := p.GetRequest().
 		SetResult(&rsp).
 		SetPathParam("model", modelId).
-		Get("https://api.siliconflow.cn/v1/models/{model}")
+		Get(p.channel.BaseUrl + "/v1/models/{model}")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
@@ -249,7 +252,7 @@ func (p *SiliconFlow) CreateAudioTranslation(req *SiliconFlowCreateAudioTranslat
 
 	resp, err := request.
 		SetResult(&rsp).
-		Post("https://api.siliconflow.cn/v1/audio/translations")
+		Post(p.channel.BaseUrl + "/v1/audio/translations")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
@@ -302,7 +305,7 @@ func (p *SiliconFlow) CreateAudioTranscription(req *SiliconFlowCreateAudioTransc
 
 	resp, err := request.
 		SetResult(&rsp).
-		Post("https://api.siliconflow.cn/v1/audio/transcriptions")
+		Post(p.channel.BaseUrl + "/v1/audio/transcriptions")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
@@ -315,7 +318,7 @@ func (p *SiliconFlow) CreateAudioTranscription(req *SiliconFlowCreateAudioTransc
 // CreateChatCompletion creates a chat completion.
 func (p *SiliconFlow) CreateChatCompletion(req *SiliconFlowCreateChatCompletionReq) (*SiliconFlowCreateChatCompletionRsp, error) {
 	var rsp SiliconFlowCreateChatCompletionRsp
-	err := p.post("https://api.siliconflow.cn/v1/chat/completions", req, &rsp)
+	err := p.post(p.channel.BaseUrl+"/v1/chat/completions", req, &rsp)
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -347,7 +350,7 @@ type SiliconFlowCreateEmbeddingRsp struct {
 // CreateEmbedding creates embeddings.
 func (p *SiliconFlow) CreateEmbedding(req *SiliconFlowCreateEmbeddingReq) (*SiliconFlowCreateEmbeddingRsp, error) {
 	var rsp SiliconFlowCreateEmbeddingRsp
-	err := p.post("https://api.siliconflow.cn/v1/embeddings", req, &rsp)
+	err := p.post(p.channel.BaseUrl+"/v1/embeddings", req, &rsp)
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -377,7 +380,7 @@ type SiliconFlowCreateImageGenerationsRsp struct {
 // CreateImageGenerations creates image generations.
 func (p *SiliconFlow) CreateImageGenerations(req *SiliconFlowCreateImageGenerationsReq) (*SiliconFlowCreateImageGenerationsRsp, error) {
 	var rsp SiliconFlowCreateImageGenerationsRsp
-	err := p.post("https://api.siliconflow.cn/v1/images/generations", req, &rsp)
+	err := p.post(p.channel.BaseUrl+"/v1/images/generations", req, &rsp)
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -439,7 +442,7 @@ func (p *SiliconFlow) CreateImageEdits(req *SiliconFlowCreateImageEditsReq) (*Si
 
 	resp, err := request.
 		SetResult(&rsp).
-		Post("https://api.siliconflow.cn/v1/images/edits")
+		Post(p.channel.BaseUrl + "/v1/images/edits")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
@@ -503,7 +506,7 @@ func (p *SiliconFlow) DeleteFile(fileID string) (*SiliconFlowDeleteFileRsp, erro
 		SetPathParams(map[string]string{
 			"file_id": fileID,
 		}).
-		Delete("https://api.siliconflow.cn/v1/files/{file_id}")
+		Delete(p.channel.BaseUrl + "/v1/files/{file_id}")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
@@ -531,7 +534,7 @@ func (p *SiliconFlow) UploadFile(req *SiliconFlowUploadFileReq) (*SiliconFlowFil
 
 	resp, err := request.
 		SetResult(&rsp).
-		Post("https://api.siliconflow.cn/v1/files")
+		Post(p.channel.BaseUrl + "/v1/files")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
@@ -546,7 +549,7 @@ func (p *SiliconFlow) ListFiles() (*SiliconFlowListFilesRsp, error) {
 	var rsp SiliconFlowListFilesRsp
 	resp, err := p.GetRequest().
 		SetResult(&rsp).
-		Get("https://api.siliconflow.cn/v1/files")
+		Get(p.channel.BaseUrl + "/v1/files")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
@@ -561,7 +564,7 @@ func (p *SiliconFlow) RetrieveFile(fileID string) (*SiliconFlowFileObj, error) {
 	resp, err := p.GetRequest().
 		SetResult(&rsp).
 		SetPathParam("file_id", fileID).
-		Get("https://api.siliconflow.cn/v1/files/{file_id}")
+		Get(p.channel.BaseUrl + "/v1/files/{file_id}")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
@@ -575,7 +578,7 @@ func (p *SiliconFlow) RetrieveFileContent(fileID string) (io.ReadCloser, error) 
 	resp, err := p.GetRequest().
 		SetDoNotParseResponse(true). // Prevent auto-reading of the body
 		SetPathParam("file_id", fileID).
-		Get("https://api.siliconflow.cn/v1/files/{file_id}/content")
+		Get(p.channel.BaseUrl + "/v1/files/{file_id}/content")
 
 	if err != nil {
 		log.Errorf("err:%s", err)
@@ -637,7 +640,7 @@ func (p *SiliconFlow) CreateImageVariations(req *SiliconFlowCreateImageVariation
 
 	resp, err := request.
 		SetResult(&rsp).
-		Post("https://api.siliconflow.cn/v1/images/variations")
+		Post(p.channel.BaseUrl + "/v1/images/variations")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
@@ -701,7 +704,7 @@ type SiliconFlowFineTuningJobEventList struct {
 // CreateFineTuningJob 创建一个新的微调任务。
 func (p *SiliconFlow) CreateFineTuningJob(req *SiliconFlowFineTuningJobRequest) (*SiliconFlowFineTuningJob, error) {
 	var rsp SiliconFlowFineTuningJob
-	err := p.post("https://api.siliconflow.cn/v1/fine_tuning/jobs", req, &rsp)
+	err := p.post(p.channel.BaseUrl+"/v1/fine_tuning/jobs", req, &rsp)
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -721,7 +724,7 @@ func (p *SiliconFlow) ListFineTuningJobs(limit int, after string) (*SiliconFlowF
 		req.SetQueryParam("after", after)
 	}
 
-	resp, err := req.Get("https://api.siliconflow.cn/v1/fine_tuning/jobs")
+	resp, err := req.Get(p.channel.BaseUrl + "/v1/fine_tuning/jobs")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
@@ -736,7 +739,7 @@ func (p *SiliconFlow) RetrieveFineTuningJob(jobID string) (*SiliconFlowFineTunin
 	resp, err := p.GetRequest().
 		SetResult(&rsp).
 		SetPathParam("job_id", jobID).
-		Get("https://api.siliconflow.cn/v1/fine_tuning/jobs/{job_id}")
+		Get(p.channel.BaseUrl + "/v1/fine_tuning/jobs/{job_id}")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
@@ -751,7 +754,7 @@ func (p *SiliconFlow) CancelFineTuningJob(jobID string) (*SiliconFlowFineTuningJ
 	resp, err := p.GetRequest().
 		SetResult(&rsp).
 		SetPathParam("job_id", jobID).
-		Post("https://api.siliconflow.cn/v1/fine_tuning/jobs/{job_id}/cancel")
+		Post(p.channel.BaseUrl + "/v1/fine_tuning/jobs/{job_id}/cancel")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)
@@ -781,7 +784,7 @@ func (p *SiliconFlow) ListFineTuningJobEvents(req *SiliconFlowListFineTuningJobE
 		request.SetQueryParam("after", req.After)
 	}
 
-	resp, err := request.Get("https://api.siliconflow.cn/v1/fine_tuning/jobs/{job_id}/events")
+	resp, err := request.Get(p.channel.BaseUrl + "/v1/fine_tuning/jobs/{job_id}/events")
 
 	if err := handleSiliconFlowError(resp, err); err != nil {
 		log.Errorf("err:%s", err)

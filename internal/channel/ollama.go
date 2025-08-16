@@ -16,6 +16,9 @@ type Ollama struct {
 }
 
 func NewOllama(channel *aiload.ModelChannel) *Ollama {
+	if channel.BaseUrl == "" {
+		channel.BaseUrl = "http://localhost:11434"
+	}
 	return &Ollama{
 		channel: channel,
 	}
@@ -36,7 +39,7 @@ type OllamaGetLocalModelListRsp struct {
 
 func (p *Ollama) GetLocalModelList() (*OllamaGetLocalModelListRsp, error) {
 	var rsp OllamaGetLocalModelListRsp
-	resp, err := p.GetRequest().Get("http://localhost:11434/api/tags")
+	resp, err := p.GetRequest().Get(p.channel.BaseUrl + "/api/tags")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -220,7 +223,7 @@ type OllamaVersionRsp struct {
 // GenerateCompletion sends a request to generate a completion.
 func (p *Ollama) GenerateCompletion(req *OllamaGenerateReq) (*OllamaGenerateRsp, error) {
 	var rsp OllamaGenerateRsp
-	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/generate")
+	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/generate")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -240,7 +243,7 @@ func (p *Ollama) GenerateCompletion(req *OllamaGenerateReq) (*OllamaGenerateRsp,
 // CreateChatCompletion sends a request to create a chat completion.
 func (p *Ollama) CreateChatCompletion(req *OllamaChatReq) (*OllamaChatRsp, error) {
 	var rsp OllamaChatRsp
-	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/chat")
+	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/chat")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -260,7 +263,7 @@ func (p *Ollama) CreateChatCompletion(req *OllamaChatReq) (*OllamaChatRsp, error
 // CreateModel sends a request to create a new model.
 func (p *Ollama) CreateModel(req *OllamaCreateModelReq) (*OllamaCreateModelRsp, error) {
 	var rsp OllamaCreateModelRsp
-	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/create")
+	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/create")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -280,7 +283,7 @@ func (p *Ollama) CreateModel(req *OllamaCreateModelReq) (*OllamaCreateModelRsp, 
 // ShowModelInfo sends a request to get information about a model.
 func (p *Ollama) ShowModelInfo(req *OllamaShowModelReq) (*OllamaShowModelRsp, error) {
 	var rsp OllamaShowModelRsp
-	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/show")
+	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/show")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -299,7 +302,7 @@ func (p *Ollama) ShowModelInfo(req *OllamaShowModelReq) (*OllamaShowModelRsp, er
 
 // CopyModel sends a request to copy a model.
 func (p *Ollama) CopyModel(req *OllamaCopyModelReq) error {
-	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/copy")
+	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/copy")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return err
@@ -314,7 +317,7 @@ func (p *Ollama) CopyModel(req *OllamaCopyModelReq) error {
 
 // DeleteModel sends a request to delete a model.
 func (p *Ollama) DeleteModel(req *OllamaDeleteModelReq) error {
-	resp, err := p.GetRequest().SetBody(req).Delete("http://localhost:11434/api/delete")
+	resp, err := p.GetRequest().SetBody(req).Delete(p.channel.BaseUrl + "/api/delete")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return err
@@ -330,7 +333,7 @@ func (p *Ollama) DeleteModel(req *OllamaDeleteModelReq) error {
 // PullModel sends a request to pull a model from the registry.
 func (p *Ollama) PullModel(req *OllamaPullModelReq) (*OllamaPullModelRsp, error) {
 	var rsp OllamaPullModelRsp
-	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/pull")
+	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/pull")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -350,7 +353,7 @@ func (p *Ollama) PullModel(req *OllamaPullModelReq) (*OllamaPullModelRsp, error)
 // PushModel sends a request to push a model to the registry.
 func (p *Ollama) PushModel(req *OllamaPushModelReq) (*OllamaPushModelRsp, error) {
 	var rsp OllamaPushModelRsp
-	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/push")
+	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/push")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -370,7 +373,7 @@ func (p *Ollama) PushModel(req *OllamaPushModelReq) (*OllamaPushModelRsp, error)
 // GenerateEmbeddings sends a request to generate embeddings for a prompt.
 func (p *Ollama) GenerateEmbeddings(req *OllamaEmbeddingsReq) (*OllamaEmbeddingsRsp, error) {
 	var rsp OllamaEmbeddingsRsp
-	resp, err := p.GetRequest().SetBody(req).Post("http://localhost:11434/api/embeddings")
+	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/embeddings")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -390,7 +393,7 @@ func (p *Ollama) GenerateEmbeddings(req *OllamaEmbeddingsReq) (*OllamaEmbeddings
 // ListRunningModels sends a request to list currently running models.
 func (p *Ollama) ListRunningModels() (*OllamaGetRunningModelListRsp, error) {
 	var rsp OllamaGetRunningModelListRsp
-	resp, err := p.GetRequest().Get("http://localhost:11434/api/ps")
+	resp, err := p.GetRequest().Get(p.channel.BaseUrl + "/api/ps")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -410,7 +413,7 @@ func (p *Ollama) ListRunningModels() (*OllamaGetRunningModelListRsp, error) {
 // GetVersion sends a request to get the version of Ollama.
 func (p *Ollama) GetVersion() (*OllamaVersionRsp, error) {
 	var rsp OllamaVersionRsp
-	resp, err := p.GetRequest().Get("http://localhost:11434/api/version")
+	resp, err := p.GetRequest().Get(p.channel.BaseUrl + "/api/version")
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return nil, err
@@ -429,7 +432,7 @@ func (p *Ollama) GetVersion() (*OllamaVersionRsp, error) {
 
 // CheckBlobExists sends a request to check if a blob exists.
 func (p *Ollama) CheckBlobExists(digest string) (bool, error) {
-	resp, err := p.GetRequest().Head("http://localhost:11434/api/blobs/" + digest)
+	resp, err := p.GetRequest().Head(p.channel.BaseUrl + "/api/blobs/" + digest)
 	if err != nil {
 		log.Errorf("err:%s", err)
 		return false, err
