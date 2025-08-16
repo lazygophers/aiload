@@ -3,7 +3,6 @@ package channel
 import (
 	"encoding/json"
 	"fmt"
-
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -11,10 +10,13 @@ import (
 	"github.com/lazygophers/log"
 )
 
+// Ollama 结构体封装了与 Ollama 服务交互所需的状态。
 type Ollama struct {
 	channel *aiload.ModelChannel
 }
 
+// NewOllama 创建一个新的 Ollama 客户端实例。
+// 如果 channel 中没有指定 BaseUrl，则使用默认的 "http://localhost:11434"。
 func NewOllama(channel *aiload.ModelChannel) *Ollama {
 	if channel.BaseUrl == "" {
 		channel.BaseUrl = "http://localhost:11434"
@@ -24,6 +26,7 @@ func NewOllama(channel *aiload.ModelChannel) *Ollama {
 	}
 }
 
+// OllamaModel 代表一个 Ollama 模型的信息。
 type OllamaModel struct {
 	Name       string             `json:"name"`
 	Model      string             `json:"model"`
@@ -33,34 +36,43 @@ type OllamaModel struct {
 	Details    OllamaModelDetails `json:"details"`
 }
 
+// OllamaGetLocalModelListRsp 代表获取本地模型列表的响应。
 type OllamaGetLocalModelListRsp struct {
 	Models []OllamaModel `json:"models"`
 }
 
+// GetLocalModelList 获取本地可用的模型列表。
 func (p *Ollama) GetLocalModelList() (*OllamaGetLocalModelListRsp, error) {
 	var rsp OllamaGetLocalModelListRsp
+	var err error
+
 	resp, err := p.GetRequest().Get(p.channel.BaseUrl + "/api/tags")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("failed to request ollama api: %s", err)
 		return nil, err
 	}
+
 	if resp.IsError() {
-		err := fmt.Errorf("api error: %s", resp.String())
-		log.Errorf("err:%s", err)
+		err = fmt.Errorf("ollama api error: %s", resp.String())
+		log.Errorf("error detail: %s", err)
 		return nil, err
 	}
-	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+
+	err = json.Unmarshal(resp.Body(), &rsp)
+	if err != nil {
+		log.Errorf("failed to unmarshal response json: %s", err)
 		return nil, err
 	}
+
 	return &rsp, nil
 }
 
+// GetRequest 创建并返回一个配置了基本认证和超时的 resty 请求。
 func (p *Ollama) GetRequest() *resty.Request {
 	return client.R()
 }
 
-// OllamaGenerateReq represents the request for generating a completion.
+// OllamaGenerateReq 代表生成补全的请求。
 type OllamaGenerateReq struct {
 	Model    string                 `json:"model"`
 	Prompt   string                 `json:"prompt"`
@@ -74,7 +86,7 @@ type OllamaGenerateReq struct {
 	Raw      bool                   `json:"raw,omitempty"`
 }
 
-// OllamaGenerateRsp represents the response for a generated completion.
+// OllamaGenerateRsp 代表生成补全的响应。
 type OllamaGenerateRsp struct {
 	Model           string    `json:"model"`
 	CreatedAt       time.Time `json:"created_at"`
@@ -88,14 +100,14 @@ type OllamaGenerateRsp struct {
 	EvalDuration    int64     `json:"eval_duration,omitempty"`
 }
 
-// OllamaMessage represents a message in a chat completion request.
+// OllamaMessage 代表聊天补全请求中的一条消息。
 type OllamaMessage struct {
 	Role    string   `json:"role"`
 	Content string   `json:"content"`
 	Images  []string `json:"images,omitempty"`
 }
 
-// OllamaChatReq represents the request for a chat completion.
+// OllamaChatReq 代表聊天补全的请求。
 type OllamaChatReq struct {
 	Model    string                 `json:"model"`
 	Messages []OllamaMessage        `json:"messages"`
@@ -104,7 +116,7 @@ type OllamaChatReq struct {
 	Stream   bool                   `json:"stream,omitempty"`
 }
 
-// OllamaChatRsp represents the response for a chat completion.
+// OllamaChatRsp 代表聊天补全的响应。
 type OllamaChatRsp struct {
 	Model     string        `json:"model"`
 	CreatedAt time.Time     `json:"created_at"`
@@ -112,24 +124,24 @@ type OllamaChatRsp struct {
 	Done      bool          `json:"done"`
 }
 
-// OllamaCreateModelReq represents the request to create a model.
+// OllamaCreateModelReq 代表创建模型的请求。
 type OllamaCreateModelReq struct {
 	Name      string `json:"name"`
 	Modelfile string `json:"modelfile"`
 	Stream    bool   `json:"stream,omitempty"`
 }
 
-// OllamaCreateModelRsp represents the response for creating a model.
+// OllamaCreateModelRsp 代表创建模型的响应。
 type OllamaCreateModelRsp struct {
 	Status string `json:"status"`
 }
 
-// OllamaShowModelReq represents the request to show model information.
+// OllamaShowModelReq 代表显示模型信息的请求。
 type OllamaShowModelReq struct {
 	Name string `json:"name"`
 }
 
-// OllamaShowModelRsp represents the response with model information.
+// OllamaShowModelRsp 代表包含模型信息的响应。
 type OllamaShowModelRsp struct {
 	License    string `json:"license"`
 	Modelfile  string `json:"modelfile"`
@@ -137,25 +149,25 @@ type OllamaShowModelRsp struct {
 	Template   string `json:"template"`
 }
 
-// OllamaCopyModelReq represents the request to copy a model.
+// OllamaCopyModelReq 代表复制模型的请求。
 type OllamaCopyModelReq struct {
 	Source      string `json:"source"`
 	Destination string `json:"destination"`
 }
 
-// OllamaDeleteModelReq represents the request to delete a model.
+// OllamaDeleteModelReq 代表删除模型的请求。
 type OllamaDeleteModelReq struct {
 	Name string `json:"name"`
 }
 
-// OllamaPullModelReq represents the request to pull a model.
+// OllamaPullModelReq 代表拉取模型的请求。
 type OllamaPullModelReq struct {
 	Name     string `json:"name"`
 	Insecure bool   `json:"insecure,omitempty"`
 	Stream   bool   `json:"stream,omitempty"`
 }
 
-// OllamaPullModelRsp represents the response for pulling a model.
+// OllamaPullModelRsp 代表拉取模型的响应。
 type OllamaPullModelRsp struct {
 	Status    string `json:"status"`
 	Digest    string `json:"digest,omitempty"`
@@ -163,14 +175,14 @@ type OllamaPullModelRsp struct {
 	Completed int64  `json:"completed,omitempty"`
 }
 
-// OllamaPushModelReq represents the request to push a model.
+// OllamaPushModelReq 代表推送模型的请求。
 type OllamaPushModelReq struct {
 	Name     string `json:"name"`
 	Insecure bool   `json:"insecure,omitempty"`
 	Stream   bool   `json:"stream,omitempty"`
 }
 
-// OllamaPushModelRsp represents the response for pushing a model.
+// OllamaPushModelRsp 代表推送模型的响应。
 type OllamaPushModelRsp struct {
 	Status    string `json:"status"`
 	Digest    string `json:"digest,omitempty"`
@@ -178,18 +190,18 @@ type OllamaPushModelRsp struct {
 	Completed int64  `json:"completed,omitempty"`
 }
 
-// OllamaEmbeddingsReq represents the request for generating embeddings.
+// OllamaEmbeddingsReq 代表生成嵌入的请求。
 type OllamaEmbeddingsReq struct {
 	Model  string `json:"model"`
 	Prompt string `json:"prompt"`
 }
 
-// OllamaEmbeddingsRsp represents the response with the generated embeddings.
+// OllamaEmbeddingsRsp 代表包含生成嵌入的响应。
 type OllamaEmbeddingsRsp struct {
 	Embedding []float64 `json:"embedding"`
 }
 
-// OllamaRunningModel represents information about a running model.
+// OllamaRunningModel 代表有关正在运行模型的信息。
 type OllamaRunningModel struct {
 	Name      string             `json:"name"`
 	Model     string             `json:"model"`
@@ -200,7 +212,7 @@ type OllamaRunningModel struct {
 	SizeVRAM  int64              `json:"size_vram"`
 }
 
-// OllamaModelDetails provides detailed information about a model.
+// OllamaModelDetails 提供有关模型的详细信息。
 type OllamaModelDetails struct {
 	ParentModel       string   `json:"parent_model"`
 	Format            string   `json:"format"`
@@ -210,240 +222,306 @@ type OllamaModelDetails struct {
 	QuantizationLevel string   `json:"quantization_level"`
 }
 
-// OllamaGetRunningModelListRsp represents the response for listing running models.
+// OllamaGetRunningModelListRsp 代表列出正在运行模型的响应。
 type OllamaGetRunningModelListRsp struct {
 	Models []OllamaRunningModel `json:"models"`
 }
 
-// OllamaVersionRsp represents the response for the version request.
+// OllamaVersionRsp 代表版本请求的响应。
 type OllamaVersionRsp struct {
 	Version string `json:"version"`
 }
 
-// GenerateCompletion sends a request to generate a completion.
+// GenerateCompletion 发送生成补全的请求。
 func (p *Ollama) GenerateCompletion(req *OllamaGenerateReq) (*OllamaGenerateRsp, error) {
 	var rsp OllamaGenerateRsp
+	var err error
+
 	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/generate")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("failed to request ollama api: %s", err)
 		return nil, err
 	}
+
 	if resp.IsError() {
-		err := fmt.Errorf("api error: %s", resp.String())
-		log.Errorf("err:%s", err)
+		err = fmt.Errorf("ollama api error: %s", resp.String())
+		log.Errorf("error detail: %s", err)
 		return nil, err
 	}
-	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+
+	err = json.Unmarshal(resp.Body(), &rsp)
+	if err != nil {
+		log.Errorf("failed to unmarshal response json: %s", err)
 		return nil, err
 	}
+
 	return &rsp, nil
 }
 
-// CreateChatCompletion sends a request to create a chat completion.
+// CreateChatCompletion 发送创建聊天补全的请求。
 func (p *Ollama) CreateChatCompletion(req *OllamaChatReq) (*OllamaChatRsp, error) {
 	var rsp OllamaChatRsp
+	var err error
+
 	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/chat")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("failed to request ollama api: %s", err)
 		return nil, err
 	}
+
 	if resp.IsError() {
-		err := fmt.Errorf("api error: %s", resp.String())
-		log.Errorf("err:%s", err)
+		err = fmt.Errorf("ollama api error: %s", resp.String())
+		log.Errorf("error detail: %s", err)
 		return nil, err
 	}
-	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+
+	err = json.Unmarshal(resp.Body(), &rsp)
+	if err != nil {
+		log.Errorf("failed to unmarshal response json: %s", err)
 		return nil, err
 	}
+
 	return &rsp, nil
 }
 
-// CreateModel sends a request to create a new model.
+// CreateModel 发送创建新模型的请求。
 func (p *Ollama) CreateModel(req *OllamaCreateModelReq) (*OllamaCreateModelRsp, error) {
 	var rsp OllamaCreateModelRsp
+	var err error
+
 	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/create")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("failed to request ollama api: %s", err)
 		return nil, err
 	}
+
 	if resp.IsError() {
-		err := fmt.Errorf("api error: %s", resp.String())
-		log.Errorf("err:%s", err)
+		err = fmt.Errorf("ollama api error: %s", resp.String())
+		log.Errorf("error detail: %s", err)
 		return nil, err
 	}
-	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+
+	err = json.Unmarshal(resp.Body(), &rsp)
+	if err != nil {
+		log.Errorf("failed to unmarshal response json: %s", err)
 		return nil, err
 	}
+
 	return &rsp, nil
 }
 
-// ShowModelInfo sends a request to get information about a model.
+// ShowModelInfo 发送获取模型信息的请求。
 func (p *Ollama) ShowModelInfo(req *OllamaShowModelReq) (*OllamaShowModelRsp, error) {
 	var rsp OllamaShowModelRsp
+	var err error
+
 	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/show")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("failed to request ollama api: %s", err)
 		return nil, err
 	}
+
 	if resp.IsError() {
-		err := fmt.Errorf("api error: %s", resp.String())
-		log.Errorf("err:%s", err)
+		err = fmt.Errorf("ollama api error: %s", resp.String())
+		log.Errorf("error detail: %s", err)
 		return nil, err
 	}
-	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+
+	err = json.Unmarshal(resp.Body(), &rsp)
+	if err != nil {
+		log.Errorf("failed to unmarshal response json: %s", err)
 		return nil, err
 	}
+
 	return &rsp, nil
 }
 
-// CopyModel sends a request to copy a model.
+// CopyModel 发送复制模型的请求。
 func (p *Ollama) CopyModel(req *OllamaCopyModelReq) error {
+	var err error
+
 	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/copy")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("failed to request ollama api: %s", err)
 		return err
 	}
+
 	if resp.IsError() {
-		err := fmt.Errorf("api error: %s", resp.String())
-		log.Errorf("err:%s", err)
+		err = fmt.Errorf("ollama api error: %s", resp.String())
+		log.Errorf("error detail: %s", err)
 		return err
 	}
+
 	return nil
 }
 
-// DeleteModel sends a request to delete a model.
+// DeleteModel 发送删除模型的请求。
 func (p *Ollama) DeleteModel(req *OllamaDeleteModelReq) error {
+	var err error
+
 	resp, err := p.GetRequest().SetBody(req).Delete(p.channel.BaseUrl + "/api/delete")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("failed to request ollama api: %s", err)
 		return err
 	}
+
 	if resp.IsError() {
-		err := fmt.Errorf("api error: %s", resp.String())
-		log.Errorf("err:%s", err)
+		err = fmt.Errorf("ollama api error: %s", resp.String())
+		log.Errorf("error detail: %s", err)
 		return err
 	}
+
 	return nil
 }
 
-// PullModel sends a request to pull a model from the registry.
+// PullModel 发送从注册表拉取模型的请求。
 func (p *Ollama) PullModel(req *OllamaPullModelReq) (*OllamaPullModelRsp, error) {
 	var rsp OllamaPullModelRsp
+	var err error
+
 	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/pull")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("failed to request ollama api: %s", err)
 		return nil, err
 	}
+
 	if resp.IsError() {
-		err := fmt.Errorf("api error: %s", resp.String())
-		log.Errorf("err:%s", err)
+		err = fmt.Errorf("ollama api error: %s", resp.String())
+		log.Errorf("error detail: %s", err)
 		return nil, err
 	}
-	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+
+	err = json.Unmarshal(resp.Body(), &rsp)
+	if err != nil {
+		log.Errorf("failed to unmarshal response json: %s", err)
 		return nil, err
 	}
+
 	return &rsp, nil
 }
 
-// PushModel sends a request to push a model to the registry.
+// PushModel 发送将模型推送到注册表的请求。
 func (p *Ollama) PushModel(req *OllamaPushModelReq) (*OllamaPushModelRsp, error) {
 	var rsp OllamaPushModelRsp
+	var err error
+
 	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/push")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("failed to request ollama api: %s", err)
 		return nil, err
 	}
+
 	if resp.IsError() {
-		err := fmt.Errorf("api error: %s", resp.String())
-		log.Errorf("err:%s", err)
+		err = fmt.Errorf("ollama api error: %s", resp.String())
+		log.Errorf("error detail: %s", err)
 		return nil, err
 	}
-	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+
+	err = json.Unmarshal(resp.Body(), &rsp)
+	if err != nil {
+		log.Errorf("failed to unmarshal response json: %s", err)
 		return nil, err
 	}
+
 	return &rsp, nil
 }
 
-// GenerateEmbeddings sends a request to generate embeddings for a prompt.
+// GenerateEmbeddings 发送为提示生成嵌入的请求。
 func (p *Ollama) GenerateEmbeddings(req *OllamaEmbeddingsReq) (*OllamaEmbeddingsRsp, error) {
 	var rsp OllamaEmbeddingsRsp
+	var err error
+
 	resp, err := p.GetRequest().SetBody(req).Post(p.channel.BaseUrl + "/api/embeddings")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("failed to request ollama api: %s", err)
 		return nil, err
 	}
+
 	if resp.IsError() {
-		err := fmt.Errorf("api error: %s", resp.String())
-		log.Errorf("err:%s", err)
+		err = fmt.Errorf("ollama api error: %s", resp.String())
+		log.Errorf("error detail: %s", err)
 		return nil, err
 	}
-	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+
+	err = json.Unmarshal(resp.Body(), &rsp)
+	if err != nil {
+		log.Errorf("failed to unmarshal response json: %s", err)
 		return nil, err
 	}
+
 	return &rsp, nil
 }
 
-// ListRunningModels sends a request to list currently running models.
+// ListRunningModels 发送列出当前正在运行模型的请求。
 func (p *Ollama) ListRunningModels() (*OllamaGetRunningModelListRsp, error) {
 	var rsp OllamaGetRunningModelListRsp
+	var err error
+
 	resp, err := p.GetRequest().Get(p.channel.BaseUrl + "/api/ps")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("failed to request ollama api: %s", err)
 		return nil, err
 	}
+
 	if resp.IsError() {
-		err := fmt.Errorf("api error: %s", resp.String())
-		log.Errorf("err:%s", err)
+		err = fmt.Errorf("ollama api error: %s", resp.String())
+		log.Errorf("error detail: %s", err)
 		return nil, err
 	}
-	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+
+	err = json.Unmarshal(resp.Body(), &rsp)
+	if err != nil {
+		log.Errorf("failed to unmarshal response json: %s", err)
 		return nil, err
 	}
+
 	return &rsp, nil
 }
 
-// GetVersion sends a request to get the version of Ollama.
+// GetVersion 发送获取 Ollama 版本的请求。
 func (p *Ollama) GetVersion() (*OllamaVersionRsp, error) {
 	var rsp OllamaVersionRsp
+	var err error
+
 	resp, err := p.GetRequest().Get(p.channel.BaseUrl + "/api/version")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("failed to request ollama api: %s", err)
 		return nil, err
 	}
+
 	if resp.IsError() {
-		err := fmt.Errorf("api error: %s", resp.String())
-		log.Errorf("err:%s", err)
+		err = fmt.Errorf("ollama api error: %s", resp.String())
+		log.Errorf("error detail: %s", err)
 		return nil, err
 	}
-	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+
+	err = json.Unmarshal(resp.Body(), &rsp)
+	if err != nil {
+		log.Errorf("failed to unmarshal response json: %s", err)
 		return nil, err
 	}
+
 	return &rsp, nil
 }
 
-// CheckBlobExists sends a request to check if a blob exists.
+// CheckBlobExists 发送检查 Blob 是否存在的请求。
 func (p *Ollama) CheckBlobExists(digest string) (bool, error) {
+	var err error
+
 	resp, err := p.GetRequest().Head(p.channel.BaseUrl + "/api/blobs/" + digest)
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("failed to request ollama api: %s", err)
 		return false, err
 	}
+
 	if resp.IsError() {
 		if resp.StatusCode() == 404 {
 			return false, nil
 		}
-		err := fmt.Errorf("api error: %s", resp.String())
-		log.Errorf("err:%s", err)
+		err = fmt.Errorf("ollama api error: %s", resp.String())
+		log.Errorf("error detail: %s", err)
 		return false, err
 	}
+
 	return resp.StatusCode() == 200, nil
 }

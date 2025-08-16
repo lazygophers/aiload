@@ -1212,7 +1212,7 @@ func TestSiliconflowMetadataAPI(t *testing.T) {
 			name:          "get_info_list/success",
 			method:        "GET",
 			endpoint:      "https://api.siliconflow.cn/v1/user/info",
-			giveRequest:   &aiload.ModelChannel{Token: "test-token"},
+			giveRequest:   &aiload.ModelChannel{Token: "test-token", BaseUrl: "https://api.siliconflow.cn"},
 			mockResponder: newMockResponder(http.StatusOK, string(getInfoListSuccessBody)),
 			apiCall: func(p *SiliconFlow, req any) (any, error) {
 				p.channel = req.(*aiload.ModelChannel)
@@ -1230,7 +1230,7 @@ func TestSiliconflowMetadataAPI(t *testing.T) {
 			name:          "get_info_list/no_token",
 			method:        "GET",
 			endpoint:      "https://api.siliconflow.cn/v1/user/info",
-			giveRequest:   &aiload.ModelChannel{Token: ""},
+			giveRequest:   &aiload.ModelChannel{Token: "", BaseUrl: "https://api.siliconflow.cn"},
 			mockResponder: newMockResponder(http.StatusOK, ""), // Not called
 			apiCall: func(p *SiliconFlow, req any) (any, error) {
 				p.channel = req.(*aiload.ModelChannel)
@@ -1245,7 +1245,7 @@ func TestSiliconflowMetadataAPI(t *testing.T) {
 			name:          "get_info_list/api_unstructured_error",
 			method:        "GET",
 			endpoint:      "https://api.siliconflow.cn/v1/user/info",
-			giveRequest:   &aiload.ModelChannel{Token: "test-token"},
+			giveRequest:   &aiload.ModelChannel{Token: "test-token", BaseUrl: "https://api.siliconflow.cn"},
 			mockResponder: newMockResponder(http.StatusInternalServerError, "internal server error"),
 			apiCall: func(p *SiliconFlow, req any) (any, error) {
 				p.channel = req.(*aiload.ModelChannel)

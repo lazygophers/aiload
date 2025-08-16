@@ -5,9 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"strings"
-
 	"fmt"
+	"strings"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/lazygophers/aiload"
@@ -15,7 +14,7 @@ import (
 	"github.com/lazygophers/utils/anyx"
 )
 
-// GeminiError represents an error response from the Gemini API.
+// GeminiError 封装了从 Gemini API 返回的错误信息。
 type GeminiError struct {
 	Error struct {
 		Code    int    `json:"code"`
@@ -24,71 +23,77 @@ type GeminiError struct {
 	} `json:"error"`
 }
 
-// Gemini a channel for gemini models
+// Gemini 实现了与 Google Gemini 模型进行交互的 aiload.ModelChannel。
+// 它处理 API 请求的构建、发送以及响应的解析。
 type Gemini struct {
 	channel *aiload.ModelChannel
+	client  *resty.Client
 }
 
-// NewGemini creates a new gemini channel
+// NewGemini 创建并返回一个新的 Gemini channel 实例。
+// 它会初始化一个配置了 API token 的 resty 客户端。
 func NewGemini(channel *aiload.ModelChannel) *Gemini {
 	client := resty.New()
 	client.SetQueryParam("key", channel.Token)
 	client.SetError(&GeminiError{})
-
 	return &Gemini{
 		channel: channel,
+		client:  client,
 	}
 }
 
-// GeminiGetModelListReq represents a request to get a list of models.
+// GeminiGetModelListReq 定义了获取模型列表的请求参数。
 type GeminiGetModelListReq struct {
-	// PageSize is the number of models to return.
+	// PageSize 指定每页返回的模型数量。
 	PageSize int
-	// PageToken is the page token to use for pagination.
+	// PageToken 用于分页的页面令牌。
 	PageToken string
 }
 
-// GeminiModel represents a single model.
+// GeminiModel 代表一个具体的 Gemini 模型及其属性。
 type GeminiModel struct {
-	// Name is the name of the model.
+	// Name 模型的唯一名称。
 	Name string `json:"name"`
-	// BaseModelID is the base model ID.
+	// BaseModelID 基础模型的 ID。
 	BaseModelID string `json:"baseModelId"`
-	// Version is the version of the model.
+	// Version 模型的版本号。
 	Version string `json:"version"`
-	// DisplayName is the display name of the model.
+	// DisplayName 模型在 UI 中展示的名称。
 	DisplayName string `json:"displayName"`
-	// Description is the description of the model.
+	// Description 模型的详细描述。
 	Description string `json:"description"`
-	// InputTokenLimit is the input token limit.
+	// InputTokenLimit 模型支持的最大输入 token 数。
 	InputTokenLimit int `json:"inputTokenLimit"`
-	// OutputTokenLimit is the output token limit.
+	// OutputTokenLimit 模型支持的最大输出 token 数。
 	OutputTokenLimit int `json:"outputTokenLimit"`
-	// SupportedGenerationMethods is a list of supported generation methods.
+	// SupportedGenerationMethods 支持的生成方法列表。
 	SupportedGenerationMethods []string `json:"supportedGenerationMethods"`
-	// Thinking is whether the model is thinking.
+	// Thinking 指示模型是否处于“思考”状态。
 	Thinking bool `json:"thinking"`
-	// Temperature is the temperature of the model.
+	// Temperature 模型的温度参数。
 	Temperature int `json:"temperature"`
-	// MaxTemperature is the maximum temperature of the model.
+	// MaxTemperature 模型的最大温度参数。
 	MaxTemperature int `json:"maxTemperature"`
-	// TopP is the top-p value of the model.
+	// TopP 模型的 Top-p 采样参数。
 	TopP int `json:"topP"`
-	// TopK is the top-k value of the model.
+	// TopK 模型的 Top-k 采样参数。
 	TopK int `json:"topK"`
 }
 
-// GeminiGetModelListRsp represents a response from getting a list of models.
+// GeminiGetModelListRsp 定义了获取模型列表的响应结构。
 type GeminiGetModelListRsp struct {
-	// Models is a list of models.
+	// Models 返回的模型列表。
 	Models []GeminiModel `json:"models"`
-	// NextPageToken is the next page token.
+	// NextPageToken 用于获取下一页结果的令牌。
 	NextPageToken string `json:"nextPageToken"`
 }
 
-// GetModelList gets a list of models.
+// GetModelList 从 Gemini API 获取可用的模型列表。
+// 它支持通过 PageSize 和 PageToken进行分页。
 func (p *Gemini) GetModelList(ctx context.Context, req *GeminiGetModelListReq) (*GeminiGetModelListRsp, error) {
 	var rsp GeminiGetModelListRsp
+	var err error
+
 	pageSize := anyx.ToString(req.PageSize)
 	if req.PageSize <= 0 {
 		pageSize = "50"
@@ -96,72 +101,67 @@ func (p *Gemini) GetModelList(ctx context.Context, req *GeminiGetModelListReq) (
 	if req.PageSize > 1000 {
 		pageSize = "1000"
 	}
-
-	resp, err := client.R().SetQueryParams(map[string]string{
+	resp, err := p.client.R().SetQueryParams(map[string]string{
 		"pageSize":  pageSize,
 		"pageToken": req.PageToken,
 	}).Get(p.channel.BaseUrl + "/v1beta/models")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
-
 	if resp.IsError() {
 		if geminiErr, ok := resp.Error().(*GeminiError); ok && geminiErr.Error.Message != "" {
-			err := fmt.Errorf("API error: %s", geminiErr.Error.Message)
-			log.Errorf("err:%s", err)
+			err = fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			log.Errorf("error: %s", err)
 			return nil, err
 		}
-		err := errors.New(resp.String())
-		log.Errorf("err:%s", err)
+		err = errors.New(resp.String())
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
-
-	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+	err = json.Unmarshal(resp.Body(), &rsp)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
-
 	return &rsp, nil
 }
 
-// GeminiGetModelReq represents a request to get a model.
+// GeminiGetModelReq 定义了获取单个模型信息的请求。
 type GeminiGetModelReq struct {
-	// Model is the name of the model to get.
+	// Model 要获取的模型的名称。
 	Model string
 }
 
-// GeminiGetModelRsp represents a response from getting a model.
+// GeminiGetModelRsp 定义了获取单个模型信息的响应。
 type GeminiGetModelRsp struct {
 	GeminiModel
 }
 
-// GetModel gets a model.
+// GetModel 根据模型名称获取单个模型的详细信息。
 func (p *Gemini) GetModel(ctx context.Context, req *GeminiGetModelReq) (*GeminiGetModelRsp, error) {
 	var rsp GeminiGetModelRsp
+	var err error
 
-	resp, err := client.R().Get(p.channel.BaseUrl + "/v1/models/" + req.Model)
+	resp, err := p.client.R().Get(p.channel.BaseUrl + "/v1/models/" + req.Model)
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
-
 	if resp.IsError() {
 		if geminiErr, ok := resp.Error().(*GeminiError); ok && geminiErr.Error.Message != "" {
-			err := fmt.Errorf("API error: %s", geminiErr.Error.Message)
-			log.Errorf("err:%s", err)
+			err = fmt.Errorf("API error: %s", geminiErr.Error.Message)
+			log.Errorf("error: %s", err)
 			return nil, err
 		}
-		err := errors.New(resp.String())
-		log.Errorf("err:%s", err)
+		err = errors.New(resp.String())
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
-
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
-
 	return &rsp, nil
 }
 
@@ -316,29 +316,29 @@ func (p *Gemini) CountTokens(ctx context.Context, req *GeminiCountTokensReq) (*G
 
 	if req.Model == "" {
 		err := errors.New("model name cannot be empty")
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
-	resp, err := client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + req.Model + ":countTokens")
+	resp, err := p.client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + req.Model + ":countTokens")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
 	if resp.IsError() {
 		if geminiErr, ok := resp.Error().(*GeminiError); ok && geminiErr.Error.Message != "" {
 			err := fmt.Errorf("API error: %s", geminiErr.Error.Message)
-			log.Errorf("err:%s", err)
+			log.Errorf("error: %s", err)
 			return nil, err
 		}
 		err := errors.New(resp.String())
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
@@ -349,25 +349,25 @@ func (p *Gemini) CountTokens(ctx context.Context, req *GeminiCountTokensReq) (*G
 func (p *Gemini) EmbedContent(ctx context.Context, req *GeminiEmbedContentReq) (*GeminiEmbedContentRsp, error) {
 	var rsp GeminiEmbedContentRsp
 
-	resp, err := client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + req.Model + ":embedContent")
+	resp, err := p.client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + req.Model + ":embedContent")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
 	if resp.IsError() {
 		if geminiErr, ok := resp.Error().(*GeminiError); ok && geminiErr.Error.Message != "" {
 			err := fmt.Errorf("API error: %s", geminiErr.Error.Message)
-			log.Errorf("err:%s", err)
+			log.Errorf("error: %s", err)
 			return nil, err
 		}
 		err := errors.New(resp.String())
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
 	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
@@ -380,7 +380,7 @@ func (p *Gemini) BatchEmbedContents(ctx context.Context, req *GeminiBatchEmbedCo
 
 	if len(req.Requests) == 0 {
 		err := errors.New("requests cannot be empty")
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
@@ -388,29 +388,30 @@ func (p *Gemini) BatchEmbedContents(ctx context.Context, req *GeminiBatchEmbedCo
 	model := req.Requests[0].Model
 	if model == "" {
 		err := errors.New("model name cannot be empty in the first request")
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
-	resp, err := client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + model + ":batchEmbedContents")
+	resp, err := p.client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + model + ":batchEmbedContents")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
 	if resp.IsError() {
 		if geminiErr, ok := resp.Error().(*GeminiError); ok && geminiErr.Error.Message != "" {
 			err := fmt.Errorf("API error: %s", geminiErr.Error.Message)
-			log.Errorf("err:%s", err)
+			log.Errorf("error: %s", err)
 			return nil, err
 		}
 		err := errors.New(resp.String())
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
-	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+	err = json.Unmarshal(resp.Body(), &rsp)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
@@ -423,55 +424,84 @@ func (p *Gemini) GenerateContent(ctx context.Context, model string, req *GeminiG
 
 	if model == "" {
 		err := errors.New("model name cannot be empty")
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
-	resp, err := client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + model + ":generateContent")
+	resp, err := p.client.R().SetBody(req).Post(p.channel.BaseUrl + "/v1/models/" + model + ":generateContent")
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
 	if resp.IsError() {
 		if geminiErr, ok := resp.Error().(*GeminiError); ok && geminiErr.Error.Message != "" {
 			err := fmt.Errorf("API error: %s", geminiErr.Error.Message)
-			log.Errorf("err:%s", err)
+			log.Errorf("error: %s", err)
 			return nil, err
 		}
 		err := errors.New(resp.String())
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
-	if err := json.Unmarshal(resp.Body(), &rsp); err != nil {
-		log.Errorf("err:%s", err)
+	err = json.Unmarshal(resp.Body(), &rsp)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
 	return &rsp, nil
 }
 
-// StreamGenerateContent generates content from a prompt in a streaming fashion.
+// StreamGenerateContent 以流式方式从 prompt 生成内容。
+// 此函数是并发安全的，它启动一个 goroutine 来处理流式响应，并通过一个 channel 将结果返回。
+//
+// 工作流程:
+// 1. 输入验证：检查 model 名称是否为空。
+// 2. 通道创建：创建一个无缓冲的 channel，用于异步地将 GeminiGenerateContentRsp 推送给调用者。
+// 3. 异步请求：启动一个新的 goroutine 来执行 HTTP 请求和流处理。
+//   - defer close(ch): 确保在 goroutine 退出时，无论成功还是失败，都会关闭 channel，以防调用者死锁。
+//
+// 4. 请求构建：
+//   - SetDoNotParseResponse(true): 关键设置！这告诉 resty 不要自动解析响应体，因为我们需要手动逐行读取流数据。
+//
+// 5. 请求执行：发送 POST 请求到 streamGenerateContent 端点。
+// 6. 错误处理：
+//   - 请求发送失败：记录错误并直接退出 goroutine。
+//   - API 返回错误：尝试将响应体解析为 GeminiError。如果成功，记录具体的 API 错误信息；否则，记录原始响应体。然后退出 goroutine。
+//
+// 7. 流处理：
+//   - defer resp.RawBody().Close(): 确保在处理完响应后关闭响应体。
+//   - bufio.Scanner: 使用 scanner 高效地逐行读取响应流。
+//   - Server-Sent Events (SSE) 解析:
+//   - `strings.HasPrefix(line, "data: ")`: 检查每一行是否是 SSE 的数据事件。
+//   - `strings.TrimPrefix`: 提取 "data: " 后面的 JSON 数据。
+//   - JSON 解析：将提取的 JSON 数据解析到 GeminiGenerateContentRsp 结构体中。
+//   - 流内错误检查：检查解析后的响应中是否包含错误字段。如果存在，记录错误并终止流处理。
+//
+// 8. 数据发送与上下文取消：
+//   - `select` 语句：这是一个关键的并发控制模式。
+//   - `case ch <- &rsp`: 尝试将成功解析的响应发送到 channel。这是一个阻塞操作，如果调用者没有准备好接收，它会等待。
+//   - `case <-ctx.Done()`: 同时监听调用者上下文的取消信号。如果上层操作（例如，用户关闭了请求）被取消，`ctx.Done()` 会被关闭，此 case 会被选中，goroutine 会立即退出，从而避免了 goroutine 泄漏。
+//
+// 9. 扫描器错误检查：在循环结束后，检查 scanner 是否在读取过程中遇到了 IO 错误。
+// 10. 返回值：函数立即返回 channel 和 nil error，调用者可以立即开始从 channel 中读取流式响应。
 func (p *Gemini) StreamGenerateContent(ctx context.Context, model string, req *GeminiGenerateContentReq) (<-chan *GeminiGenerateContentRsp, error) {
 	if model == "" {
 		err := errors.New("model name cannot be empty")
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
-	// 创建一个通道用于流式返回响应
 	ch := make(chan *GeminiGenerateContentRsp)
 
-	// 使用 go aio.Run 异步执行请求
 	go func() {
-		defer close(ch) // 确保在函数退出时关闭通道
+		defer close(ch)
 
-		// 设置请求，但不执行
-		request := client.R().SetBody(req)
-		request.SetDoNotParseResponse(true) // 必须设置，以便我们可以手动处理响应流
+		request := p.client.R().SetBody(req)
+		request.SetDoNotParseResponse(true)
 
-		// 执行请求
 		resp, err := request.Post(p.channel.BaseUrl + "/v1/models/" + model + ":streamGenerateContent")
 		if err != nil {
 			log.Errorf("failed to send stream request: %v", err)
@@ -487,7 +517,6 @@ func (p *Gemini) StreamGenerateContent(ctx context.Context, model string, req *G
 			return
 		}
 
-		// 手动处理响应流
 		defer resp.RawBody().Close()
 		scanner := bufio.NewScanner(resp.RawBody())
 		for scanner.Scan() {
@@ -497,18 +526,17 @@ func (p *Gemini) StreamGenerateContent(ctx context.Context, model string, req *G
 				var rsp GeminiGenerateContentRsp
 				if err := json.Unmarshal([]byte(jsonData), &rsp); err != nil {
 					log.Errorf("failed to unmarshal stream data: %v", err)
-					continue // 继续处理下一行
+					continue
 				}
 
-				// 检查流中是否包含错误
 				if rsp.Error != nil && rsp.Error.Error.Message != "" {
 					log.Errorf("received error in stream: %s", rsp.Error.Error.Message)
-					return // 遇到错误，停止处理并关闭通道
+					return
 				}
 
 				select {
 				case ch <- &rsp:
-				case <-ctx.Done(): // 如果上下文被取消，则停止发送
+				case <-ctx.Done():
 					return
 				}
 			}

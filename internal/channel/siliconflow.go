@@ -15,7 +15,7 @@ var (
 	ErrAuthTokenNil = errors.New("auth token is nil")
 )
 
-// SiliconFlowErrorRsp represents the error response from the SiliconFlow API.
+// SiliconFlowErrorRsp 表示来自 SiliconFlow API 的错误响应。
 type SiliconFlowErrorRsp struct {
 	Err struct {
 		Message string `json:"message"`
@@ -25,16 +25,17 @@ type SiliconFlowErrorRsp struct {
 	} `json:"error"`
 }
 
+// Error 实现 error 接口，返回错误信息。
 func (e *SiliconFlowErrorRsp) Error() string {
 	return e.Err.Message
 }
 
-// SiliconFlow is the client for the SiliconFlow API.
+// SiliconFlow 是用于与 SiliconFlow API 交互的客户端。
 type SiliconFlow struct {
 	channel *aiload.ModelChannel
 }
 
-// NewSiliconFlow creates a new SiliconFlow client.
+// NewSiliconFlow 创建一个新的 SiliconFlow 客户端实例。
 func NewSiliconFlow(channel *aiload.ModelChannel) *SiliconFlow {
 	if channel.BaseUrl == "" {
 		channel.BaseUrl = "https://api.siliconflow.cn"
@@ -44,37 +45,38 @@ func NewSiliconFlow(channel *aiload.ModelChannel) *SiliconFlow {
 	}
 }
 
-// GetRequestRequired checks if the request can be authenticated.
+// GetRequestRequired 检查请求是否可以被认证。
 func (p *SiliconFlow) GetRequestRequired() bool {
 	return p.channel.Token != ""
 }
 
-// GetRequest creates a new resty request with authentication.
+// GetRequest 创建一个带有认证信息的新 resty 请求。
 func (p *SiliconFlow) GetRequest() *resty.Request {
 	return client.R().SetAuthToken(p.channel.Token)
 }
 
-// handleSiliconFlowError checks for an API error from SiliconFlow and returns a structured error if possible.
+// handleSiliconFlowError 检查并处理来自 SiliconFlow 的 API 错误。
 func handleSiliconFlowError(resp *resty.Response, err error) error {
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return err
 	}
 	if !resp.IsError() {
 		return nil
 	}
 	var errRsp SiliconFlowErrorRsp
-	if e := json.Unmarshal(resp.Body(), &errRsp); e == nil && errRsp.Err.Message != "" {
-		err := &errRsp
-		log.Errorf("err:%s", err)
+	e := json.Unmarshal(resp.Body(), &errRsp)
+	if e == nil && errRsp.Err.Message != "" {
+		err = &errRsp
+		log.Errorf("error: %s", err)
 		return err
 	}
 	err = errors.New(resp.String())
-	log.Errorf("err:%s", err)
+	log.Errorf("error: %s", err)
 	return err
 }
 
-// post is a helper function to make a POST request with a JSON body.
+// post 是一个辅助函数，用于发送带有 JSON 主体的 POST 请求。
 func (p *SiliconFlow) post(url string, req, rsp interface{}) error {
 	resp, err := p.GetRequest().
 		SetBody(req).
@@ -83,7 +85,7 @@ func (p *SiliconFlow) post(url string, req, rsp interface{}) error {
 	return handleSiliconFlowError(resp, err)
 }
 
-// SiliconFlowGetInfoListRsp defines the response for getting user info.
+// SiliconFlowGetInfoListRsp 定义了获取用户信息响应的结构。
 type SiliconFlowGetInfoListRsp struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
@@ -103,17 +105,18 @@ type SiliconFlowGetInfoListRsp struct {
 	} `json:"data"`
 }
 
-// GetInfoList gets the user info.
+// GetInfoList 获取用户信息。
 func (p *SiliconFlow) GetInfoList() (*SiliconFlowGetInfoListRsp, error) {
 	if !p.GetRequestRequired() {
 		err := ErrAuthTokenNil
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	var rsp SiliconFlowGetInfoListRsp
 	resp, err := p.GetRequest().SetResult(&rsp).Get(p.channel.BaseUrl + "/v1/user/info")
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -139,7 +142,7 @@ type SiliconFlowGetModelListRsp struct {
 	Data   []Model `json:"data"`
 }
 
-// GetModelList gets the model list.
+// GetModelList 获取模型列表。
 func (p *SiliconFlow) GetModelList(req *SiliconFlowGetModelListReq) (*SiliconFlowGetModelListRsp, error) {
 	var rsp SiliconFlowGetModelListRsp
 	resp, err := p.GetRequest().SetResult(&rsp).SetQueryParams(map[string]string{
@@ -147,14 +150,15 @@ func (p *SiliconFlow) GetModelList(req *SiliconFlowGetModelListReq) (*SiliconFlo
 		"sub_type": req.SubType,
 	}).Get(p.channel.BaseUrl + "/v1/models")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
 }
 
-// GetModel retrieves a model instance.
+// GetModel 获取指定 ID 的模型实例。
 func (p *SiliconFlow) GetModel(modelId string) (*Model, error) {
 	var rsp Model
 	resp, err := p.GetRequest().
@@ -162,8 +166,9 @@ func (p *SiliconFlow) GetModel(modelId string) (*Model, error) {
 		SetPathParam("model", modelId).
 		Get(p.channel.BaseUrl + "/v1/models/{model}")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -228,7 +233,7 @@ type SiliconFlowCreateAudioTranslationRsp struct {
 func (p *SiliconFlow) CreateAudioTranslation(req *SiliconFlowCreateAudioTranslationReq) (*SiliconFlowCreateAudioTranslationRsp, error) {
 	if req.File == nil {
 		err := errors.New("file reader is required")
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
@@ -254,8 +259,9 @@ func (p *SiliconFlow) CreateAudioTranslation(req *SiliconFlowCreateAudioTranslat
 		SetResult(&rsp).
 		Post(p.channel.BaseUrl + "/v1/audio/translations")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
@@ -281,7 +287,7 @@ type SiliconFlowCreateAudioTranscriptionResp struct {
 func (p *SiliconFlow) CreateAudioTranscription(req *SiliconFlowCreateAudioTranscriptionReq) (*SiliconFlowCreateAudioTranscriptionResp, error) {
 	if req.File == nil {
 		err := errors.New("file reader is required")
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
@@ -307,8 +313,9 @@ func (p *SiliconFlow) CreateAudioTranscription(req *SiliconFlowCreateAudioTransc
 		SetResult(&rsp).
 		Post(p.channel.BaseUrl + "/v1/audio/transcriptions")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
@@ -320,7 +327,7 @@ func (p *SiliconFlow) CreateChatCompletion(req *SiliconFlowCreateChatCompletionR
 	var rsp SiliconFlowCreateChatCompletionRsp
 	err := p.post(p.channel.BaseUrl+"/v1/chat/completions", req, &rsp)
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -352,7 +359,7 @@ func (p *SiliconFlow) CreateEmbedding(req *SiliconFlowCreateEmbeddingReq) (*Sili
 	var rsp SiliconFlowCreateEmbeddingRsp
 	err := p.post(p.channel.BaseUrl+"/v1/embeddings", req, &rsp)
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -382,7 +389,7 @@ func (p *SiliconFlow) CreateImageGenerations(req *SiliconFlowCreateImageGenerati
 	var rsp SiliconFlowCreateImageGenerationsRsp
 	err := p.post(p.channel.BaseUrl+"/v1/images/generations", req, &rsp)
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -405,11 +412,11 @@ type SiliconFlowCreateImageEditsReq struct {
 // SiliconFlowCreateImageEditsRsp defines the response for creating image edits.
 type SiliconFlowCreateImageEditsRsp = SiliconFlowCreateImageGenerationsRsp
 
-// CreateImageEdits creates image edits.
+// CreateImageEdits 根据提示词编辑图片。
 func (p *SiliconFlow) CreateImageEdits(req *SiliconFlowCreateImageEditsReq) (*SiliconFlowCreateImageEditsRsp, error) {
 	if req.Image == nil {
 		err := errors.New("image reader is required")
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
@@ -444,8 +451,9 @@ func (p *SiliconFlow) CreateImageEdits(req *SiliconFlowCreateImageEditsReq) (*Si
 		SetResult(&rsp).
 		Post(p.channel.BaseUrl + "/v1/images/edits")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
@@ -498,7 +506,7 @@ type SiliconFlowUploadFileReq struct {
 	Purpose  string
 }
 
-// DeleteFile sends a request to delete a specific file by its ID.
+// DeleteFile 删除指定 ID 的文件。
 func (p *SiliconFlow) DeleteFile(fileID string) (*SiliconFlowDeleteFileRsp, error) {
 	var rsp SiliconFlowDeleteFileRsp
 	resp, err := p.GetRequest().
@@ -508,18 +516,19 @@ func (p *SiliconFlow) DeleteFile(fileID string) (*SiliconFlowDeleteFileRsp, erro
 		}).
 		Delete(p.channel.BaseUrl + "/v1/files/{file_id}")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
 }
 
-// UploadFile uploads a file.
+// UploadFile 上传一个文件。
 func (p *SiliconFlow) UploadFile(req *SiliconFlowUploadFileReq) (*SiliconFlowFileObj, error) {
 	if req.File == nil {
 		err := errors.New("file reader is required")
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
@@ -536,29 +545,31 @@ func (p *SiliconFlow) UploadFile(req *SiliconFlowUploadFileReq) (*SiliconFlowFil
 		SetResult(&rsp).
 		Post(p.channel.BaseUrl + "/v1/files")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
 	return &rsp, nil
 }
 
-// ListFiles lists the files.
+// ListFiles 列出用户上传的文件。
 func (p *SiliconFlow) ListFiles() (*SiliconFlowListFilesRsp, error) {
 	var rsp SiliconFlowListFilesRsp
 	resp, err := p.GetRequest().
 		SetResult(&rsp).
 		Get(p.channel.BaseUrl + "/v1/files")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
 }
 
-// RetrieveFile retrieves a file.
+// RetrieveFile 获取指定文件的元数据。
 func (p *SiliconFlow) RetrieveFile(fileID string) (*SiliconFlowFileObj, error) {
 	var rsp SiliconFlowFileObj
 	resp, err := p.GetRequest().
@@ -566,53 +577,55 @@ func (p *SiliconFlow) RetrieveFile(fileID string) (*SiliconFlowFileObj, error) {
 		SetPathParam("file_id", fileID).
 		Get(p.channel.BaseUrl + "/v1/files/{file_id}")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
 }
 
-// RetrieveFileContent retrieves the content of a specific file.
+// RetrieveFileContent 下载指定文件的内容。
 func (p *SiliconFlow) RetrieveFileContent(fileID string) (io.ReadCloser, error) {
 	resp, err := p.GetRequest().
-		SetDoNotParseResponse(true). // Prevent auto-reading of the body
+		SetDoNotParseResponse(true). // 防止自动解析响应体
 		SetPathParam("file_id", fileID).
 		Get(p.channel.BaseUrl + "/v1/files/{file_id}/content")
 
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
-	// Custom error handling because we are streaming the body
+	// 自定义错误处理，因为我们正在流式传输响应体
 	if resp.IsError() {
-		defer resp.RawBody().Close() // Ensure body is closed on error path
+		defer resp.RawBody().Close() // 确保在错误路径上关闭响应体
 		body, readErr := io.ReadAll(resp.RawBody())
 		if readErr != nil {
-			log.Errorf("err:%s", readErr)
-			return nil, readErr // Error reading the error body
+			log.Errorf("error: %s", readErr)
+			return nil, readErr // 读取错误响应体时发生错误
 		}
 
 		var errRsp SiliconFlowErrorRsp
-		if e := json.Unmarshal(body, &errRsp); e == nil && errRsp.Err.Message != "" {
-			err := &errRsp
-			log.Errorf("err:%s", err)
+		e := json.Unmarshal(body, &errRsp)
+		if e == nil && errRsp.Err.Message != "" {
+			err = &errRsp
+			log.Errorf("error: %s", err)
 			return nil, err
 		}
-		err := errors.New(string(body))
-		log.Errorf("err:%s", err)
+		err = errors.New(string(body))
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
 	return resp.RawBody(), nil
 }
 
-// CreateImageVariations creates variations of an image.
+// CreateImageVariations 创建图片的变体。
 func (p *SiliconFlow) CreateImageVariations(req *SiliconFlowCreateImageVariationsReq) (*SiliconFlowCreateImageVariationsRsp, error) {
 	if req.Image == nil {
 		err := errors.New("image reader is required")
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
@@ -642,8 +655,9 @@ func (p *SiliconFlow) CreateImageVariations(req *SiliconFlowCreateImageVariation
 		SetResult(&rsp).
 		Post(p.channel.BaseUrl + "/v1/images/variations")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 
@@ -706,7 +720,7 @@ func (p *SiliconFlow) CreateFineTuningJob(req *SiliconFlowFineTuningJobRequest) 
 	var rsp SiliconFlowFineTuningJob
 	err := p.post(p.channel.BaseUrl+"/v1/fine_tuning/jobs", req, &rsp)
 	if err != nil {
-		log.Errorf("err:%s", err)
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -726,8 +740,9 @@ func (p *SiliconFlow) ListFineTuningJobs(limit int, after string) (*SiliconFlowF
 
 	resp, err := req.Get(p.channel.BaseUrl + "/v1/fine_tuning/jobs")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -741,8 +756,9 @@ func (p *SiliconFlow) RetrieveFineTuningJob(jobID string) (*SiliconFlowFineTunin
 		SetPathParam("job_id", jobID).
 		Get(p.channel.BaseUrl + "/v1/fine_tuning/jobs/{job_id}")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -756,8 +772,9 @@ func (p *SiliconFlow) CancelFineTuningJob(jobID string) (*SiliconFlowFineTuningJ
 		SetPathParam("job_id", jobID).
 		Post(p.channel.BaseUrl + "/v1/fine_tuning/jobs/{job_id}/cancel")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
@@ -786,8 +803,9 @@ func (p *SiliconFlow) ListFineTuningJobEvents(req *SiliconFlowListFineTuningJobE
 
 	resp, err := request.Get(p.channel.BaseUrl + "/v1/fine_tuning/jobs/{job_id}/events")
 
-	if err := handleSiliconFlowError(resp, err); err != nil {
-		log.Errorf("err:%s", err)
+	err = handleSiliconFlowError(resp, err)
+	if err != nil {
+		log.Errorf("error: %s", err)
 		return nil, err
 	}
 	return &rsp, nil
