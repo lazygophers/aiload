@@ -2,7 +2,7 @@
 //	versions:
 //		codegen	v0.0.0-SNAPSHOT-35b9c92
 //		go		go1.24.5
-//	update:	1755221752
+//	update:	1755398237
 //	source: aiload.proto
 
 package aiload
@@ -16,6 +16,7 @@ const (
 	DbLimit      = "limit"
 	DbModel      = "model"
 	DbModelAlias = "model_alias"
+	DbModelList  = "model_list"
 	DbName       = "name"
 	DbPassword   = "password"
 	DbPlatform   = "platform"

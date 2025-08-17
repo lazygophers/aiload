@@ -2,7 +2,7 @@
 //	versions:
 //		codegen	v0.0.0-SNAPSHOT-35b9c92
 //		go		go1.24.5
-//	update:	1755221751
+//	update:	1755398237
 //	source: aiload.proto
 
 package main
@@ -90,6 +90,12 @@ var Routes = []*api.Route{
 		Method:  "POST",
 		Path:    aiload.RpcPathListChannelAdmin,
 		Handler: impl.ToHandler(impl.ListChannelAdmin, "admin"),
+		Role:    "admin",
+	},
+	{
+		Method:  "POST",
+		Path:    aiload.RpcPathGetModelListAdmin,
+		Handler: impl.ToHandler(impl.GetModelListAdmin, "admin"),
 		Role:    "admin",
 	},
 }

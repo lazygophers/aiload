@@ -102,3 +102,11 @@ func ListChannelAdmin(ctx *lrpc.Ctx, req *ListChannelAdminReq) (*ListChannelAdmi
 		ServicePath: RpcPathListChannelAdmin,
 	}, req, &rsp)
 }
+
+func GetModelListAdmin(ctx *lrpc.Ctx, req *GetModelListAdminReq) (*GetModelListAdminRsp, error) {
+	var rsp GetModelListAdminRsp
+	return &rsp, lrpc.Call(ctx, &core.ServiceDiscoveryClient{
+		ServiceName: ServerName,
+		ServicePath: RpcPathGetModelListAdmin,
+	}, req, &rsp)
+}

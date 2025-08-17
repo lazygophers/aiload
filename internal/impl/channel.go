@@ -130,3 +130,8 @@ func ListChannelAdmin(ctx *lrpc.Ctx, req *aiload.ListChannelAdminReq) (*aiload.L
 
 	return &rsp, nil
 }
+func GetModelListAdmin(ctx *lrpc.Ctx, req *aiload.GetModelListAdminReq) (*aiload.GetModelListAdminRsp, error) {
+	var rsp aiload.GetModelListAdminRsp
+
+	return &rsp, nil
+}
