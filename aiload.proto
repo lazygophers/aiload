@@ -244,7 +244,6 @@ message ModelChannel {
 	// @doc: base_url is the base url of the model channel.
 	string base_url = 8;
 
-	// @v: required,min=1,hive,required
 	// @gorm: -
 	repeated string model_list = 9;
 }
@@ -465,5 +464,3 @@ message GetModelListAdminReq {
 message GetModelListAdminRsp {
 	repeated string model_list = 1;
 }
-
-
