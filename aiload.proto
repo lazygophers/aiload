@@ -177,6 +177,19 @@ service aiload {
 		};
 	};
 
+
+    // @gen: channel
+	// @model: ModelChannel
+	rpc GetModelListAdmin (GetModelListAdminReq) returns (GetModelListAdminRsp) {
+		option (lazygophers.lrpc.core.http) = {
+			method: "POST",
+			path: "GetModelListAdmin",
+		};
+		option (lazygophers.lrpc.core.lazygen) = {
+			role: "admin",
+		};
+	};
+
 }
 
 enum ErrCode {
@@ -219,14 +232,21 @@ message ModelChannel {
 	// @gorm: index: idx_channel,unique
 	int64 deleted_at = 4;
 
+	// @v: required
 	string name = 5;
 	// @gorm: index: idx_channel,unique
+	// @v: required
 	string token = 6;
 	// @gorm: index: idx_channel,unique
+	// @v: required
 	Platform platform = 7;
 
 	// @doc: base_url is the base url of the model channel.
 	string base_url = 8;
+
+	// @v: required,min=1,hive,required
+	// @gorm: -
+	repeated string model_list = 9;
 }
 
 message ModelChannelAccess {
@@ -436,3 +456,14 @@ message ListChannelAdminRsp {
 	lazygophers.lrpc.core.Paginate paginate = 1;
 	repeated ModelChannel list = 2;
 }
+
+message GetModelListAdminReq {
+	// @validate: required
+	ModelChannel channel = 1;
+}
+
+message GetModelListAdminRsp {
+	repeated string model_list = 1;
+}
+
+
