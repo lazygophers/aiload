@@ -327,13 +327,13 @@ type ModelChannel struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT" yaml:"id,omitempty"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0" yaml:"updated_at,omitempty" toml:"updated_at,omitempty"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT" yaml:"id,omitempty" toml:"id,omitempty"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"not null;default:0;autoCreateTime;column:created_at"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0"`
 	// @gorm: index: idx_channel,unique
 	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" gorm:"index:idx_channel,unique;column:deleted_at;not null;default:0" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty"`
 	// @v: required
-	Name string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty" validate:"required" yaml:"name,omitempty" toml:"name,omitempty" gorm:"type:varchar(255);not null;default:'';column:name"`
+	Name string `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty" yaml:"name,omitempty" toml:"name,omitempty" gorm:"type:varchar(255);not null;default:'';column:name" validate:"required"`
 	// @gorm: index: idx_channel,unique
 	// @v: required
 	Token string `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty" gorm:"index:idx_channel,unique;type:varchar(255);not null;default:'';column:token" validate:"required" yaml:"token,omitempty" toml:"token,omitempty"`
@@ -341,10 +341,9 @@ type ModelChannel struct {
 	// @v: required
 	Platform Platform `protobuf:"varint,7,opt,name=platform,proto3,enum=aiload.Platform" json:"platform,omitempty" gorm:"index:idx_channel,unique;not null;default:0;column:platform" validate:"required" yaml:"platform,omitempty" toml:"platform,omitempty"`
 	// @doc: base_url is the base url of the model channel.
-	BaseUrl string `protobuf:"bytes,8,opt,name=base_url,json=baseUrl,proto3" json:"base_url,omitempty" doc:"base_urlisthebaseurlofthemodelchannel." yaml:"base_url,omitempty" toml:"base_url,omitempty" gorm:"type:varchar(255);not null;default:'';column:base_url"`
-	// @v: required,min=1,hive,required
+	BaseUrl string `protobuf:"bytes,8,opt,name=base_url,json=baseUrl,proto3" json:"base_url,omitempty" doc:"base_urlisthebaseurlofthemodelchannel." yaml:"base_url,omitempty" toml:"base_url,omitempty" gorm:"not null;default:'';column:base_url;type:varchar(255)"`
 	// @gorm: -
-	ModelList []string `protobuf:"bytes,9,rep,name=model_list,json=modelList,proto3" json:"model_list,omitempty" validate:"required,min=1,hive" gorm:"-" yaml:"model_list,omitempty" toml:"model_list,omitempty"`
+	ModelList []string `protobuf:"bytes,9,rep,name=model_list,json=modelList,proto3" json:"model_list,omitempty" gorm:"-" yaml:"model_list,omitempty" toml:"model_list,omitempty"`
 }
 
 func (x *ModelChannel) Reset() {
@@ -447,15 +446,15 @@ type ModelChannelAccess struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" toml:"id,omitempty" gorm:"AUTOINCREMENT;column:id;primaryKey;PRIMARY KEY;autoIncrement" yaml:"id,omitempty"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT;column:id"`
 	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0" yaml:"updated_at,omitempty" toml:"updated_at,omitempty"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"not null;default:0;autoUpdateTime;column:updated_at"`
 	// @gorm: index: idx_channel_access,unique
-	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"not null;default:0;index:idx_channel_access,unique;column:deleted_at"`
+	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" gorm:"index:idx_channel_access,unique;column:deleted_at;not null;default:0" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty"`
 	// @gorm: index: idx_channel_access,unique
-	ChannelId uint64 `protobuf:"varint,5,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty" gorm:"not null;default:0;column:channel_id;index:idx_channel_access,unique" yaml:"channel_id,omitempty" toml:"channel_id,omitempty"`
+	ChannelId uint64 `protobuf:"varint,5,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty" gorm:"default:0;column:channel_id;index:idx_channel_access,unique;not null" yaml:"channel_id,omitempty" toml:"channel_id,omitempty"`
 	// @gorm: index: idx_channel_access,unique
-	Model string `protobuf:"bytes,6,opt,name=model,proto3" json:"model,omitempty" gorm:"index:idx_channel_access,unique;type:varchar(255);not null;default:'';column:model" yaml:"model,omitempty" toml:"model,omitempty"`
+	Model string `protobuf:"bytes,6,opt,name=model,proto3" json:"model,omitempty" gorm:"column:model;index:idx_channel_access,unique;type:varchar(255);not null;default:''" yaml:"model,omitempty" toml:"model,omitempty"`
 }
 
 func (x *ModelChannelAccess) Reset() {
@@ -537,13 +536,13 @@ type ModelModelAlias struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"PRIMARY KEY;autoIncrement;AUTOINCREMENT;column:id;primaryKey"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0" yaml:"created_at,omitempty"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0" yaml:"updated_at,omitempty" toml:"updated_at,omitempty"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"not null;default:0;autoCreateTime;column:created_at"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0" yaml:"updated_at,omitempty"`
 	// gorm: index:idx_alias,unique
-	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"column:deleted_at;not null;default:0"`
+	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"not null;default:0;column:deleted_at"`
 	// gorm: index:idx_alias,unique
-	Model string `protobuf:"bytes,5,opt,name=model,proto3" json:"model,omitempty" yaml:"model,omitempty" toml:"model,omitempty" gorm:"column:model;type:varchar(255);not null;default:''"`
+	Model string `protobuf:"bytes,5,opt,name=model,proto3" json:"model,omitempty" yaml:"model,omitempty" toml:"model,omitempty" gorm:"type:varchar(255);not null;default:'';column:model"`
 	// gorm: index:idx_alias,unique
 	ModelAlias string `protobuf:"bytes,6,opt,name=model_alias,json=modelAlias,proto3" json:"model_alias,omitempty" yaml:"model_alias,omitempty" toml:"model_alias,omitempty" gorm:"type:varchar(255);not null;default:'';column:model_alias"`
 }
@@ -627,16 +626,16 @@ type ModelUser struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"autoIncrement;AUTOINCREMENT;column:id;primaryKey;PRIMARY KEY"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"column:created_at;not null;default:0;autoCreateTime"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT;column:id"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0" yaml:"created_at,omitempty"`
 	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0"`
 	// gorm: index:idx_user,unique
-	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"default:0;column:deleted_at;not null"`
+	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"column:deleted_at;not null;default:0"`
 	// gorm: index:idx_user,unique
 	Username string   `protobuf:"bytes,5,opt,name=username,proto3" json:"username,omitempty" yaml:"username,omitempty" toml:"username,omitempty" gorm:"type:varchar(255);not null;default:'';column:username"`
-	Password string   `protobuf:"bytes,6,opt,name=password,proto3" json:"password,omitempty" gorm:"column:password;type:varchar(255);not null;default:''" yaml:"password,omitempty" toml:"password,omitempty"`
-	Name     string   `protobuf:"bytes,7,opt,name=name,proto3" json:"name,omitempty" yaml:"name,omitempty" toml:"name,omitempty" gorm:"default:'';column:name;type:varchar(255);not null"`
-	Role     UserRole `protobuf:"varint,8,opt,name=role,proto3,enum=aiload.UserRole" json:"role,omitempty" yaml:"role,omitempty" toml:"role,omitempty" gorm:"not null;default:0;column:role"`
+	Password string   `protobuf:"bytes,6,opt,name=password,proto3" json:"password,omitempty" yaml:"password,omitempty" toml:"password,omitempty" gorm:"type:varchar(255);not null;default:'';column:password"`
+	Name     string   `protobuf:"bytes,7,opt,name=name,proto3" json:"name,omitempty" gorm:"type:varchar(255);not null;default:'';column:name" yaml:"name,omitempty" toml:"name,omitempty"`
+	Role     UserRole `protobuf:"varint,8,opt,name=role,proto3,enum=aiload.UserRole" json:"role,omitempty" gorm:"not null;default:0;column:role" yaml:"role,omitempty" toml:"role,omitempty"`
 }
 
 func (x *ModelUser) Reset() {
@@ -732,15 +731,15 @@ type ModelUserToken struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" toml:"created_at,omitempty" gorm:"not null;default:0;autoCreateTime;column:created_at" yaml:"created_at,omitempty"`
-	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"column:updated_at;not null;default:0;autoUpdateTime"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT;column:id"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"default:0;autoCreateTime;column:created_at;not null"`
+	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"not null;default:0;autoUpdateTime;column:updated_at"`
 	// gorm: index:idx_token,unique
-	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"column:deleted_at;not null;default:0"`
+	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"not null;default:0;column:deleted_at"`
 	// gorm: index:idx_token,unique
-	UserId uint64 `protobuf:"varint,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty" toml:"user_id,omitempty" gorm:"not null;default:0;column:user_id" yaml:"user_id,omitempty"`
+	UserId uint64 `protobuf:"varint,5,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty" yaml:"user_id,omitempty" toml:"user_id,omitempty" gorm:"default:0;column:user_id;not null"`
 	// gorm: index:idx_token,unique
-	Token string `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty" yaml:"token,omitempty" toml:"token,omitempty" gorm:"type:varchar(255);not null;default:'';column:token"`
+	Token string `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty" yaml:"token,omitempty" toml:"token,omitempty" gorm:"not null;default:'';column:token;type:varchar(255)"`
 	Limit int64  `protobuf:"varint,7,opt,name=limit,proto3" json:"limit,omitempty" yaml:"limit,omitempty" toml:"limit,omitempty" gorm:"not null;default:0;column:limit"`
 }
 
@@ -830,15 +829,15 @@ type ModelUserAccess struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT" yaml:"id,omitempty"`
-	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" toml:"created_at,omitempty" gorm:"autoCreateTime;column:created_at;not null;default:0" yaml:"created_at,omitempty"`
+	Id        uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
+	CreatedAt int64  `protobuf:"varint,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty" yaml:"created_at,omitempty" toml:"created_at,omitempty" gorm:"column:created_at;not null;default:0;autoCreateTime"`
 	UpdatedAt int64  `protobuf:"varint,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty" yaml:"updated_at,omitempty" toml:"updated_at,omitempty" gorm:"autoUpdateTime;column:updated_at;not null;default:0"`
 	// @gorm: index:idx_user_access,unique
-	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" yaml:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"default:0;index:idx_user_access,unique;column:deleted_at;not null"`
+	DeletedAt int64 `protobuf:"varint,4,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty" toml:"deleted_at,omitempty" gorm:"index:idx_user_access,unique;column:deleted_at;not null;default:0" yaml:"deleted_at,omitempty"`
 	// @gorm: index:idx_user_access,unique
 	Token uint64 `protobuf:"varint,5,opt,name=token,proto3" json:"token,omitempty" gorm:"index:idx_user_access,unique;not null;default:0;column:token" yaml:"token,omitempty" toml:"token,omitempty"`
 	// @gorm: index:idx_user_access,unique
-	Model string `protobuf:"bytes,6,opt,name=model,proto3" json:"model,omitempty" gorm:"index:idx_user_access,unique;type:varchar(255);not null;default:'';column:model" yaml:"model,omitempty" toml:"model,omitempty"`
+	Model string `protobuf:"bytes,6,opt,name=model,proto3" json:"model,omitempty" gorm:"default:'';column:model;index:idx_user_access,unique;type:varchar(255);not null" yaml:"model,omitempty" toml:"model,omitempty"`
 }
 
 func (x *ModelUserAccess) Reset() {
@@ -921,7 +920,7 @@ type AddUserAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" validate:"required" yaml:"user,omitempty" toml:"user,omitempty" gorm:"serializer:json;column:user;type:json"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" validate:"required" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
 }
 
 func (x *AddUserAdminReq) Reset() {
@@ -968,7 +967,7 @@ type AddUserAdminRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"serializer:json;column:user;type:json"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
 }
 
 func (x *AddUserAdminRsp) Reset() {
@@ -1053,7 +1052,7 @@ type GetUserRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"serializer:json;column:user;type:json"`
 }
 
 func (x *GetUserRsp) Reset() {
@@ -1101,7 +1100,7 @@ type GetUserAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" yaml:"id,omitempty" toml:"id,omitempty" gorm:"PRIMARY KEY;autoIncrement;AUTOINCREMENT;column:id;primaryKey" validate:"required"`
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" validate:"required" yaml:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT"`
 }
 
 func (x *GetUserAdminReq) Reset() {
@@ -1148,7 +1147,7 @@ type GetUserAdminRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" gorm:"column:user;type:json;serializer:json" yaml:"user,omitempty" toml:"user,omitempty"`
 }
 
 func (x *GetUserAdminRsp) Reset() {
@@ -1244,7 +1243,7 @@ type ListUserAdminRsp struct {
 	unknownFields protoimpl.UnknownFields
 
 	Paginate *core.Paginate `protobuf:"bytes,1,opt,name=paginate,proto3" json:"paginate,omitempty" yaml:"paginate,omitempty" toml:"paginate,omitempty" gorm:"column:paginate"`
-	List     []*ModelUser   `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty" gorm:"serializer:json;column:list;type:json" yaml:"list,omitempty" toml:"list,omitempty"`
+	List     []*ModelUser   `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty" gorm:"type:json;serializer:json;column:list" yaml:"list,omitempty" toml:"list,omitempty"`
 }
 
 func (x *ListUserAdminRsp) Reset() {
@@ -1299,7 +1298,7 @@ type SetUserReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" gorm:"type:json;serializer:json;column:user" validate:"required" yaml:"user,omitempty" toml:"user,omitempty"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" validate:"required" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
 }
 
 func (x *SetUserReq) Reset() {
@@ -1346,7 +1345,7 @@ type SetUserRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" toml:"user,omitempty" gorm:"column:user;type:json;serializer:json" yaml:"user,omitempty"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"column:user;type:json;serializer:json"`
 }
 
 func (x *SetUserRsp) Reset() {
@@ -1394,7 +1393,7 @@ type SetUserAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user" validate:"required" yaml:"user,omitempty"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user" validate:"required"`
 }
 
 func (x *SetUserAdminReq) Reset() {
@@ -1441,7 +1440,7 @@ type SetUserAdminRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" gorm:"type:json;serializer:json;column:user" yaml:"user,omitempty" toml:"user,omitempty"`
+	User *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user"`
 }
 
 func (x *SetUserAdminRsp) Reset() {
@@ -1489,7 +1488,7 @@ type DelUserAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT" validate:"required" yaml:"id,omitempty"`
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" validate:"required" yaml:"id,omitempty" toml:"id,omitempty" gorm:"PRIMARY KEY;autoIncrement;AUTOINCREMENT;column:id;primaryKey"`
 }
 
 func (x *DelUserAdminReq) Reset() {
@@ -1575,9 +1574,9 @@ type LoginReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty" gorm:"type:varchar(255);not null;default:'';column:username" validate:"required" yaml:"username,omitempty" toml:"username,omitempty"`
+	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty" validate:"required" yaml:"username,omitempty" toml:"username,omitempty" gorm:"default:'';column:username;type:varchar(255);not null"`
 	// @validate: required
-	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty" yaml:"password,omitempty" toml:"password,omitempty" gorm:"type:varchar(255);not null;default:'';column:password" validate:"required"`
+	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty" validate:"required" yaml:"password,omitempty" toml:"password,omitempty" gorm:"type:varchar(255);not null;default:'';column:password"`
 }
 
 func (x *LoginReq) Reset() {
@@ -1631,9 +1630,9 @@ type LoginRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	User      *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" yaml:"user,omitempty" toml:"user,omitempty" gorm:"column:user;type:json;serializer:json"`
-	Token     string     `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty" yaml:"token,omitempty" toml:"token,omitempty" gorm:"default:'';column:token;type:varchar(255);not null"`
-	ExpiresAt int64      `protobuf:"varint,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty" yaml:"expires_at,omitempty" toml:"expires_at,omitempty" gorm:"not null;default:0;column:expires_at"`
+	User      *ModelUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty" toml:"user,omitempty" gorm:"type:json;serializer:json;column:user" yaml:"user,omitempty"`
+	Token     string     `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty" yaml:"token,omitempty" toml:"token,omitempty" gorm:"type:varchar(255);not null;default:'';column:token"`
+	ExpiresAt int64      `protobuf:"varint,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty" yaml:"expires_at,omitempty" toml:"expires_at,omitempty" gorm:"default:0;column:expires_at;not null"`
 }
 
 func (x *LoginRsp) Reset() {
@@ -1695,7 +1694,7 @@ type SetChannelAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	Channel *ModelChannel `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty" validate:"required" yaml:"channel,omitempty" toml:"channel,omitempty" gorm:"column:channel;type:json;serializer:json"`
+	Channel *ModelChannel `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty" yaml:"channel,omitempty" toml:"channel,omitempty" gorm:"type:json;serializer:json;column:channel" validate:"required"`
 }
 
 func (x *SetChannelAdminReq) Reset() {
@@ -1742,7 +1741,7 @@ type SetChannelAdminRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Channel *ModelChannel `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty" toml:"channel,omitempty" gorm:"type:json;serializer:json;column:channel" yaml:"channel,omitempty"`
+	Channel *ModelChannel `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty" yaml:"channel,omitempty" toml:"channel,omitempty" gorm:"column:channel;type:json;serializer:json"`
 }
 
 func (x *SetChannelAdminRsp) Reset() {
@@ -1790,7 +1789,7 @@ type DelChannelAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" gorm:"autoIncrement;AUTOINCREMENT;column:id;primaryKey;PRIMARY KEY" validate:"required" yaml:"id,omitempty" toml:"id,omitempty"`
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" toml:"id,omitempty" gorm:"column:id;primaryKey;PRIMARY KEY;autoIncrement;AUTOINCREMENT" validate:"required" yaml:"id,omitempty"`
 }
 
 func (x *DelChannelAdminReq) Reset() {
@@ -1876,7 +1875,7 @@ type AddChannelAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	Channel *ModelChannel `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty" toml:"channel,omitempty" gorm:"type:json;serializer:json;column:channel" validate:"required" yaml:"channel,omitempty"`
+	Channel *ModelChannel `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty" validate:"required" yaml:"channel,omitempty" toml:"channel,omitempty" gorm:"type:json;serializer:json;column:channel"`
 }
 
 func (x *AddChannelAdminReq) Reset() {
@@ -1923,7 +1922,7 @@ type AddChannelAdminRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Channel *ModelChannel `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty" gorm:"serializer:json;column:channel;type:json" yaml:"channel,omitempty" toml:"channel,omitempty"`
+	Channel *ModelChannel `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty" yaml:"channel,omitempty" toml:"channel,omitempty" gorm:"type:json;serializer:json;column:channel"`
 }
 
 func (x *AddChannelAdminRsp) Reset() {
@@ -2066,7 +2065,7 @@ type ListChannelAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	ListOption *core.ListOption `protobuf:"bytes,1,opt,name=list_option,json=listOption,proto3" json:"list_option,omitempty" yaml:"list_option,omitempty" toml:"list_option,omitempty" gorm:"column:list_option" validate:"required"`
+	ListOption *core.ListOption `protobuf:"bytes,1,opt,name=list_option,json=listOption,proto3" json:"list_option,omitempty" validate:"required" yaml:"list_option,omitempty" toml:"list_option,omitempty" gorm:"column:list_option"`
 }
 
 func (x *ListChannelAdminReq) Reset() {
@@ -2113,7 +2112,7 @@ type ListChannelAdminRsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Paginate *core.Paginate  `protobuf:"bytes,1,opt,name=paginate,proto3" json:"paginate,omitempty" yaml:"paginate,omitempty" toml:"paginate,omitempty" gorm:"column:paginate"`
+	Paginate *core.Paginate  `protobuf:"bytes,1,opt,name=paginate,proto3" json:"paginate,omitempty" toml:"paginate,omitempty" gorm:"column:paginate" yaml:"paginate,omitempty"`
 	List     []*ModelChannel `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty" yaml:"list,omitempty" toml:"list,omitempty" gorm:"type:json;serializer:json;column:list"`
 }
 
@@ -2169,7 +2168,7 @@ type GetModelListAdminReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	// @validate: required
-	Channel *ModelChannel `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty" gorm:"type:json;serializer:json;column:channel" validate:"required" yaml:"channel,omitempty" toml:"channel,omitempty"`
+	Channel *ModelChannel `protobuf:"bytes,1,opt,name=channel,proto3" json:"channel,omitempty" validate:"required" yaml:"channel,omitempty" toml:"channel,omitempty" gorm:"type:json;serializer:json;column:channel"`
 }
 
 func (x *GetModelListAdminReq) Reset() {
