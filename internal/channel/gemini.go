@@ -21,7 +21,7 @@ type Gemini struct {
 }
 
 // NewGemini 创建并返回一个新的 Gemini channel 实例。
-// 如果 channel 中没有指定 BaseUrl，则使用默认的 "https://generativelanguage.googleapis.com"。
+// 它会检查并设置 BaseUrl 的默认值。
 func NewGemini(channel *aiload.ModelChannel) *Gemini {
 	if channel.BaseUrl == "" {
 		channel.BaseUrl = "https://generativelanguage.googleapis.com"
@@ -90,6 +90,7 @@ func (p *Gemini) GetModelList(ctx context.Context, req *GeminiGetModelListReq) (
 	if req.PageSize > 1000 {
 		pageSize = "1000"
 	}
+
 	resp, err := p.GetRequest().SetQueryParams(map[string]string{
 		"pageSize":  pageSize,
 		"pageToken": req.PageToken,

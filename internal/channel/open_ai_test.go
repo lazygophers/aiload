@@ -6,7 +6,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/jarcoal/httpmock"
 	"github.com/lazygophers/aiload"
 	"github.com/stretchr/testify/assert"
@@ -14,13 +13,8 @@ import (
 )
 
 func setupOpenAITest(t *testing.T) *OpenAI {
-	mockClient := resty.New()
-	httpmock.ActivateNonDefault(mockClient.GetClient())
-
-	originalClient := client
-	client = mockClient
+	httpmock.ActivateNonDefault(client.GetClient())
 	t.Cleanup(func() {
-		client = originalClient
 		httpmock.DeactivateAndReset()
 	})
 

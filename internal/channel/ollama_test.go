@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/jarcoal/httpmock"
 	"github.com/lazygophers/aiload"
 	"github.com/stretchr/testify/assert"
@@ -16,13 +15,8 @@ import (
 var _ = time.Time{}
 
 func setupOllamaTest(t *testing.T) *Ollama {
-	mockClient := resty.New()
-	httpmock.ActivateNonDefault(mockClient.GetClient())
-
-	originalClient := client
-	client = mockClient
+	httpmock.ActivateNonDefault(client.GetClient())
 	t.Cleanup(func() {
-		client = originalClient
 		httpmock.DeactivateAndReset()
 	})
 
