@@ -2,10 +2,12 @@ package impl
 
 import (
 	"github.com/lazygophers/aiload"
+	"github.com/lazygophers/aiload/internal/channel"
 	"github.com/lazygophers/aiload/internal/state"
 	"github.com/lazygophers/log"
 	"github.com/lazygophers/lrpc"
 	"github.com/lazygophers/lrpc/middleware/xerror"
+	"github.com/lazygophers/utils/anyx"
 )
 
 func SetChannelAdmin(ctx *lrpc.Ctx, req *aiload.SetChannelAdminReq) (*aiload.SetChannelAdminRsp, error) {
@@ -132,6 +134,24 @@ func ListChannelAdmin(ctx *lrpc.Ctx, req *aiload.ListChannelAdminReq) (*aiload.L
 }
 func GetModelListAdmin(ctx *lrpc.Ctx, req *aiload.GetModelListAdminReq) (*aiload.GetModelListAdminRsp, error) {
 	var rsp aiload.GetModelListAdminRsp
+
+	channeler, err := channel.NewChannel(req.Channel)
+	if err != nil {
+		log.Errorf("err:%s", err)
+		return nil, err
+	}
+
+	var getModelList *channel.GetModelListRsp
+	getModelList, err = channeler.GetModelList()
+	if err != nil {
+		log.Errorf("err:%s", err)
+		return nil, err
+	}
+
+	rsp.ModelList = anyx.PluckString(getModelList.Data, "Model")
+	/*candy.Map(getModelList.Data, func(model ) string {
+		return &model.Model
+	})*/
 
 	return &rsp, nil
 }

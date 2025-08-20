@@ -1,7 +1,6 @@
 package channel
 
 import (
-	"context"
 	"time"
 
 	"github.com/lazygophers/aiload"
@@ -21,12 +20,12 @@ func NewGeminiAdapter(channel *aiload.ModelChannel) *GeminiAdapter {
 }
 
 // GetModelList 调用 Gemini 客户端的 GetModelList 方法，并将结果转换为统一的 GetModelListRsp 格式。
-func (a *GeminiAdapter) GetModelList(ctx context.Context, req *GetModelListReq) (*GetModelListRsp, error) {
-	geminiReq := &GeminiGetModelListReq{
+func (a *GeminiAdapter) GetModelList() (*GetModelListRsp, error) {
+	/*geminiReq := &GeminiGetModelListReq{
 		PageSize:  req.PageSize,
 		PageToken: req.PageToken,
-	}
-	geminiRsp, err := a.client.GetModelList(ctx, geminiReq)
+	}*/
+	geminiRsp, err := a.client.GetModelList()
 	if err != nil {
 		return nil, err
 	}

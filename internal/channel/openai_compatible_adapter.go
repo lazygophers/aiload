@@ -1,7 +1,6 @@
 package channel
 
 import (
-	"context"
 	"time"
 
 	"github.com/lazygophers/aiload"
@@ -20,7 +19,7 @@ func NewOpenAiCompatibleAdapter(channel *aiload.ModelChannel) *OpenAiCompatibleA
 }
 
 // GetModelList 调用 OpenAiCompatible 客户端的 GetModelList 方法，并将结果转换为统一的 GetModelListRsp 格式。
-func (a *OpenAiCompatibleAdapter) GetModelList(ctx context.Context, req *GetModelListReq) (*GetModelListRsp, error) {
+func (a *OpenAiCompatibleAdapter) GetModelList() (*GetModelListRsp, error) {
 	openAiCompatRsp, err := a.client.GetModelList()
 	if err != nil {
 		return nil, err

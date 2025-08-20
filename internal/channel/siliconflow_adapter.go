@@ -1,7 +1,6 @@
 package channel
 
 import (
-	"context"
 	"time"
 
 	"github.com/lazygophers/aiload"
@@ -9,7 +8,13 @@ import (
 
 // SiliconFlowAdapter 实现了 Channeler 接口，用于适配 SiliconFlow 客户端。
 type SiliconFlowAdapter struct {
+	req    SiliconFlowGetModelListReq
 	client *SiliconFlow
+}
+
+type SiliconFlowAdapterGetModelListReq struct {
+	Type    string
+	SubType string
 }
 
 // NewSiliconFlowAdapter 创建一个新的 SiliconFlow 适配器实例。
@@ -20,12 +25,11 @@ func NewSiliconFlowAdapter(channel *aiload.ModelChannel) *SiliconFlowAdapter {
 }
 
 // GetModelList 调用 SiliconFlow 客户端的 GetModelList 方法，并将结果转换为统一的 GetModelListRsp 格式。
-func (a *SiliconFlowAdapter) GetModelList(ctx context.Context, req *GetModelListReq) (*GetModelListRsp, error) {
-	siliconFlowReq := &SiliconFlowGetModelListReq{
-		Type:    req.Type,
-		SubType: req.SubType,
-	}
-	siliconFlowRsp, err := a.client.GetModelList(siliconFlowReq)
+func (a *SiliconFlowAdapter) GetModelList() (*GetModelListRsp, error) {
+
+	//anyx.DeepCopy(&siliconFlowReq, req)
+
+	siliconFlowRsp, err := a.client.GetModelList()
 	if err != nil {
 		return nil, err
 	}

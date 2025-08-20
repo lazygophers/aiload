@@ -143,11 +143,14 @@ type SiliconFlowGetModelListRsp struct {
 }
 
 // GetModelList 获取模型列表。
-func (p *SiliconFlow) GetModelList(req *SiliconFlowGetModelListReq) (*SiliconFlowGetModelListRsp, error) {
+func (p *SiliconFlow) GetModelList() (*SiliconFlowGetModelListRsp, error) {
+	var Type string
+	var SubType string
+
 	var rsp SiliconFlowGetModelListRsp
 	resp, err := p.GetRequest().SetResult(&rsp).SetQueryParams(map[string]string{
-		"type":     req.Type,
-		"sub_type": req.SubType,
+		"type":     Type,
+		"sub_type": SubType,
 	}).Get(p.channel.BaseUrl + "/v1/models")
 
 	err = handleSiliconFlowError(resp, err)

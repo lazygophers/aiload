@@ -11,7 +11,6 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/lazygophers/aiload"
 	"github.com/lazygophers/log"
-	"github.com/lazygophers/utils/anyx"
 )
 
 // Gemini 实现了与 Google Gemini 模型进行交互的 aiload.ModelChannel。
@@ -79,21 +78,23 @@ type GeminiGetModelListRsp struct {
 
 // GetModelList 从 Gemini API 获取可用的模型列表。
 // 它支持通过 PageSize 和 PageToken进行分页。
-func (p *Gemini) GetModelList(ctx context.Context, req *GeminiGetModelListReq) (*GeminiGetModelListRsp, error) {
+func (p *Gemini) GetModelList() (*GeminiGetModelListRsp, error) {
 	var rsp GeminiGetModelListRsp
 	var err error
 
-	pageSize := anyx.ToString(req.PageSize)
+	var pageSize string
+	var pageToken string
+	/*pageSize := anyx.ToString(req.PageSize)
 	if req.PageSize <= 0 {
 		pageSize = "50"
 	}
 	if req.PageSize > 1000 {
 		pageSize = "1000"
-	}
+	}*/
 
 	resp, err := p.GetRequest().SetQueryParams(map[string]string{
 		"pageSize":  pageSize,
-		"pageToken": req.PageToken,
+		"pageToken": pageToken,
 	}).Get(p.channel.BaseUrl + "/v1beta/models")
 	if err != nil {
 		log.Errorf("error: %s", err)

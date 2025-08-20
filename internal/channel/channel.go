@@ -1,19 +1,11 @@
 package channel
 
 import (
-	"context"
 	"errors"
 	"time"
 
 	"github.com/lazygophers/aiload"
 )
-
-type GetModelListReq struct {
-	Type      string
-	SubType   string
-	PageSize  int
-	PageToken string
-}
 
 type GetModelListRsp struct {
 	Object string `json:"object"`
@@ -56,7 +48,7 @@ type GetModelListRsp struct {
 }
 
 type Channeler interface {
-	GetModelList(context.Context, *GetModelListReq) (*GetModelListRsp, error)
+	GetModelList() (*GetModelListRsp, error)
 }
 
 func NewChannel(channel *aiload.ModelChannel) (Channeler, error) {

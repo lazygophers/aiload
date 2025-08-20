@@ -1,7 +1,6 @@
 package channel
 
 import (
-	"context"
 	"time"
 
 	"github.com/lazygophers/aiload"
@@ -20,7 +19,7 @@ func NewOllamaAdapter(channel *aiload.ModelChannel) *OllamaAdapter {
 }
 
 // GetModelList 调用 Ollama 客户端的 GetLocalModelList 方法，并将结果转换为统一的 GetModelListRsp 格式。
-func (a *OllamaAdapter) GetModelList(ctx context.Context, req *GetModelListReq) (*GetModelListRsp, error) {
+func (a *OllamaAdapter) GetModelList() (*GetModelListRsp, error) {
 	ollamaRsp, err := a.client.GetLocalModelList()
 	if err != nil {
 		return nil, err
