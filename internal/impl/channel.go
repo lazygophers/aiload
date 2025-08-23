@@ -10,7 +10,6 @@ import (
 	"github.com/lazygophers/lrpc/middleware/xerror"
 	"github.com/lazygophers/utils/anyx"
 	"github.com/lazygophers/utils/candy"
-	"slices"
 )
 
 func SetChannelAdmin(ctx *lrpc.Ctx, req *aiload.SetChannelAdminReq) (*aiload.SetChannelAdminRsp, error) {
@@ -19,13 +18,66 @@ func SetChannelAdmin(ctx *lrpc.Ctx, req *aiload.SetChannelAdminReq) (*aiload.Set
 	//goland:noinspection GoVetCopyLock
 	channel := req.Channel
 
-	err := state.Channel.
-		NewScoop().
-		Where("id = ?", channel.Id).
-		Updates(channel).
-		Error
+	err := state.CommitOrRollback(func(tx *db.Scoop) error {
+		err := state.Channel.
+			NewScoop(tx).
+			Where("id = ?", channel.Id).
+			Updates(channel).
+			Error
+		if err != nil {
+			log.Errorf("err:%v", err)
+			return err
+		}
+
+		var oldModelList []string
+		newModelList := channel.ModelList
+
+		{
+			modelList, err := state.ChannelAccess.NewScoop(tx).
+				Select(aiload.DbModel).
+				Where(aiload.DbChannelId, channel.Id).
+				Find()
+			if err != nil {
+				log.Errorf("err:%s", err)
+				return err
+			}
+
+			oldModelList = anyx.PluckString(modelList, "Model")
+		}
+
+		added, removed := candy.Diff(oldModelList, newModelList)
+
+		if len(removed) > 0 {
+			err = state.ChannelAccess.NewScoop(tx).
+				Where(aiload.DbChannelId, channel.Id).
+				In(aiload.DbModel, removed).
+				Delete().
+				Error
+			if err != nil {
+				log.Errorf("err:%s", err)
+				return err
+			}
+		}
+
+		if len(added) > 0 {
+			err = state.ChannelAccess.NewScoop(tx).
+				CreateInBatches(candy.Map(added, func(modelName string) *aiload.ModelChannelAccess {
+					return &aiload.ModelChannelAccess{
+						ChannelId: channel.Id,
+						Model:     modelName,
+					}
+				}), 100).
+				Error
+			if err != nil {
+				log.Errorf("err:%s", err)
+				return err
+			}
+		}
+
+		return nil
+	})
 	if err != nil {
-		log.Errorf("err:%v", err)
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -35,36 +87,6 @@ func SetChannelAdmin(ctx *lrpc.Ctx, req *aiload.SetChannelAdminReq) (*aiload.Set
 		First()
 	if err != nil {
 		log.Errorf("err:%v", err)
-		return nil, err
-	}
-
-	var channelAccessList []*aiload.ModelChannelAccess
-	channelAccessList, _ = state.ChannelAccess.NewScoop().Find()
-	models := candy.Map(channelAccessList, func(channelAccess *aiload.ModelChannelAccess) string {
-		return channelAccess.Model
-	})
-	if slices.Equal(models, req.Channel.ModelList) {
-		return &rsp, nil
-	}
-
-	err = state.CommitOrRollback(func(tx *db.Scoop) error {
-		err = state.ChannelAccess.NewScoop().
-			CreateInBatches(candy.Map(channel.ModelList, func(modelName string) *aiload.ModelChannelAccess {
-				return &aiload.ModelChannelAccess{
-					ChannelId: channel.Id,
-					Model:     modelName,
-				}
-			}), 100).
-			Error
-		if err != nil {
-			log.Errorf("err:%s", err)
-			return err
-		}
-
-		return nil
-	})
-	if err != nil {
-		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
