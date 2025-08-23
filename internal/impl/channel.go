@@ -6,8 +6,11 @@ import (
 	"github.com/lazygophers/aiload/internal/state"
 	"github.com/lazygophers/log"
 	"github.com/lazygophers/lrpc"
+	"github.com/lazygophers/lrpc/middleware/storage/db"
 	"github.com/lazygophers/lrpc/middleware/xerror"
 	"github.com/lazygophers/utils/anyx"
+	"github.com/lazygophers/utils/candy"
+	"slices"
 )
 
 func SetChannelAdmin(ctx *lrpc.Ctx, req *aiload.SetChannelAdminReq) (*aiload.SetChannelAdminRsp, error) {
@@ -32,6 +35,36 @@ func SetChannelAdmin(ctx *lrpc.Ctx, req *aiload.SetChannelAdminReq) (*aiload.Set
 		First()
 	if err != nil {
 		log.Errorf("err:%v", err)
+		return nil, err
+	}
+
+	var channelAccessList []*aiload.ModelChannelAccess
+	channelAccessList, _ = state.ChannelAccess.NewScoop().Find()
+	models := candy.Map(channelAccessList, func(channelAccess *aiload.ModelChannelAccess) string {
+		return channelAccess.Model
+	})
+	if slices.Equal(models, req.Channel.ModelList) {
+		return &rsp, nil
+	}
+
+	err = state.CommitOrRollback(func(tx *db.Scoop) error {
+		err = state.ChannelAccess.NewScoop().
+			CreateInBatches(candy.Map(channel.ModelList, func(modelName string) *aiload.ModelChannelAccess {
+				return &aiload.ModelChannelAccess{
+					ChannelId: channel.Id,
+					Model:     modelName,
+				}
+			}), 100).
+			Error
+		if err != nil {
+			log.Errorf("err:%s", err)
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
@@ -61,11 +94,32 @@ func AddChannelAdmin(ctx *lrpc.Ctx, req *aiload.AddChannelAdminReq) (*aiload.Add
 	channel := *req.Channel
 	channel.Id = 0
 
-	err := state.Channel.
-		NewScoop().
-		Create(&channel)
+	err := state.CommitOrRollback(func(tx *db.Scoop) error {
+		err := state.Channel.
+			NewScoop(tx).
+			Create(&channel)
+		if err != nil {
+			log.Errorf("err:%v", err)
+			return err
+		}
+
+		err = state.ChannelAccess.NewScoop(tx).
+			CreateInBatches(candy.Map(channel.ModelList, func(modelName string) *aiload.ModelChannelAccess {
+				return &aiload.ModelChannelAccess{
+					ChannelId: channel.Id,
+					Model:     modelName,
+				}
+			}), 100).
+			Error
+		if err != nil {
+			log.Errorf("err:%s", err)
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
-		log.Errorf("err:%v", err)
+		log.Errorf("err:%s", err)
 		return nil, err
 	}
 
