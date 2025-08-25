@@ -1,7 +1,6 @@
 package channel
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -52,7 +51,6 @@ func TestGeminiAdapter_GetModelList(t *testing.T) {
 	testCases := []struct {
 		name          string
 		channel       *aiload.ModelChannel
-		req           *GetModelListReq
 		wantErr       bool
 		expectErr     error
 		checkResponse func(t *testing.T, got *GetModelListRsp)
@@ -62,7 +60,6 @@ func TestGeminiAdapter_GetModelList(t *testing.T) {
 			channel: &aiload.ModelChannel{
 				BaseUrl: mockServer.URL,
 			},
-			req:     &GetModelListReq{PageSize: 10},
 			wantErr: false,
 			checkResponse: func(t *testing.T, got *GetModelListRsp) {
 				if got == nil {
@@ -84,7 +81,6 @@ func TestGeminiAdapter_GetModelList(t *testing.T) {
 			channel: &aiload.ModelChannel{
 				BaseUrl: mockServer.URL,
 			},
-			req:       &GetModelListReq{},
 			wantErr:   true,
 			expectErr: errors.New("Gemini api error"),
 		},
@@ -101,7 +97,7 @@ func TestGeminiAdapter_GetModelList(t *testing.T) {
 				defer client.SetHeader("X-Test-Error", "")
 			}
 
-			gotRsp, err := adapter.GetModelList(context.Background(), tc.req)
+			gotRsp, err := adapter.GetModelList()
 
 			if (err != nil) != tc.wantErr {
 				t.Errorf("GetModelList() error = %v, wantErr %v", err, tc.wantErr)

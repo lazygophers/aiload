@@ -21,10 +21,6 @@ func NewGeminiAdapter(channel *aiload.ModelChannel) *GeminiAdapter {
 
 // GetModelList 调用 Gemini 客户端的 GetModelList 方法，并将结果转换为统一的 GetModelListRsp 格式。
 func (a *GeminiAdapter) GetModelList() (*GetModelListRsp, error) {
-	/*geminiReq := &GeminiGetModelListReq{
-		PageSize:  req.PageSize,
-		PageToken: req.PageToken,
-	}*/
 	geminiRsp, err := a.client.GetModelList()
 	if err != nil {
 		return nil, err

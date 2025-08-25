@@ -26,9 +26,6 @@ func NewSiliconFlowAdapter(channel *aiload.ModelChannel) *SiliconFlowAdapter {
 
 // GetModelList 调用 SiliconFlow 客户端的 GetModelList 方法，并将结果转换为统一的 GetModelListRsp 格式。
 func (a *SiliconFlowAdapter) GetModelList() (*GetModelListRsp, error) {
-
-	//anyx.DeepCopy(&siliconFlowReq, req)
-
 	siliconFlowRsp, err := a.client.GetModelList()
 	if err != nil {
 		return nil, err

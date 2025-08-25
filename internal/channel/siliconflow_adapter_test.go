@@ -1,7 +1,6 @@
 package channel
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -46,11 +45,7 @@ func TestSiliconFlowAdapter_GetModelList(t *testing.T) {
 		channel := &aiload.ModelChannel{BaseUrl: mockServer.URL}
 		adapter := NewSiliconFlowAdapter(channel)
 
-		req := &GetModelListReq{
-			Type:    "test_type",
-			SubType: "test_subtype",
-		}
-		rsp, err := adapter.GetModelList(context.Background(), req)
+		rsp, err := adapter.GetModelList()
 
 		assert.NoError(t, err)
 		assert.NotNil(t, rsp)
@@ -74,11 +69,7 @@ func TestSiliconFlowAdapter_GetModelList(t *testing.T) {
 		channel := &aiload.ModelChannel{BaseUrl: mockServer.URL}
 		adapter := NewSiliconFlowAdapter(channel)
 
-		req := &GetModelListReq{
-			Type:    "test_type",
-			SubType: "test_subtype",
-		}
-		rsp, err := adapter.GetModelList(context.Background(), req)
+		rsp, err := adapter.GetModelList()
 
 		assert.Error(t, err)
 		assert.Nil(t, rsp)

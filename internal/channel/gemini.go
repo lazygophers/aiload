@@ -82,19 +82,11 @@ func (p *Gemini) GetModelList() (*GeminiGetModelListRsp, error) {
 	var rsp GeminiGetModelListRsp
 	var err error
 
-	var pageSize string
-	var pageToken string
-	/*pageSize := anyx.ToString(req.PageSize)
-	if req.PageSize <= 0 {
-		pageSize = "50"
-	}
-	if req.PageSize > 1000 {
-		pageSize = "1000"
-	}*/
-
+	// Note: Pagination parameters are not currently passed from the adapter.
+	// Default values can be set here if needed in the future.
 	resp, err := p.GetRequest().SetQueryParams(map[string]string{
-		"pageSize":  pageSize,
-		"pageToken": pageToken,
+		"pageSize":  "50", // Default page size
+		"pageToken": "",
 	}).Get(p.channel.BaseUrl + "/v1beta/models")
 	if err != nil {
 		log.Errorf("error: %s", err)

@@ -1,7 +1,6 @@
 package channel
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -56,7 +55,6 @@ func TestOllamaAdapter_GetModelList(t *testing.T) {
 	testCases := []struct {
 		name          string
 		channel       *aiload.ModelChannel
-		req           *GetModelListReq
 		wantErr       bool
 		expectErr     error
 		checkResponse func(t *testing.T, got *GetModelListRsp)
@@ -66,7 +64,6 @@ func TestOllamaAdapter_GetModelList(t *testing.T) {
 			channel: &aiload.ModelChannel{
 				BaseUrl: mockServer.URL,
 			},
-			req:     &GetModelListReq{},
 			wantErr: false,
 			checkResponse: func(t *testing.T, got *GetModelListRsp) {
 				if got == nil {
@@ -88,7 +85,6 @@ func TestOllamaAdapter_GetModelList(t *testing.T) {
 			channel: &aiload.ModelChannel{
 				BaseUrl: mockServer.URL,
 			},
-			req:       &GetModelListReq{},
 			wantErr:   true,
 			expectErr: errors.New("ollama api error"),
 		},
@@ -104,7 +100,7 @@ func TestOllamaAdapter_GetModelList(t *testing.T) {
 				defer client.Header.Del("X-Test-Error") // Clean up after the test
 			}
 
-			gotRsp, err := adapter.GetModelList(context.Background(), tc.req)
+			gotRsp, err := adapter.GetModelList()
 
 			if (err != nil) != tc.wantErr {
 				t.Errorf("GetModelList() error = %v, wantErr %v", err, tc.wantErr)

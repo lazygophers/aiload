@@ -1176,12 +1176,12 @@ func TestSiliconflowMetadataAPI(t *testing.T) {
 				Type: "chat", SubType: "open-source",
 			},
 			mockResponder: func(req *http.Request) (*http.Response, error) {
-				assert.Equal(t, "chat", req.URL.Query().Get("type"))
-				assert.Equal(t, "open-source", req.URL.Query().Get("sub_type"))
+				// assert.Equal(t, "chat", req.URL.Query().Get("type")) // No longer passing params
+				// assert.Equal(t, "open-source", req.URL.Query().Get("sub_type"))
 				return newMockResponder(http.StatusOK, string(getModelListFilteredBody))(req)
 			},
 			apiCall: func(p *SiliconFlow, req any) (any, error) {
-				return p.GetModelList(req.(*SiliconFlowGetModelListReq))
+				return p.GetModelList()
 			},
 			checkResponse: func(t *testing.T, rsp any, err error) {
 				assert.NoError(t, err)
@@ -1198,7 +1198,7 @@ func TestSiliconflowMetadataAPI(t *testing.T) {
 			giveRequest:   &SiliconFlowGetModelListReq{},
 			mockResponder: newMockResponder(http.StatusOK, string(getModelListUnfilteredBody)),
 			apiCall: func(p *SiliconFlow, req any) (any, error) {
-				return p.GetModelList(req.(*SiliconFlowGetModelListReq))
+				return p.GetModelList()
 			},
 			checkResponse: func(t *testing.T, rsp any, err error) {
 				assert.NoError(t, err)
@@ -1264,7 +1264,7 @@ func TestSiliconflowMetadataAPI(t *testing.T) {
 			giveRequest:   &SiliconFlowGetModelListReq{},
 			mockResponder: newMockResponder(http.StatusInternalServerError, `{"error":{"message":"Internal server error"}}`),
 			apiCall: func(p *SiliconFlow, req any) (any, error) {
-				return p.GetModelList(req.(*SiliconFlowGetModelListReq))
+				return p.GetModelList()
 			},
 			checkResponse: func(t *testing.T, rsp any, err error) {
 				assert.Error(t, err)

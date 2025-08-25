@@ -1,7 +1,6 @@
 package channel
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -40,8 +39,7 @@ func TestOpenAiCompatibleAdapter_GetModelList(t *testing.T) {
 		channel := &aiload.ModelChannel{BaseUrl: mockServer.URL}
 		adapter := NewOpenAiCompatibleAdapter(channel)
 
-		req := &GetModelListReq{}
-		rsp, err := adapter.GetModelList(context.Background(), req)
+		rsp, err := adapter.GetModelList()
 
 		assert.NoError(t, err)
 		assert.NotNil(t, rsp)
@@ -60,8 +58,7 @@ func TestOpenAiCompatibleAdapter_GetModelList(t *testing.T) {
 		channel := &aiload.ModelChannel{BaseUrl: mockServer.URL}
 		adapter := NewOpenAiCompatibleAdapter(channel)
 
-		req := &GetModelListReq{}
-		rsp, err := adapter.GetModelList(context.Background(), req)
+		rsp, err := adapter.GetModelList()
 
 		assert.Error(t, err)
 		assert.Nil(t, rsp)

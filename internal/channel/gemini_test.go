@@ -25,19 +25,14 @@ func TestNewGemini(t *testing.T) {
 func TestGemini_GetModelList(t *testing.T) {
 	tests := []struct {
 		name          string
-		giveReq       *GeminiGetModelListReq
 		handler       http.HandlerFunc
 		checkResponse func(t *testing.T, rsp *GeminiGetModelListRsp, err error)
 	}{
 		{
 			name: "success",
-			giveReq: &GeminiGetModelListReq{
-				PageSize:  10,
-				PageToken: "token-123",
-			},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				assert.Equal(t, "10", r.URL.Query().Get("pageSize"))
-				assert.Equal(t, "token-123", r.URL.Query().Get("pageToken"))
+				assert.Equal(t, "50", r.URL.Query().Get("pageSize"))
+				assert.Equal(t, "", r.URL.Query().Get("pageToken"))
 
 				mockResponse := GeminiGetModelListRsp{
 					Models: []GeminiModel{
@@ -60,8 +55,7 @@ func TestGemini_GetModelList(t *testing.T) {
 			},
 		},
 		{
-			name:    "api error",
-			giveReq: &GeminiGetModelListReq{},
+			name: "api error",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte("Internal Server Error"))
@@ -87,7 +81,7 @@ func TestGemini_GetModelList(t *testing.T) {
 			}
 			p := NewGemini(mockChannel)
 
-			rsp, err := p.GetModelList(context.Background(), tt.giveReq)
+			rsp, err := p.GetModelList()
 
 			tt.checkResponse(t, rsp, err)
 		})
