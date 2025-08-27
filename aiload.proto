@@ -225,6 +225,12 @@ enum Platform {
 	OpenAi = 5;
 }
 
+enum State {
+	Enable = 0;// 启用
+	Disable = 1;// 禁用
+	AutoDisable = 2;// 自动禁用
+}
+
 message ModelChannel {
 	uint64 id = 1;
 	int64 created_at = 2;
@@ -244,6 +250,8 @@ message ModelChannel {
 	// @doc: base_url is the base url of the model channel.
 	string base_url = 8;
 
+	State state = 10;
+
 	// @gorm: -
 	repeated string model_list = 9;
 }
@@ -259,6 +267,8 @@ message ModelChannelAccess {
 	uint64 channel_id = 5;
 	// @gorm: index: idx_channel_access,unique
 	string model = 6;
+
+	State state = 7;
 }
 
 message ModelModelAlias {
