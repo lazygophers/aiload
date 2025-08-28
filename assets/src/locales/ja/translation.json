@@ -1,3 +1,85 @@
 {
-  "welcome": "私たちのアプリケーションへようこそ！"
+  "welcome": "私たちのアプリケーションへようこそ！",
+  "header": {
+    "defaultTitle": "ダッシュボード",
+    "expandSidebar": "サイドバーを展開",
+    "collapseSidebar": "サイドバーを折りたたむ"
+  },
+  "sidebar": {
+    "docs": "ドキュメント",
+    "documents": "すべてのドキュメント",
+    "api": "API",
+    "faq": "よくある質問",
+    "i18n": "国際化",
+    "settings": "設定"
+  },
+  "docs": {
+    "page": {
+      "title": "ドキュメントセンター",
+      "description": "すべてのドキュメントを閲覧して、AI Loadシステムの使用方法を学ぶ"
+    },
+    "categories": {
+      "getting-started": "クイックスタート",
+      "core-concepts": "コアコンセプト",
+      "api-reference": "APIリファレンス",
+      "guides": "ガイド",
+      "development": "開発ガイド"
+    },
+    "search": {
+      "placeholder": "ドキュメントを検索..."
+    },
+    "filter": {
+      "category": "カテゴリを選択",
+      "tag": "タグを選択",
+      "all-categories": "すべてのカテゴリ",
+      "all-tags": "すべてのタグ",
+      "clear": "フィルターをクリア"
+    },
+    "no-results": "一致するドキュメントが見つかりません",
+    "minutes": "分",
+    "introduction": {
+      "title": "プロジェクト紹介",
+      "description": "AI Loadの背景、目標、コアバリューを理解する"
+    },
+    "getting-started": {
+      "title": "クイックスタートガイド",
+      "description": "AI Loadシステムを迅速にデプロイして使用開始"
+    },
+    "architecture": {
+      "title": "システムアーキテクチャ",
+      "description": "システムの設計理念と技術アーキテクチャを深く理解"
+    },
+    "core-modules": {
+      "title": "コアモジュール",
+      "description": "システムの各機能モジュールと責任分担を理解"
+    },
+    "api-spec": {
+      "title": "API仕様",
+      "description": "完全なRPCインターフェースドキュメントとデータモデル定義を表示"
+    },
+    "llms-api": {
+      "title": "LLM APIリファレンス",
+      "description": "さまざまな大規模言語モデルのAPIインターフェース詳細説明"
+    },
+    "configuration": {
+      "title": "設定説明",
+      "description": "すべての設定項目をマスターして、システムの全ポテンシャルを解放"
+    },
+    "deployment": {
+      "title": "デプロイメントガイド",
+      "description": "AI Loadを本番環境にデプロイするさまざまな方法"
+    },
+    "database": {
+      "title": "データベース設計",
+      "description": "システムのデータモデルとテーブル構造設計を理解"
+    },
+    "cache": {
+      "title": "キャッシュアーキテクチャ",
+      "description": "システムキャッシュ戦略と実装ソリューションの詳細説明"
+    },
+    "contributing": {
+      "title": "貢献ガイド",
+      "description": "プロジェクト開発への参加方法とコード貢献方法を学ぶ"
+    }
+  }
 }

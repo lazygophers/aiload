@@ -1,3 +1,85 @@
 {
-  "welcome": "Willkommen bei unserer Anwendung!"
+  "welcome": "Willkommen in unserer Anwendung!",
+  "header": {
+    "defaultTitle": "Dashboard",
+    "expandSidebar": "Seitenleiste erweitern",
+    "collapseSidebar": "Seitenleiste einklappen"
+  },
+  "sidebar": {
+    "docs": "Dokumentation",
+    "documents": "Alle Dokumente",
+    "api": "API",
+    "faq": "FAQ",
+    "i18n": "Internationalisierung",
+    "settings": "Einstellungen"
+  },
+  "docs": {
+    "page": {
+      "title": "Dokumentationszentrum",
+      "description": "Durchsuchen Sie alle Dokumentationen, um zu lernen, wie Sie das AI Load-System verwenden"
+    },
+    "categories": {
+      "getting-started": "Schnellstart",
+      "core-concepts": "Kernkonzepte",
+      "api-reference": "API-Referenz",
+      "guides": "Anleitungen",
+      "development": "Entwicklungshandbuch"
+    },
+    "search": {
+      "placeholder": "Dokumente durchsuchen..."
+    },
+    "filter": {
+      "category": "Kategorie auswählen",
+      "tag": "Tag auswählen",
+      "all-categories": "Alle Kategorien",
+      "all-tags": "Alle Tags",
+      "clear": "Filter löschen"
+    },
+    "no-results": "Keine übereinstimmenden Dokumente gefunden",
+    "minutes": "Min",
+    "introduction": {
+      "title": "Projekteinführung",
+      "description": "Erfahren Sie mehr über Hintergrund, Ziele und Kernwerte von AI Load"
+    },
+    "getting-started": {
+      "title": "Schnellstartanleitung",
+      "description": "AI Load-System schnell bereitstellen und verwenden"
+    },
+    "architecture": {
+      "title": "Systemarchitektur",
+      "description": "Tiefer Einblick in die Designphilosophie und technische Architektur des Systems"
+    },
+    "core-modules": {
+      "title": "Kernmodule",
+      "description": "Verstehen Sie die Funktionsmodule und Verantwortlichkeiten des Systems"
+    },
+    "api-spec": {
+      "title": "API-Spezifikation",
+      "description": "Vollständige RPC-Schnittstellendokumentation und Datenmodelldefinitionen anzeigen"
+    },
+    "llms-api": {
+      "title": "LLM API-Referenz",
+      "description": "Detaillierte API-Schnittstellendokumentation für verschiedene große Sprachmodelle"
+    },
+    "configuration": {
+      "title": "Konfigurationshandbuch",
+      "description": "Meistern Sie alle Konfigurationsoptionen, um das volle Potenzial des Systems freizusetzen"
+    },
+    "deployment": {
+      "title": "Bereitstellungshandbuch",
+      "description": "Verschiedene Methoden zur Bereitstellung von AI Load in der Produktionsumgebung"
+    },
+    "database": {
+      "title": "Datenbankdesign",
+      "description": "Verstehen Sie die Datenmodelle und Tabellenstrukturdesign des Systems"
+    },
+    "cache": {
+      "title": "Cache-Architektur",
+      "description": "Detaillierte Erklärung der Cache-Strategien und Implementierung des Systems"
+    },
+    "contributing": {
+      "title": "Beitragshandbuch",
+      "description": "Erfahren Sie, wie Sie an der Projektentwicklung mitwirken und Code beitragen können"
+    }
+  }
 }

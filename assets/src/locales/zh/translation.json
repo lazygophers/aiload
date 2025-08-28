@@ -1,3 +1,85 @@
 {
-  "welcome": "欢迎来到我们的应用！"
+  "welcome": "欢迎来到我们的应用！",
+  "header": {
+    "defaultTitle": "控制台",
+    "expandSidebar": "展开侧边栏",
+    "collapseSidebar": "收起侧边栏"
+  },
+  "sidebar": {
+    "docs": "文档",
+    "documents": "所有文档",
+    "api": "API",
+    "faq": "常见问题",
+    "i18n": "国际化",
+    "settings": "设置"
+  },
+  "docs": {
+    "page": {
+      "title": "文档中心",
+      "description": "浏览所有文档，了解如何使用 AI Load 系统"
+    },
+    "categories": {
+      "getting-started": "快速开始",
+      "core-concepts": "核心概念",
+      "api-reference": "API 参考",
+      "guides": "使用指南",
+      "development": "开发指南"
+    },
+    "search": {
+      "placeholder": "搜索文档..."
+    },
+    "filter": {
+      "category": "选择分类",
+      "tag": "选择标签",
+      "all-categories": "所有分类",
+      "all-tags": "所有标签",
+      "clear": "清除筛选"
+    },
+    "no-results": "没有找到匹配的文档",
+    "minutes": "分钟",
+    "introduction": {
+      "title": "项目介绍",
+      "description": "了解 AI Load 的背景、目标和核心价值"
+    },
+    "getting-started": {
+      "title": "快速上手指南",
+      "description": "快速部署和开始使用 AI Load 系统"
+    },
+    "architecture": {
+      "title": "系统架构",
+      "description": "深入了解系统的设计理念和技术架构"
+    },
+    "core-modules": {
+      "title": "核心模块",
+      "description": "了解系统的各个功能模块和职责分工"
+    },
+    "api-spec": {
+      "title": "API 规范",
+      "description": "查看完整的 RPC 接口文档和数据模型定义"
+    },
+    "llms-api": {
+      "title": "LLM API 参考",
+      "description": "各种大型语言模型的 API 接口详细说明"
+    },
+    "configuration": {
+      "title": "配置说明",
+      "description": "掌握所有配置项，释放系统全部潜能"
+    },
+    "deployment": {
+      "title": "部署指南",
+      "description": "将 AI Load 部署到生产环境的多种方法"
+    },
+    "database": {
+      "title": "数据库设计",
+      "description": "了解系统的数据模型和表结构设计"
+    },
+    "cache": {
+      "title": "缓存架构",
+      "description": "系统缓存策略和实现方案详解"
+    },
+    "contributing": {
+      "title": "贡献指南",
+      "description": "了解如何参与项目开发和贡献代码"
+    }
+  }
 }

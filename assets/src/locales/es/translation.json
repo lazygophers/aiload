@@ -1,3 +1,85 @@
 {
-  "welcome": "¡Bienvenido a nuestra aplicación!"
+  "welcome": "¡Bienvenido a nuestra aplicación!",
+  "header": {
+    "defaultTitle": "Panel de control",
+    "expandSidebar": "Expandir barra lateral",
+    "collapseSidebar": "Contraer barra lateral"
+  },
+  "sidebar": {
+    "docs": "Documentación",
+    "documents": "Todos los documentos",
+    "api": "API",
+    "faq": "Preguntas frecuentes",
+    "i18n": "Internacionalización",
+    "settings": "Configuración"
+  },
+  "docs": {
+    "page": {
+      "title": "Centro de Documentación",
+      "description": "Explora toda la documentación para aprender a usar el sistema AI Load"
+    },
+    "categories": {
+      "getting-started": "Inicio Rápido",
+      "core-concepts": "Conceptos Principales",
+      "api-reference": "Referencia de API",
+      "guides": "Guías",
+      "development": "Guía de Desarrollo"
+    },
+    "search": {
+      "placeholder": "Buscar documentos..."
+    },
+    "filter": {
+      "category": "Seleccionar categoría",
+      "tag": "Seleccionar etiqueta",
+      "all-categories": "Todas las categorías",
+      "all-tags": "Todas las etiquetas",
+      "clear": "Limpiar filtros"
+    },
+    "no-results": "No se encontraron documentos coincidentes",
+    "minutes": "min",
+    "introduction": {
+      "title": "Introducción del Proyecto",
+      "description": "Conoce los antecedentes, objetivos y valores centrales de AI Load"
+    },
+    "getting-started": {
+      "title": "Guía de Inicio Rápido",
+      "description": "Despliega rápidamente y comienza a usar el sistema AI Load"
+    },
+    "architecture": {
+      "title": "Arquitectura del Sistema",
+      "description": "Profundiza en la filosofía de diseño y arquitectura técnica del sistema"
+    },
+    "core-modules": {
+      "title": "Módulos Principales",
+      "description": "Entiende los módulos funcionales y responsabilidades del sistema"
+    },
+    "api-spec": {
+      "title": "Especificación de API",
+      "description": "Ver documentación completa de interfaces RPC y definiciones de modelos de datos"
+    },
+    "llms-api": {
+      "title": "Referencia de API LLM",
+      "description": "Documentación detallada de interfaces API para varios modelos de lenguaje grandes"
+    },
+    "configuration": {
+      "title": "Guía de Configuración",
+      "description": "Domina todas las opciones de configuración para liberar todo el potencial del sistema"
+    },
+    "deployment": {
+      "title": "Guía de Despliegue",
+      "description": "Varios métodos para desplegar AI Load en entorno de producción"
+    },
+    "database": {
+      "title": "Diseño de Base de Datos",
+      "description": "Entiende los modelos de datos y diseño de estructura de tablas del sistema"
+    },
+    "cache": {
+      "title": "Arquitectura de Caché",
+      "description": "Explicación detallada de estrategias de caché del sistema e implementación"
+    },
+    "contributing": {
+      "title": "Guía de Contribución",
+      "description": "Aprende cómo participar en el desarrollo del proyecto y contribuir código"
+    }
+  }
 }

@@ -1,3 +1,85 @@
 {
-  "welcome": "우리의 애플리케이션에 오신 것을 환영합니다!"
+  "welcome": "저희 애플리케이션에 오신 것을 환영합니다!",
+  "header": {
+    "defaultTitle": "대시보드",
+    "expandSidebar": "사이드바 확장",
+    "collapseSidebar": "사이드바 축소"
+  },
+  "sidebar": {
+    "docs": "문서",
+    "documents": "모든 문서",
+    "api": "API",
+    "faq": "자주 묻는 질문",
+    "i18n": "국제화",
+    "settings": "설정"
+  },
+  "docs": {
+    "page": {
+      "title": "문서 센터",
+      "description": "모든 문서를 찾아보고 AI Load 시스템 사용법을 학습하세요"
+    },
+    "categories": {
+      "getting-started": "빠른 시작",
+      "core-concepts": "핵심 개념",
+      "api-reference": "API 참조",
+      "guides": "가이드",
+      "development": "개발 가이드"
+    },
+    "search": {
+      "placeholder": "문서 검색..."
+    },
+    "filter": {
+      "category": "카테고리 선택",
+      "tag": "태그 선택",
+      "all-categories": "모든 카테고리",
+      "all-tags": "모든 태그",
+      "clear": "필터 지우기"
+    },
+    "no-results": "일치하는 문서를 찾을 수 없습니다",
+    "minutes": "분",
+    "introduction": {
+      "title": "프로젝트 소개",
+      "description": "AI Load의 배경, 목표 및 핵심 가치 이해하기"
+    },
+    "getting-started": {
+      "title": "빠른 시작 가이드",
+      "description": "AI Load 시스템을 빠르게 배포하고 사용 시작하기"
+    },
+    "architecture": {
+      "title": "시스템 아키텍처",
+      "description": "시스템의 설계 철학과 기술 아키텍처 심층 이해"
+    },
+    "core-modules": {
+      "title": "핵심 모듈",
+      "description": "시스템의 기능 모듈과 책임 분담 이해하기"
+    },
+    "api-spec": {
+      "title": "API 사양",
+      "description": "완전한 RPC 인터페이스 문서와 데이터 모델 정의 보기"
+    },
+    "llms-api": {
+      "title": "LLM API 참조",
+      "description": "다양한 대규모 언어 모델의 API 인터페이스 상세 설명"
+    },
+    "configuration": {
+      "title": "구성 설명",
+      "description": "모든 구성 옵션을 마스터하여 시스템의 잠재력을 최대한 활용"
+    },
+    "deployment": {
+      "title": "배포 가이드",
+      "description": "AI Load를 프로덕션 환경에 배포하는 다양한 방법"
+    },
+    "database": {
+      "title": "데이터베이스 설계",
+      "description": "시스템의 데이터 모델과 테이블 구조 설계 이해하기"
+    },
+    "cache": {
+      "title": "캐시 아키텍처",
+      "description": "시스템 캐싱 전략과 구현 솔루션 상세 설명"
+    },
+    "contributing": {
+      "title": "기여 가이드",
+      "description": "프로젝트 개발에 참여하고 코드를 기여하는 방법 학습"
+    }
+  }
 }

@@ -1,3 +1,85 @@
 {
-  "welcome": "歡迎來到我們的應用！"
+  "welcome": "歡迎使用我們的應用程式！",
+  "header": {
+    "defaultTitle": "控制台",
+    "expandSidebar": "展開側邊欄",
+    "collapseSidebar": "收起側邊欄"
+  },
+  "sidebar": {
+    "docs": "文件",
+    "documents": "所有文件",
+    "api": "API",
+    "faq": "常見問題",
+    "i18n": "國際化",
+    "settings": "設定"
+  },
+  "docs": {
+    "page": {
+      "title": "文件中心",
+      "description": "瀏覽所有文件，了解如何使用 AI Load 系統"
+    },
+    "categories": {
+      "getting-started": "快速開始",
+      "core-concepts": "核心概念",
+      "api-reference": "API 參考",
+      "guides": "使用指南",
+      "development": "開發指南"
+    },
+    "search": {
+      "placeholder": "搜尋文件..."
+    },
+    "filter": {
+      "category": "選擇分類",
+      "tag": "選擇標籤",
+      "all-categories": "所有分類",
+      "all-tags": "所有標籤",
+      "clear": "清除篩選"
+    },
+    "no-results": "沒有找到符合的文件",
+    "minutes": "分鐘",
+    "introduction": {
+      "title": "專案介紹",
+      "description": "了解 AI Load 的背景、目標和核心價值"
+    },
+    "getting-started": {
+      "title": "快速上手指南",
+      "description": "快速部署並開始使用 AI Load 系統"
+    },
+    "architecture": {
+      "title": "系統架構",
+      "description": "深入了解系統的設計理念和技術架構"
+    },
+    "core-modules": {
+      "title": "核心模組",
+      "description": "了解系統的各個功能模組和職責分工"
+    },
+    "api-spec": {
+      "title": "API 規範",
+      "description": "查看完整的 RPC 介面文件和資料模型定義"
+    },
+    "llms-api": {
+      "title": "LLM API 參考",
+      "description": "各種大型語言模型的 API 介面詳細說明"
+    },
+    "configuration": {
+      "title": "設定說明",
+      "description": "掌握所有設定項，釋放系統全部潛能"
+    },
+    "deployment": {
+      "title": "部署指南",
+      "description": "將 AI Load 部署到生產環境的多種方法"
+    },
+    "database": {
+      "title": "資料庫設計",
+      "description": "了解系統的資料模型和表結構設計"
+    },
+    "cache": {
+      "title": "快取架構",
+      "description": "系統快取策略和實作方案詳解"
+    },
+    "contributing": {
+      "title": "貢獻指南",
+      "description": "了解如何參與專案開發和貢獻程式碼"
+    }
+  }
 }

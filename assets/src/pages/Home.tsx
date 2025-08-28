@@ -1,69 +1,94 @@
-import React, { useState, useEffect } from 'react';
-import { Tabs, Spin } from 'antd';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import React from 'react';
+import { Typography, Card, Row, Col, Button } from 'antd';
+import { useTranslation } from 'react-i18next';
 
-const markdownFiles = [
-  'README.md',
-  'api_spec.md',
-  'architecture.md',
-  'cache.md',
-  'configuration.md',
-  'contributing.md',
-  'database.md',
-  'deployment.md',
-  'getting-started.md',
-  'introduction.md',
-  'llms_api.md',
-  'core-modules.md',
-];
+const { Title, Paragraph } = Typography;
 
-interface Doc {
-  fileName: string;
-  content: string;
-}
-
+/**
+ * 首页欢迎组件
+ * 展示系统介绍和快速导航
+ */
 const Home: React.FC = () => {
-  const [docs, setDocs] = useState<Doc[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const fetchDocs = async () => {
-      try {
-        const fetchedDocs = await Promise.all(
-          markdownFiles.map(async (file) => {
-            const response = await fetch(`/docs/${file}`);
-            if (!response.ok) {
-              throw new Error(`Failed to fetch ${file}`);
-            }
-            const content = await response.text();
-            return { fileName: file, content };
-          })
-        );
-        setDocs(fetchedDocs);
-      } catch (error) {
-        console.error("Error fetching markdown files:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDocs();
-  }, []);
-
-  if (loading) {
-    return <Spin size="large" style={{ display: 'block', marginTop: '50px' }} />;
-  }
-
-  const tabItems = docs.map((doc, index) => ({
-    key: String(index),
-    label: doc.fileName,
-    children: <ReactMarkdown remarkPlugins={[remarkGfm]}>{doc.content}</ReactMarkdown>,
-  }));
+  const { t } = useTranslation();
 
   return (
-    <div style={{ padding: '24px' }}>
-      <Tabs defaultActiveKey="0" type="card" items={tabItems} />
+    <div
+      style={{
+        backgroundColor: '#fff',
+        padding: '24px',
+        borderRadius: '8px',
+        minHeight: 'calc(100vh - 112px)',
+        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+      }}
+    >
+      <Typography>
+        <Title level={2}>{t('welcome.title', '欢迎使用 AI Load 系统')}</Title>
+        <Paragraph>
+          {t('welcome.description', '这是一个强大的 AI 模型加载和管理系统，支持多种 AI 服务的集成和管理。')}
+        </Paragraph>
+      </Typography>
+
+      <Row gutter={[16, 16]} style={{ marginTop: '32px' }}>
+        <Col xs={24} sm={12} md={8}>
+          <Card
+            title="模型管理"
+            bordered={false}
+            hoverable
+            style={{ height: '100%' }}
+          >
+            <Paragraph>
+              管理和配置各种 AI 模型，包括 OpenAI、Gemini、Ollama 等主流服务。
+            </Paragraph>
+            <Button type="primary" block>
+              开始配置
+            </Button>
+          </Card>
+        </Col>
+        
+        <Col xs={24} sm={12} md={8}>
+          <Card
+            title="API 文档"
+            bordered={false}
+            hoverable
+            style={{ height: '100%' }}
+          >
+            <Paragraph>
+              查看详细的 API 文档，了解如何使用系统提供的各种接口。
+            </Paragraph>
+            <Button type="primary" block>
+              查看文档
+            </Button>
+          </Card>
+        </Col>
+        
+        <Col xs={24} sm={12} md={8}>
+          <Card
+            title="系统监控"
+            bordered={false}
+            hoverable
+            style={{ height: '100%' }}
+          >
+            <Paragraph>
+              实时监控系统状态，查看模型加载情况和性能指标。
+            </Paragraph>
+            <Button type="primary" block>
+              查看状态
+            </Button>
+          </Card>
+        </Col>
+      </Row>
+
+      <Card title="快速开始" style={{ marginTop: '32px' }}>
+        <Row gutter={[16, 16]}>
+          <Col span={24}>
+            <Paragraph>
+              1. 在侧边栏中选择"模型管理"开始配置您的第一个 AI 模型<br />
+              2. 配置完成后，您可以通过 API 调用来使用这些模型<br />
+              3. 查看"API 文档"了解详细的接口说明
+            </Paragraph>
+          </Col>
+        </Row>
+      </Card>
     </div>
   );
 };

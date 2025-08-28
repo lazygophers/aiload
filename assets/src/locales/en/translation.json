@@ -1,3 +1,85 @@
 {
-  "welcome": "Welcome to our application!"
+  "welcome": "Welcome to our application!",
+  "header": {
+    "defaultTitle": "Dashboard",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar"
+  },
+  "sidebar": {
+    "docs": "Documentation",
+    "documents": "All Documents",
+    "api": "API",
+    "faq": "FAQ",
+    "i18n": "Internationalization",
+    "settings": "Settings"
+  },
+  "docs": {
+    "page": {
+      "title": "Documentation Center",
+      "description": "Browse all documentation to learn how to use AI Load system"
+    },
+    "categories": {
+      "getting-started": "Getting Started",
+      "core-concepts": "Core Concepts",
+      "api-reference": "API Reference",
+      "guides": "Guides",
+      "development": "Development"
+    },
+    "search": {
+      "placeholder": "Search documents..."
+    },
+    "filter": {
+      "category": "Select Category",
+      "tag": "Select Tag",
+      "all-categories": "All Categories",
+      "all-tags": "All Tags",
+      "clear": "Clear Filters"
+    },
+    "no-results": "No matching documents found",
+    "minutes": "mins",
+    "introduction": {
+      "title": "Introduction",
+      "description": "Learn about AI Load's background, goals, and core values"
+    },
+    "getting-started": {
+      "title": "Getting Started Guide",
+      "description": "Quickly deploy and start using the AI Load system"
+    },
+    "architecture": {
+      "title": "System Architecture",
+      "description": "Deep dive into the system's design philosophy and technical architecture"
+    },
+    "core-modules": {
+      "title": "Core Modules",
+      "description": "Understand the system's functional modules and responsibilities"
+    },
+    "api-spec": {
+      "title": "API Specification",
+      "description": "View complete RPC interface documentation and data model definitions"
+    },
+    "llms-api": {
+      "title": "LLM API Reference",
+      "description": "Detailed API interface documentation for various large language models"
+    },
+    "configuration": {
+      "title": "Configuration Guide",
+      "description": "Master all configuration options to unlock the system's full potential"
+    },
+    "deployment": {
+      "title": "Deployment Guide",
+      "description": "Various methods to deploy AI Load to production environment"
+    },
+    "database": {
+      "title": "Database Design",
+      "description": "Understand the system's data models and table structure design"
+    },
+    "cache": {
+      "title": "Cache Architecture",
+      "description": "Detailed explanation of system caching strategies and implementation"
+    },
+    "contributing": {
+      "title": "Contributing Guide",
+      "description": "Learn how to participate in project development and contribute code"
+    }
+  }
 }

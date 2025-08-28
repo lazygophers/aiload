@@ -1,0 +1,153 @@
+/* 侧边栏组件样式 */
+
+/* 折叠按钮容器 */
+.sidebar-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* 折叠按钮样式优化 */
+.sidebar-trigger .ant-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.sidebar-trigger .ant-btn:hover {
+  color: #1890ff;
+  background-color: #e6f7ff;
+}
+
+/* 侧边栏菜单样式 */
+.sidebar-menu {
+  border-right: none;
+  padding: 16px 0;
+}
+
+/* 菜单项样式优化 */
+.sidebar-menu .ant-menu-item {
+  margin: 4px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  height: 48px;
+  line-height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-menu .ant-menu-item:hover {
+  color: #1890ff;
+  background-color: #e6f7ff;
+}
+
+.sidebar-menu .ant-menu-item-selected {
+  color: #1890ff;
+  background-color: #e6f7ff;
+  font-weight: 500;
+}
+
+.sidebar-menu .ant-menu-item .anticon {
+  font-size: 18px;
+  margin-right: 12px;
+}
+
+/* 子菜单样式优化 */
+.sidebar-menu .ant-menu-submenu-title {
+  margin: 4px 16px;
+  border-radius: 8px;
+  height: 48px;
+  line-height: 48px;
+}
+
+.sidebar-menu .ant-menu-submenu-title:hover {
+  color: #1890ff;
+  background-color: #e6f7ff;
+}
+
+.sidebar-menu .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  color: #1890ff;
+}
+
+.sidebar-menu .ant-menu-submenu-inline > .ant-menu-submenu-title {
+  height: 40px;
+  line-height: 40px;
+  margin: 2px 16px;
+}
+
+.sidebar-menu .ant-menu-item-group-title {
+  padding: 8px 16px;
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 子菜单项样式 */
+.sidebar-menu .ant-menu-submenu .ant-menu-item {
+  margin: 2px 16px 2px 32px;
+  height: 40px;
+  line-height: 40px;
+  border-radius: 6px;
+}
+
+.sidebar-menu .ant-menu-submenu .ant-menu-item .anticon {
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+/* 折叠状态下的菜单项样式 */
+.ant-layout-sider-collapsed .sidebar-menu .ant-menu-item {
+  margin: 4px 8px;
+  padding: 0 16px !important;
+  justify-content: center;
+}
+
+.ant-layout-sider-collapsed .sidebar-menu .ant-menu-item .anticon {
+  margin-right: 0;
+  font-size: 20px;
+}
+
+/* 折叠状态下的提示框样式优化 */
+.ant-layout-sider-collapsed .sidebar-menu .ant-menu-item::after {
+  display: none;
+}
+
+/* 侧边栏过渡动画 */
+.ant-layout-sider {
+  transition: all 0.3s ease !important;
+}
+
+/* 滚动条样式优化 */
+.ant-layout-sider::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ant-layout-sider::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.ant-layout-sider::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.ant-layout-sider::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .ant-layout-sider {
+    position: absolute !important;
+    z-index: 999;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .ant-layout-sider-collapsed {
+    transform: translateX(-100%);
+  }
+}
