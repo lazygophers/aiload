@@ -41,8 +41,3 @@ var client = resty.New().
 		return nil
 	}).
 	SetLogger(log.Clone().SetOutput(io.Discard)) // 禁用默认日志记录，以避免不必要的输出
-
-// Load 是一个占位函数，目前没有实现任何功能。
-// 它可以用于未来扩展，例如在应用启动时加载配置或初始化资源。
-func Load() {
-}

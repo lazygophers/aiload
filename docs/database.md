@@ -48,7 +48,7 @@ erDiagram
         Platform platform "平台 (唯一)"
     }
 
-    ModelChannelAccess {
+    ModelChannelModel {
         uint64 id PK "主键"
         int64 created_at "创建时间"
         int64 updated_at "更新时间"
@@ -68,7 +68,7 @@ erDiagram
 
     ModelUser         ||--|{ ModelUserToken : "拥有"
     ModelUserToken    ||--|{ ModelUserAccess : "授权"
-    ModelChannel      ||--|{ ModelChannelAccess : "拥有"
+    ModelChannel      ||--|{ ModelChannelModel : "拥有"
 ```
 
 ## 📜 Protobuf Message 详细定义
@@ -87,7 +87,7 @@ erDiagram
 | `token`      | `string`   | 6        | `@gorm: index: idx_channel,unique` (唯一索引)             |
 | `platform`   | `Platform` | 7        | `@gorm: index: idx_channel,unique` (唯一索引)             |
 
-### [`ModelChannelAccess`](aiload.proto:143)
+### [`ModelChannelModel`](aiload.proto:143)
 
 | 字段名       | 字段类型 | 字段编号 | 备注                                                             |
 | :----------- | :------- | :------- | :--------------------------------------------------------------- |

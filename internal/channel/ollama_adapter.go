@@ -11,6 +11,11 @@ type OllamaAdapter struct {
 	client *Ollama
 }
 
+func (p *OllamaAdapter) ChatCompletionsAsync(req *ChatCompletionReq, callback func(item *ChatCompletionRspItem) error) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 // NewOllamaAdapter 创建一个新的 Ollama 适配器实例。
 func NewOllamaAdapter(channel *aiload.ModelChannel) *OllamaAdapter {
 	return &OllamaAdapter{
@@ -19,8 +24,8 @@ func NewOllamaAdapter(channel *aiload.ModelChannel) *OllamaAdapter {
 }
 
 // GetModelList 调用 Ollama 客户端的 GetLocalModelList 方法，并将结果转换为统一的 GetModelListRsp 格式。
-func (a *OllamaAdapter) GetModelList() (*GetModelListRsp, error) {
-	ollamaRsp, err := a.client.GetLocalModelList()
+func (p *OllamaAdapter) GetModelList() (*GetModelListRsp, error) {
+	ollamaRsp, err := p.client.GetLocalModelList()
 	if err != nil {
 		return nil, err
 	}

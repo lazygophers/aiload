@@ -42,7 +42,7 @@
 | `ModelUserToken`     | `aiload:user_token:{token}`                  | `STRING`        | 将 `token` 字符串映射到其对应的 `user_id`。 |
 | `ModelUserAccess`    | `aiload:user_access:{user_id}:{model}`       | `SET`           | 缓存用户有权访问的模型列表。                |
 | `ModelChannel`       | `aiload:channel:{channel_id}`                | `HASH`          | 缓存渠道的详细信息。                        |
-| `ModelChannelAccess` | `aiload:channel_access:{channel_id}:{model}` | `SET`           | 缓存渠道有权访问的模型列表。                |
+| `ModelChannelModel` | `aiload:channel_access:{channel_id}:{model}` | `SET`           | 缓存渠道有权访问的模型列表。                |
 | `ModelModelAlias`    | `aiload:model_alias:{alias_name}`            | `STRING`        | 将模型别名映射到实际的模型名称。            |
 
 **字段类型约定:**

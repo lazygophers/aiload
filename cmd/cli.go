@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/lazygophers/aiload/internal/api"
+	"github.com/lazygophers/aiload/internal/core"
 	"github.com/lazygophers/aiload/internal/state"
 	"github.com/lazygophers/log"
 	"github.com/lazygophers/utils/app"
-	"github.com/lazygophers/utils/runtime"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -26,19 +26,11 @@ var rootCmd = &cobra.Command{
 
 		api.RegisteApi(Routes)
 
-		//err = core.Run()
-		//if err != nil {
-		//	log.Errorf("err:%v", err)
-		//	return err
-		//}
-
-		err = api.Listen()
+		err = core.Load()
 		if err != nil {
-			log.Errorf("err:%s", err)
+			log.Errorf("err:%v", err)
 			return err
 		}
-
-		runtime.WaitExit()
 
 		return nil
 	},

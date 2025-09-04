@@ -2,7 +2,7 @@
 //	versions:
 //		codegen	v0.0.0-SNAPSHOT-35b9c92
 //		go		go1.24.5
-//	update:	1756281190
+//	update:	1757003468
 //	source: aiload.proto
 
 package aiload
@@ -20,11 +20,11 @@ func (m *ModelChannel) Value() (driver.Value, error) {
 	return utils.Value(m)
 }
 
-func (m *ModelChannelAccess) Scan(value interface{}) error {
+func (m *ModelChannelModel) Scan(value interface{}) error {
 	return utils.Scan(m, value)
 }
 
-func (m *ModelChannelAccess) Value() (driver.Value, error) {
+func (m *ModelChannelModel) Value() (driver.Value, error) {
 	return utils.Value(m)
 }
 

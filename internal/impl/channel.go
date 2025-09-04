@@ -33,7 +33,7 @@ func SetChannelAdmin(ctx *lrpc.Ctx, req *aiload.SetChannelAdminReq) (*aiload.Set
 		newModelList := channel.ModelList
 
 		{
-			modelList, err := state.ChannelAccess.NewScoop(tx).
+			modelList, err := state.ChannelModel.NewScoop(tx).
 				Select(aiload.DbModel).
 				Where(aiload.DbChannelId, channel.Id).
 				Find()
@@ -48,7 +48,7 @@ func SetChannelAdmin(ctx *lrpc.Ctx, req *aiload.SetChannelAdminReq) (*aiload.Set
 		added, removed := candy.Diff(oldModelList, newModelList)
 
 		if len(removed) > 0 {
-			err = state.ChannelAccess.NewScoop(tx).
+			err = state.ChannelModel.NewScoop(tx).
 				Where(aiload.DbChannelId, channel.Id).
 				In(aiload.DbModel, removed).
 				Delete().
@@ -60,9 +60,9 @@ func SetChannelAdmin(ctx *lrpc.Ctx, req *aiload.SetChannelAdminReq) (*aiload.Set
 		}
 
 		if len(added) > 0 {
-			err = state.ChannelAccess.NewScoop(tx).
-				CreateInBatches(candy.Map(added, func(modelName string) *aiload.ModelChannelAccess {
-					return &aiload.ModelChannelAccess{
+			err = state.ChannelModel.NewScoop(tx).
+				CreateInBatches(candy.Map(added, func(modelName string) *aiload.ModelChannelModel {
+					return &aiload.ModelChannelModel{
 						ChannelId: channel.Id,
 						Model:     modelName,
 					}
@@ -125,9 +125,9 @@ func AddChannelAdmin(ctx *lrpc.Ctx, req *aiload.AddChannelAdminReq) (*aiload.Add
 			return err
 		}
 
-		err = state.ChannelAccess.NewScoop(tx).
-			CreateInBatches(candy.Map(channel.ModelList, func(modelName string) *aiload.ModelChannelAccess {
-				return &aiload.ModelChannelAccess{
+		err = state.ChannelModel.NewScoop(tx).
+			CreateInBatches(candy.Map(channel.ModelList, func(modelName string) *aiload.ModelChannelModel {
+				return &aiload.ModelChannelModel{
 					ChannelId: channel.Id,
 					Model:     modelName,
 				}

@@ -12,6 +12,11 @@ type GeminiAdapter struct {
 	client *Gemini
 }
 
+func (p *GeminiAdapter) ChatCompletionsAsync(req *ChatCompletionReq, callback func(item *ChatCompletionRspItem) error) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 // NewGeminiAdapter 创建一个新的 Gemini 适配器实例。
 func NewGeminiAdapter(channel *aiload.ModelChannel) *GeminiAdapter {
 	return &GeminiAdapter{
@@ -20,8 +25,8 @@ func NewGeminiAdapter(channel *aiload.ModelChannel) *GeminiAdapter {
 }
 
 // GetModelList 调用 Gemini 客户端的 GetModelList 方法，并将结果转换为统一的 GetModelListRsp 格式。
-func (a *GeminiAdapter) GetModelList() (*GetModelListRsp, error) {
-	geminiRsp, err := a.client.GetModelList()
+func (p *GeminiAdapter) GetModelList() (*GetModelListRsp, error) {
+	geminiRsp, err := p.client.GetModelList()
 	if err != nil {
 		return nil, err
 	}

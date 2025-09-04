@@ -11,6 +11,11 @@ type OpenAiAdapter struct {
 	client *OpenAI
 }
 
+func (p *OpenAiAdapter) ChatCompletionsAsync(req *ChatCompletionReq, callback func(item *ChatCompletionRspItem) error) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 // NewOpenAiAdapter 创建一个新的 OpenAI 适配器实例。
 func NewOpenAiAdapter(channel *aiload.ModelChannel) *OpenAiAdapter {
 	return &OpenAiAdapter{
@@ -19,8 +24,8 @@ func NewOpenAiAdapter(channel *aiload.ModelChannel) *OpenAiAdapter {
 }
 
 // GetModelList 调用 OpenAI 客户端的 GetModelList 方法，并将结果转换为统一的 GetModelListRsp 格式。
-func (a *OpenAiAdapter) GetModelList() (*GetModelListRsp, error) {
-	openAiRsp, err := a.client.GetModelList()
+func (p *OpenAiAdapter) GetModelList() (*GetModelListRsp, error) {
+	openAiRsp, err := p.client.GetModelList()
 	if err != nil {
 		return nil, err
 	}

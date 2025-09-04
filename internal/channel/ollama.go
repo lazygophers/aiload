@@ -214,12 +214,12 @@ type OllamaRunningModel struct {
 
 // OllamaModelDetails 提供有关模型的详细信息。
 type OllamaModelDetails struct {
-	ParentModel       string   `json:"parent_model"`
-	Format            string   `json:"format"`
-	Family            string   `json:"family"`
-	Families          []string `json:"families"`
-	ParameterSize     string   `json:"parameter_size"`
-	QuantizationLevel string   `json:"quantization_level"`
+	ParentModel       string   `json:"parent_model,omitempty"`
+	Format            string   `json:"format,omitempty"`
+	Family            string   `json:"family,omitempty"`
+	Families          []string `json:"families,omitempty"`
+	ParameterSize     string   `json:"parameter_size,omitempty"`
+	QuantizationLevel string   `json:"quantization_level,omitempty"`
 }
 
 // OllamaGetRunningModelListRsp 代表列出正在运行模型的响应。

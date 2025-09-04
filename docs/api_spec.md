@@ -104,7 +104,7 @@
 | `token`      | `string`                | 渠道令牌 (Token)                               |
 | `platform`   | [`Platform`](#Platform) | 平台类型, `@gorm: index: idx_channel,unique`   |
 
-### `ModelChannelAccess`
+### `ModelChannelModel`
 
 | 字段         | 类型     | 描述                                                |
 | :----------- | :------- | :-------------------------------------------------- |
@@ -323,8 +323,8 @@
 | `UserNotFound`              | 10007 | 用户未找到        |
 | `UserAccessNotFound`        | 10008 | 用户访问未找到    |
 | `UserAccessDuplicateKey`    | 10009 | 用户访问重复      |
-| `ChannelAccessNotFound`     | 10010 | 渠道访问未找到    |
-| `ChannelAccessDuplicateKey` | 10011 | 渠道访问重复      |
+| `ChannelModelNotFound`     | 10010 | 渠道访问未找到    |
+| `ChannelModelDuplicateKey` | 10011 | 渠道访问重复      |
 
 ### `UserRole`
 

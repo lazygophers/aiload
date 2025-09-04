@@ -2,7 +2,7 @@
 //	versions:
 //		codegen	v0.0.0-SNAPSHOT-35b9c92
 //		go		go1.24.5
-//	update:	1756281190
+//	update:	1757003468
 //	source: aiload.proto
 
 package main

@@ -116,10 +116,10 @@ service aiload {
 	// @model: ModelChannel
 	// @action: set
 	rpc SetChannelAdmin (SetChannelAdminReq) returns (SetChannelAdminRsp) {
-			option (lazygophers.lrpc.core.http) = {
-				method: "POST",
-				path: "SetChannelAdmin",
-			};
+		option (lazygophers.lrpc.core.http) = {
+			method: "POST",
+			path: "SetChannelAdmin",
+		};
 		option (lazygophers.lrpc.core.lazygen) = {
 			role: "admin",
 		};
@@ -129,10 +129,10 @@ service aiload {
 	// @model: ModelChannel
 	// @action: del
 	rpc DelChannelAdmin (DelChannelAdminReq) returns (DelChannelAdminRsp) {
-			option (lazygophers.lrpc.core.http) = {
-				method: "POST",
-				path: "DelChannelAdmin",
-			};
+		option (lazygophers.lrpc.core.http) = {
+			method: "POST",
+			path: "DelChannelAdmin",
+		};
 		option (lazygophers.lrpc.core.lazygen) = {
 			role: "admin",
 		};
@@ -142,10 +142,10 @@ service aiload {
 	// @model: ModelChannel
 	// @action: add
 	rpc AddChannelAdmin (AddChannelAdminReq) returns (AddChannelAdminRsp) {
-			option (lazygophers.lrpc.core.http) = {
-				method: "POST",
-				path: "AddChannelAdmin",
-			};
+		option (lazygophers.lrpc.core.http) = {
+			method: "POST",
+			path: "AddChannelAdmin",
+		};
 		option (lazygophers.lrpc.core.lazygen) = {
 			role: "admin",
 		};
@@ -155,10 +155,10 @@ service aiload {
 	// @model: ModelChannel
 	// @action: get
 	rpc GetChannelAdmin (GetChannelAdminReq) returns (GetChannelAdminRsp) {
-			option (lazygophers.lrpc.core.http) = {
-				method: "POST",
-				path: "GetChannelAdmin",
-			};
+		option (lazygophers.lrpc.core.http) = {
+			method: "POST",
+			path: "GetChannelAdmin",
+		};
 		option (lazygophers.lrpc.core.lazygen) = {
 			role: "admin",
 		};
@@ -168,17 +168,17 @@ service aiload {
 	// @model: ModelChannel
 	// @action: list
 	rpc ListChannelAdmin (ListChannelAdminReq) returns (ListChannelAdminRsp) {
-			option (lazygophers.lrpc.core.http) = {
-				method: "POST",
-				path: "ListChannelAdmin",
-			};
+		option (lazygophers.lrpc.core.http) = {
+			method: "POST",
+			path: "ListChannelAdmin",
+		};
 		option (lazygophers.lrpc.core.lazygen) = {
 			role: "admin",
 		};
 	};
 
 
-    // @gen: channel
+	// @gen: channel
 	// @model: ModelChannel
 	rpc GetModelListAdmin (GetModelListAdminReq) returns (GetModelListAdminRsp) {
 		option (lazygophers.lrpc.core.http) = {
@@ -205,8 +205,8 @@ enum ErrCode {
 	UserNotFound = 10007;// 用户未找到
 	UserAccessNotFound = 10008;// 用户访问未找到
 	UserAccessDuplicateKey = 10009;// 用户访问重复
-	ChannelAccessNotFound = 10010;// 渠道访问未找到
-	ChannelAccessDuplicateKey = 10011;// 渠道访问重复
+	ChannelModelNotFound = 10010;// 渠道模型未找到
+	ChannelModelDuplicateKey = 10011;// 渠道模型重复
 }
 
 enum UserRole {
@@ -254,9 +254,12 @@ message ModelChannel {
 
 	// @gorm: -
 	repeated string model_list = 9;
+
+	bool enable_auto_update_model = 11;
+	bool enable_auto_check_model = 12;
 }
 
-message ModelChannelAccess {
+message ModelChannelModel {
 	uint64 id = 1;
 	int64 created_at = 2;
 	int64 updated_at = 3;
@@ -324,6 +327,12 @@ message ModelUserAccess {
 	uint64 token = 5;
 	// @gorm: index:idx_user_access,unique
 	string model = 6;
+}
+
+message MqTaskId {
+	// @v: required
+	uint64 id = 1;
+	bool force = 2;
 }
 
 message AddUserAdminReq {
@@ -447,7 +456,7 @@ message GetChannelAdminRsp {
 message ListChannelAdminReq {
 	enum ListOption {
 		ListOptionNil = 0;
-        // @type: uint32
+		// @type: uint32
 		ListOptionPlatform = 1;
 		// @type: like
 		ListOptionName = 2;

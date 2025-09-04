@@ -149,7 +149,7 @@ AI Load 作为透明代理服务，完整保留了各大 AI 服务商的原生 A
 | \`token\`      | \`string\`                | 渠道 Token, \`@gorm: index: idx_channel,unique\` |
 | \`platform\`   | [\`Platform\`](#Platform) | 平台类型, \`@gorm: index: idx_channel,unique\`   |
 
-### \`ModelChannelAccess\`
+### \`ModelChannelModel\`
 
 | 字段         | 类型     | 描述                                                |
 | :----------- | :------- | :-------------------------------------------------- |
@@ -331,8 +331,8 @@ AI Load 作为透明代理服务，完整保留了各大 AI 服务商的原生 A
 | \`UserNotFound\`              | 10007 | 用户未找到        |
 | \`UserAccessNotFound\`        | 10008 | 用户访问未找到    |
 | \`UserAccessDuplicateKey\`    | 10009 | 用户访问重复      |
-| \`ChannelAccessNotFound\`     | 10010 | 渠道访问未找到    |
-| \`ChannelAccessDuplicateKey\` | 10011 | 渠道访问重复      |
+| \`ChannelModelNotFound\`     | 10010 | 渠道访问未找到    |
+| \`ChannelModelDuplicateKey\` | 10011 | 渠道访问重复      |
 
 ### \`UserRole\`
 
@@ -570,7 +570,7 @@ graph TD
 | \`ModelUserToken\`     | \`aiload:user_token:{token}\`                  | \`STRING\`        | 将 \`token\` 字符串映射到其对应的 \`user_id\`。 |
 | \`ModelUserAccess\`    | \`aiload:user_access:{user_id}:{model}\`       | \`SET\`           | 缓存用户有权访问的模型列表。                |
 | \`ModelChannel\`       | \`aiload:channel:{channel_id}\`                | \`HASH\`          | 缓存渠道的详细信息。                        |
-| \`ModelChannelAccess\` | \`aiload:channel_access:{channel_id}:{model}\` | \`SET\`           | 缓存渠道有权访问的模型列表。                |
+| \`ModelChannelModel\` | \`aiload:channel_access:{channel_id}:{model}\` | \`SET\`           | 缓存渠道有权访问的模型列表。                |
 | \`ModelModelAlias\`    | \`aiload:model_alias:{alias_name}\`            | \`STRING\`        | 将模型别名映射到实际的模型名称。            |
 
 **字段类型约定:**
@@ -764,7 +764,7 @@ erDiagram
         Platform platform "平台 (唯一)"
     }
 
-    ModelChannelAccess {
+    ModelChannelModel {
         uint64 id PK "主键"
         int64 created_at "创建时间"
         int64 updated_at "更新时间"
@@ -784,7 +784,7 @@ erDiagram
 
     ModelUser         ||--|{ ModelUserToken : "拥有"
     ModelUserToken    ||--|{ ModelUserAccess : "授权"
-    ModelChannel      ||--|{ ModelChannelAccess : "拥有"
+    ModelChannel      ||--|{ ModelChannelModel : "拥有"
 \`\`\`
 
 ## 📜 Protobuf Message 详细定义
@@ -803,7 +803,7 @@ erDiagram
 | \`token\`      | \`string\`   | 6        | \`@gorm: index: idx_channel,unique\` (唯一索引)             |
 | \`platform\`   | \`Platform\` | 7        | \`@gorm: index: idx_channel,unique\` (唯一索引)             |
 
-### [\`ModelChannelAccess\`](aiload.proto:143)
+### [\`ModelChannelModel\`](aiload.proto:143)
 
 | 字段名       | 字段类型 | 字段编号 | 备注                                                             |
 | :----------- | :------- | :------- | :--------------------------------------------------------------- |

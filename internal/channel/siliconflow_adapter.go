@@ -12,6 +12,11 @@ type SiliconFlowAdapter struct {
 	client *SiliconFlow
 }
 
+func (p *SiliconFlowAdapter) ChatCompletionsAsync(req *ChatCompletionReq, callback func(item *ChatCompletionRspItem) error) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 type SiliconFlowAdapterGetModelListReq struct {
 	Type    string
 	SubType string
@@ -25,8 +30,8 @@ func NewSiliconFlowAdapter(channel *aiload.ModelChannel) *SiliconFlowAdapter {
 }
 
 // GetModelList 调用 SiliconFlow 客户端的 GetModelList 方法，并将结果转换为统一的 GetModelListRsp 格式。
-func (a *SiliconFlowAdapter) GetModelList() (*GetModelListRsp, error) {
-	siliconFlowRsp, err := a.client.GetModelList()
+func (p *SiliconFlowAdapter) GetModelList() (*GetModelListRsp, error) {
+	siliconFlowRsp, err := p.client.GetModelList()
 	if err != nil {
 		return nil, err
 	}

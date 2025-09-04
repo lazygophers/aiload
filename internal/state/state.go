@@ -50,5 +50,7 @@ func Load() (err error) {
 		return err
 	}
 
+	LoadMemQueue()
+
 	return nil
 }
